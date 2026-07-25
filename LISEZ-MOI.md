@@ -1,41 +1,85 @@
-# Carnet — version PWA (installable sur Android)
+# Budget — PWA + sauvegarde automatique Google Drive
 
-Ton appli est maintenant une **PWA** : une fois mise en ligne, elle s'installe sur
-l'écran d'accueil, s'ouvre en plein écran (sans barre de navigateur) et fonctionne
-**hors-ligne**. Tes données restent sur ton téléphone et sont désormais **protégées
-de l'effacement automatique**.
+Ton appli s'appelle maintenant **Budget**, elle s'installe sur Android (PWA) et
+peut sauvegarder automatiquement dans **ton propre Google Drive**.
 
-## Les fichiers
-- `index.html` — ton appli (identique, avec l'ajout PWA)
-- `manifest.json` — nom, icône, couleurs de l'appli installée
-- `sw.js` — le « service worker » (fait marcher le hors-ligne)
-- `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` — les icônes
+## Fichiers (à garder ensemble dans le dépôt)
+index.html · manifest.json · sw.js · icon-192.png · icon-512.png ·
+icon-maskable-512.png · apple-touch-icon.png
 
-⚠️ **Ces fichiers doivent rester ensemble dans le même dossier.**
+---
 
-## Le point important
-Une PWA ne marche PAS en ouvrant `index.html` directement (adresse `file://`).
-Elle doit être servie depuis une **adresse https://**. C'est gratuit et rapide.
+## 1) Mise en ligne (déjà fait pour toi)
+Les fichiers sont sur GitHub Pages, adresse type :
+`https://geoffreyofficial.github.io/Budget/`
+Ouvre-la sur ton téléphone, puis menu ⋮ de Chrome → **Installer l'application**.
 
-## Le plus simple : Netlify Drop (aucune compétence technique)
-1. Va sur **app.netlify.com/drop**
-2. Glisse-dépose le **dossier entier** (pas juste index.html) dans la page.
-3. Tu obtiens une adresse `https://…netlify.app`. Ouvre-la sur ton téléphone.
-4. Dans Chrome : menu ⋮ → **« Installer l'application »** (ou le bouton ⤓ en haut
-   de l'appli). Une icône Carnet apparaît sur ton écran d'accueil.
+---
 
-Un compte gratuit permet de garder l'adresse stable. Alternatives équivalentes :
-GitHub Pages, Cloudflare Pages, Vercel.
+## 2) Activer la sauvegarde Google Drive (configuration unique, ~10 min)
 
-## Tes données
-- Elles sont stockées **sur ton téléphone**, dans ce navigateur — pas en ligne.
-- L'appli demande le « stockage persistant » pour éviter tout effacement auto.
-- **Garde le réflexe Exporter** (Réglages → Sauvegarde) de temps en temps : le
-  fichier `.json` est ta ceinture de sécurité, et il te sert à passer d'un
-  téléphone à un autre.
-- Réinstaller l'appli depuis la même adresse ne supprime pas tes données.
+La synchro ne marche qu'après avoir créé un « identifiant client » Google gratuit
+et l'avoir collé dans l'appli. À faire une seule fois, sur ordinateur de préférence.
 
-## Et une vraie APK plus tard ?
-Depuis cette PWA, on peut générer un vrai `.apk` (via Bubblewrap/TWA) ou ajouter
-une synchro cloud pour un risque de perte quasi nul. Dis-le moi si tu veux aller
-plus loin.
+### a. Créer le projet et activer l'API
+1. Va sur **console.cloud.google.com** (connecte-toi avec ton compte Google).
+2. En haut, crée un projet nommé **Budget**.
+3. Menu ☰ → **APIs et services → Bibliothèque** → cherche **Google Drive API** → **Activer**.
+
+### b. Écran de consentement
+4. Menu ☰ → **APIs et services → Écran de consentement OAuth** (ou « Google Auth Platform »).
+5. Type d'utilisateur : **Externe**. Renseigne le nom de l'appli **Budget**,
+   ton email d'assistance et ton email développeur. Enregistre.
+6. Le scope utilisé (`drive.file`) est **non sensible** : **aucune validation Google
+   n'est nécessaire**. Pour que toi ET ta copine puissiez vous connecter :
+   - soit ajoute vos **deux emails Google** dans **Utilisateurs de test**,
+   - soit clique **Publier l'application** (aucune revue requise avec ce scope).
+
+### c. Créer l'identifiant client
+7. Menu ☰ → **APIs et services → Identifiants** → **Créer des identifiants**
+   → **ID client OAuth**.
+8. Type d'application : **Application Web**. Nom : `Budget web`.
+9. Dans **Origines JavaScript autorisées**, clique **Ajouter un URI** et saisis
+   EXACTEMENT (minuscules, sans barre finale, sans /Budget) :
+   ```
+   https://geoffreyofficial.github.io
+   ```
+10. Clique **Créer**. Copie l'**ID client** affiché
+    (il finit par `.apps.googleusercontent.com`).
+
+### d. Coller l'ID dans l'appli
+11. Ouvre `index.html`, cherche la ligne :
+    ```
+    const GOOGLE_CLIENT_ID = "";
+    ```
+    et colle ton ID entre les guillemets :
+    ```
+    const GOOGLE_CLIENT_ID = "1234567890-abcd....apps.googleusercontent.com";
+    ```
+12. **Ré-envoie `index.html`** sur GitHub (Add file → Upload files → Commit).
+
+### e. Connecter
+13. Ouvre l'appli → **Réglages → Sauvegarde automatique · Google Drive**
+    → **Connecter Google Drive** → choisis ton compte → **Autoriser**.
+    À partir de là, chaque changement est sauvegardé tout seul.
+
+---
+
+## Comment ça marche / bon à savoir
+- L'appli crée **un seul fichier** `budget-backup.json` dans ton Drive (tu peux le
+  voir dans drive.google.com). Il est mis à jour automatiquement.
+- **Individuel** : ta copine ouvre la même adresse et se connecte avec **son**
+  compte Google → sa propre sauvegarde, dans son propre Drive. Vos budgets ne se
+  mélangent jamais. (Si tu as gardé le mode « test », pense à ajouter son email
+  dans les utilisateurs de test.)
+- **Nouveau téléphone / perte** : installe l'appli, connecte le même compte Google,
+  et tes données se restaurent automatiquement depuis Drive.
+- L'export `.json` manuel (Réglages) reste dispo comme filet de secours supplémentaire.
+
+## Petits soucis fréquents
+- **« Connexion annulée / origin mismatch »** : l'origine autorisée ne correspond pas.
+  Elle doit être `https://geoffreyofficial.github.io` en minuscules, sans barre finale,
+  et SANS le `/Budget`. Un changement peut mettre quelques minutes à s'appliquer.
+- **« Reconnexion nécessaire »** au lancement : appuie une fois sur *Connecter*.
+- Rien ne se sauvegarde : vérifie que l'ID client a bien été collé puis `index.html`
+  ré-envoyé sur GitHub.

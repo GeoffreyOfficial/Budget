@@ -1,6 +1,6 @@
 {
-  "name": "Carnet — Budget",
-  "short_name": "Carnet",
+  "name": "Budget",
+  "short_name": "Budget",
   "description": "Suivi de budget mensuel : revenus, dépenses fixes et variables, épargne.",
   "lang": "fr",
   "start_url": "./index.html",
@@ -9,7 +9,10 @@
   "orientation": "portrait",
   "background_color": "#1E4D3B",
   "theme_color": "#1E4D3B",
-  "categories": ["finance", "productivity"],
+  "categories": [
+    "finance",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "icon-192.png",

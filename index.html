@@ -114,18 +114,18 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 }
 
 .topbar{display:flex;flex-direction:column;position:sticky;top:0;z-index:40;background:var(--paper);box-shadow:0 6px 14px -10px rgba(0,0,0,.35);padding:calc(12px + env(safe-area-inset-top)) 2px 0}
-.topbarRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:10px}
+.topbarRow{display:flex;align-items:center;gap:8px;padding-bottom:8px}
 .syncbar{display:flex;justify-content:center;overflow:hidden;max-height:0;transition:max-height .2s ease}
 .syncbar.has{max-height:40px;padding-bottom:8px}
 .brand{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .tright,.tleft{display:flex;align-items:center;gap:6px;flex:0 0 auto}
 .iconbtn:disabled{opacity:.32;cursor:default}
 .iconbtn:disabled:active{transform:none}
-.nav button:disabled{opacity:.32;cursor:default}
-.nav button:disabled:active{transform:none}
-.iconbtn,.nav button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);
+.nav>button:disabled{opacity:.32;cursor:default}
+.nav>button:disabled:active{transform:none}
+.iconbtn,.nav>button:not(.month){width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);
   color:var(--ink);font-size:15px;cursor:pointer;display:grid;place-items:center}
-.iconbtn:active,.nav button:active{transform:scale(.94)}
+.iconbtn:active,.nav>button:active{transform:scale(.94)}
 .palette-dot{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
 .settingsbtn{height:34px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);
   font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0 12px 0 10px}
@@ -138,18 +138,20 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   .settingsbtn .stxt{display:none}
   .settingsbtn{width:34px;padding:0;justify-content:center}
   .month{min-width:0;font-size:13.5px;padding:6px 2px}
-  .nav button{width:32px;height:32px}
+  .nav>button:not(.month){width:32px;height:32px}
 }
 @media (max-width:340px){
-  .iconbtn,.nav button{width:30px;height:30px;font-size:14px}
+  .iconbtn,.nav>button:not(.month){width:30px;height:30px;font-size:14px}
 }
-.nav{display:flex;align-items:center;justify-content:center;gap:6px;position:relative;min-width:0;flex:1 1 auto}
-.month{min-width:0;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-weight:700;font-size:14.5px;background:none;border:none;color:inherit;font-family:inherit;cursor:pointer;padding:6px 4px;border-radius:9px}
+.nav{display:flex;align-items:center;justify-content:flex-start;gap:6px;position:relative;min-width:0;flex:0 0 auto}
+.month{flex:0 0 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-weight:700;font-size:14.5px;background:none;border:none;color:inherit;font-family:inherit;cursor:pointer;padding:6px 4px;border-radius:9px}
 .month:active{background:var(--soft)}
 .monthDrop{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:4px;
   background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 30px -12px rgba(0,0,0,.4);
   padding:6px;min-width:160px;max-height:280px;overflow-y:auto;z-index:70}
 .monthDrop.hidden{display:none}
+.monthDropBackdrop{position:fixed;inset:0;background:rgba(20,26,22,.28);z-index:65}
+.monthDropBackdrop.hidden{display:none}
 .monthDrop button{display:block;width:100%;text-align:center;border:none;background:none;color:var(--ink);
   font:inherit;font-weight:600;font-size:13.5px;padding:9px 10px;border-radius:9px;cursor:pointer;white-space:nowrap}
 .monthDrop button.cur{background:var(--soft);color:var(--accent)}
@@ -588,6 +590,7 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
       <button class="month" id="monthLabel" aria-label="Choisir un mois"></button>
       <button id="next" aria-label="Mois suivant">›</button>
       <div class="monthDrop hidden" id="monthDrop"></div>
+      <div class="monthDropBackdrop hidden" id="monthDropBackdrop"></div>
     </div>
     </div>
     <div class="syncbar" id="syncBar"><div class="syncbadge" id="syncBadge" role="status" aria-live="polite"></div></div>
@@ -807,6 +810,10 @@ const eur0=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",max
 const mKey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 function mLabel(k){const[y,m]=k.split("-").map(Number);const d=new Date(y,m-1,1);
   const s=new Intl.DateTimeFormat("fr-FR",{month:"long",year:"numeric"}).format(d);return s[0].toUpperCase()+s.slice(1);}
+function mLabelShort(k){const[y,m]=k.split("-").map(Number);const d=new Date(y,m-1,1);
+  const s=new Intl.DateTimeFormat("fr-FR",{month:"long"}).format(d);
+  const label=s[0].toUpperCase()+s.slice(1);
+  return y===new Date().getFullYear()?label:label+" "+y;}
 function mShort(k){const[y,m]=k.split("-").map(Number);return new Intl.DateTimeFormat("fr-FR",{month:"short"}).format(new Date(y,m-1,1)).replace(".","");}
 function shift(k,delta){const[y,m]=k.split("-").map(Number);return mKey(new Date(y,m-1+delta,1));}
 function daysIn(k){const[y,m]=k.split("-").map(Number);return new Date(y,m,0).getDate();}
@@ -2137,7 +2144,7 @@ document.getElementById("searchClear").onclick=()=>{budgetSearch="";const s=docu
 function render(){
   ensure(state.current);
   updateMonthNavUI();
-  document.getElementById("monthLabel").innerHTML=mLabel(state.current)+' <span style="opacity:.5;font-size:11px">⌄</span>';
+  document.getElementById("monthLabel").innerHTML=mLabelShort(state.current)+' <span style="opacity:.5;font-size:11px">⌄</span>';
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
   ["budgets","analyse","jour","comparer"].forEach(t=>document.getElementById("tab-"+t).classList.toggle("hidden",t!==tab));
   renderBudgets();
@@ -2249,7 +2256,8 @@ async function deleteMonth(key){
 
 function toggleMonthDrop(){
   const d=document.getElementById("monthDrop");
-  if(!d.classList.contains("hidden")){d.classList.add("hidden");return;}
+  const bd=document.getElementById("monthDropBackdrop");
+  if(!d.classList.contains("hidden")){d.classList.add("hidden");bd.classList.add("hidden");return;}
   const keys=existingKeys().slice().reverse();
   let html=keys.length
     ?keys.map(k=>'<button type="button" data-mkey="'+k+'" class="'+(k===state.current?"cur":"")+'">'+mLabel(k)+'</button>').join("")
@@ -2257,16 +2265,21 @@ function toggleMonthDrop(){
   html+='<button type="button" class="mdnew" id="mdNewBtn">+ Nouveau mois</button>';
   d.innerHTML=html;
   d.classList.remove("hidden");
+  bd.classList.remove("hidden");
   d.querySelectorAll("button[data-mkey]").forEach(b=>b.onclick=()=>{
-    const k=b.dataset.mkey;d.classList.add("hidden");
+    const k=b.dataset.mkey;d.classList.add("hidden");bd.classList.add("hidden");
     if(k&&k!==state.current){state.current=k;save();render();}
   });
-  const nb=document.getElementById("mdNewBtn");if(nb)nb.onclick=()=>{d.classList.add("hidden");goToNewMonth();};
+  const nb=document.getElementById("mdNewBtn");if(nb)nb.onclick=()=>{d.classList.add("hidden");bd.classList.add("hidden");goToNewMonth();};
 }
 document.getElementById("monthLabel").onclick=e=>{e.stopPropagation();toggleMonthDrop();};
+document.getElementById("monthDropBackdrop").onclick=()=>{
+  document.getElementById("monthDrop").classList.add("hidden");
+  document.getElementById("monthDropBackdrop").classList.add("hidden");
+};
 document.addEventListener("click",e=>{
   const d=document.getElementById("monthDrop");
-  if(!d.classList.contains("hidden")&&e.target.id!=="monthLabel"&&!d.contains(e.target))d.classList.add("hidden");
+  if(!d.classList.contains("hidden")&&e.target.id!=="monthLabel"&&!d.contains(e.target)){d.classList.add("hidden");document.getElementById("monthDropBackdrop").classList.add("hidden");}
 });
 document.getElementById("addFixed").onclick=()=>addLine("fixed");
 document.getElementById("addVar").onclick=()=>addLine("variable");

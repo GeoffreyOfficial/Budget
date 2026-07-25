@@ -3,7 +3,7 @@
    Il ne touche JAMAIS à tes données : celles-ci vivent dans localStorage,
    pas dans ce cache. Vider ce cache ne supprime pas ton budget. */
 
-const CACHE = "carnet-v1";
+const CACHE = "budget-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -36,6 +36,10 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
+
+  // On ne gère que notre propre origine ; les scripts et l'API Google
+  // (accounts.google.com, googleapis.com) passent directement par le réseau.
+  if (new URL(req.url).origin !== self.location.origin) return;
 
   const isDoc = req.mode === "navigate" ||
                 (req.headers.get("accept") || "").includes("text/html");
