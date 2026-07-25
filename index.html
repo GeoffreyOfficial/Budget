@@ -974,14 +974,22 @@ function parseAmt(str){
   if(str==null)return null;
   let s=String(str).trim().replace(/\s+/g,"");
   if(s==="")return null;
-  // Le dernier "," ou "." rencontré est traité comme séparateur décimal ;
-  // tout autre "," ou "." avant lui est un séparateur de milliers et est retiré
-  // (ex. "1.234,56" -> 1234.56, "1,234.56" -> 1234.56, "1234,5" -> 1234.5).
-  const decIdx=Math.max(s.lastIndexOf(","),s.lastIndexOf("."));
-  if(decIdx>-1){
+  const seps=[];
+  for(let i=0;i<s.length;i++)if(s[i]==="."||s[i]===",")seps.push(i);
+  if(seps.length>1){
+    // Plusieurs séparateurs : le dernier est décimal, les précédents sont des milliers.
+    // (ex. "1.234,56" -> 1234.56, "1,234.56" -> 1234.56)
+    const decIdx=seps[seps.length-1];
     const intPart=s.slice(0,decIdx).replace(/[.,]/g,"");
     const fracPart=s.slice(decIdx+1).replace(/[.,]/g,"");
     s=intPart+"."+fracPart;
+  }else if(seps.length===1){
+    const idx=seps[0],fracLen=s.length-idx-1;
+    // Un seul séparateur : s'il est suivi d'exactement 3 chiffres, c'est presque toujours un
+    // séparateur de milliers (ex. "1.234" ou "1,234" -> 1234€), pas 3 décimales — un montant en
+    // euros n'a jamais 3 chiffres après la virgule. Sinon (1 ou 2 chiffres), c'est un décimal
+    // classique (ex. "1234,5" -> 1234.5 ; "12.99" -> 12.99).
+    s=fracLen===3?(s.slice(0,idx)+s.slice(idx+1)):(s.slice(0,idx)+"."+s.slice(idx+1));
   }
   const v=parseFloat(s);
   return Number.isFinite(v)?v:null;
@@ -1035,7 +1043,7 @@ function renderCategoriesSettings(){
       const ok=await askConfirm({
         icon:"🗑️",danger:true,
         title:'Supprimer « '+(cat.name||"cette catégorie")+' » ?',
-        message:"Les dépenses qui l'utilisent passeront automatiquement en « Sans catégorie ». Cette action est irréversible.",
+        message:"Les dépenses qui l'utilisent passeront automatiquement en « Sans catégorie ». Rattrapable avec ↶ juste après, tant que tu ne recharges pas l'appli.",
         confirmText:"Supprimer"
       });
       if(!ok)return;
@@ -2100,15 +2108,21 @@ function renderComparer(){
     if(!cmpB||!keys.includes(cmpB))cmpB=keys[keys.length-1];
     const spanOpts=[[1,"1 mois"],[3,"Trimestre (3 mois)"],[6,"Semestre (6 mois)"],[12,"Année (12 mois)"]];
     const spanOptsHtml=spanOpts.map(([v,lbl])=>'<option value="'+v+'"'+(v===cmpSpan?' selected':'')+'>'+lbl+'</option>').join("");
-    const rangeKeys=(endKey)=>{const idx=keys.indexOf(endKey);if(idx<0)return[endKey];
-      return keys.slice(Math.max(0,idx-cmpSpan+1),idx+1);};
+    // Plage de vrais mois calendaires se terminant à endKey (ex. cmpSpan=3 -> les 3 mois
+    // calendaires consécutifs jusqu'à endKey), qu'ils aient ou non des données enregistrées —
+    // avant, la plage était calculée par position dans la liste des mois existants, ce qui
+    // donnait des résultats faux/trompeurs dès qu'il manquait un mois dans l'historique.
+    const rangeKeys=(endKey)=>{const out=[];for(let i=cmpSpan-1;i>=0;i--)out.push(shift(endKey,-i));return out;};
     const rangeLabel=(rk)=>rk.length<=1?esc(mShort(rk[0])):esc(mShort(rk[0]))+"–"+esc(mShort(rk[rk.length-1]));
     const rA=rangeKeys(cmpA),rB=rangeKeys(cmpB);
     const optsA=keys.map(k=>'<option value="'+k+'"'+(k===cmpA?' selected':'')+'>'+esc(mLabel(k))+'</option>').join("");
     const optsB=keys.map(k=>'<option value="'+k+'"'+(k===cmpB?' selected':'')+'>'+esc(mLabel(k))+'</option>').join("");
     const cbCat=new Map();
-    rA.forEach(k=>ensure(k).lines.forEach(l=>{const cat=catById(l.category||"");const cur=cbCat.get(cat.id)||{cat,a:0,b:0};cur.a=round2(cur.a+spent(l));cbCat.set(cat.id,cur);}));
-    rB.forEach(k=>ensure(k).lines.forEach(l=>{const cat=catById(l.category||"");const cur=cbCat.get(cat.id)||{cat,a:0,b:0};cur.b=round2(cur.b+spent(l));cbCat.set(cat.id,cur);}));
+    // Lecture directe de state.months (pas ensure()) : un mois calendaire de la plage qui n'a
+    // jamais été créé compte simplement pour zéro, sans être ajouté en dur à l'historique.
+    const linesOf=k=>state.months[k]?state.months[k].lines:[];
+    rA.forEach(k=>linesOf(k).forEach(l=>{const cat=catById(l.category||"");const cur=cbCat.get(cat.id)||{cat,a:0,b:0};cur.a=round2(cur.a+spent(l));cbCat.set(cat.id,cur);}));
+    rB.forEach(k=>linesOf(k).forEach(l=>{const cat=catById(l.category||"");const cur=cbCat.get(cat.id)||{cat,a:0,b:0};cur.b=round2(cur.b+spent(l));cbCat.set(cat.id,cur);}));
     const list=[...cbCat.values()].filter(x=>x.a>0||x.b>0).sort((x,y)=>(y.a+y.b)-(x.a+x.b));
     const sameRange=rA.length===rB.length&&rA.every((k,i)=>k===rB[i]);
     let two='<div class="panel"><h3>Comparer deux périodes</h3><p class="psub">Dépenses par catégorie — choisis la durée puis le mois de fin de chaque période</p>'
@@ -2347,7 +2361,7 @@ async function deleteMonth(key){
   const ok=await askConfirm({
     icon:"🗑️",danger:true,
     title:"Supprimer "+mLabel(key)+" ?",
-    message:"Tout le contenu de ce mois ("+eur0(t.income)+" de revenus, "+eur0(t.spent)+" de dépenses) sera supprimé définitivement, sans possibilité de retour en arrière.",
+    message:"Tout le contenu de ce mois ("+eur0(t.income)+" de revenus, "+eur0(t.spent)+" de dépenses) sera supprimé. Rattrapable avec ↶ juste après, tant que tu ne recharges pas l'appli.",
     confirmText:"Supprimer le mois"
   });
   if(!ok)return;
@@ -2412,8 +2426,15 @@ const snapshot=()=>JSON.stringify({months:state.months,current:state.current,the
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
-function touch(){save();clearTimeout(recTimer);recTimer=setTimeout(record,500);}
-function commit(){clearTimeout(recTimer);save();record();}
+function touch(){save();clearTimeout(recTimer);recTimer=setTimeout(record,500);gdMarkDataChanged();}
+function commit(){clearTimeout(recTimer);save();record();gdMarkDataChanged();}
+// Appelée par touch()/commit() uniquement (vraies modifications de données) : marque les données comme
+// modifiées et programme un envoi vers Drive. Ne fait rien tant que le bloc Drive plus bas n'est pas chargé,
+// et ne fait rien si Drive n'est pas connecté (gdSchedulePush() vérifie déjà gdMeta.enabled).
+function gdMarkDataChanged(){
+  if(typeof dataUpdatedAt!=="undefined")dataUpdatedAt=Date.now();
+  if(typeof gdSchedulePush==="function")gdSchedulePush();
+}
 function updateUndoUI(){document.getElementById("undoBtn").disabled=hIndex<=0;
   document.getElementById("redoBtn").disabled=hIndex>=history.length-1;}
 function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.current=d.current;state.theme=d.theme;
@@ -2512,7 +2533,7 @@ function importData(file){
     const ok=await askConfirm({
       icon:"⬆️",danger:true,
       title:"Remplacer les données actuelles ?",
-      message:"Cette sauvegarde va remplacer tous tes mois, catégories et thème actuels. Cette action est irréversible.",
+      message:"Cette sauvegarde va remplacer tous tes mois, catégories et thème actuels. Rattrapable avec ↶ juste après, tant que tu ne recharges pas l'appli.",
       confirmText:"Remplacer"
     });
     if(!ok)return;
@@ -2604,13 +2625,30 @@ const GOOGLE_CLIENT_ID = "846329946315-b0akqn39adk8t9ufn7o99iqmu11les54.apps.goo
 const GD_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const GD_FILE  = "budget-backup.json";
 const GD_KEY   = "budget-drive"; // méta locale (fichier, email, dernière synchro)
+const GD_TOKEN_KEY = "budget-drive-token"; // cache du jeton d'accès (survit aux refresh/relances)
 
 let gdMeta = (()=>{try{return JSON.parse(localStorage.getItem(GD_KEY))||{};}catch(e){return {};}})();
 function gdSaveMeta(){try{localStorage.setItem(GD_KEY,JSON.stringify(gdMeta));}catch(e){}}
 let dataUpdatedAt = gdMeta.updatedAt || 0;
 
 // --- Jetons Google (Google Identity Services) ---
+// Le jeton est mis en cache dans localStorage pour éviter de redemander une
+// connexion à chaque refresh/relance : tant qu'il n'est pas expiré (~1h,
+// durée max imposée par Google), on le réutilise tel quel.
+function gdLoadCachedToken(){
+  try{
+    const c=JSON.parse(localStorage.getItem(GD_TOKEN_KEY));
+    if(c && c.token && c.exp && Date.now()<c.exp){ gdToken=c.token; gdTokenExp=c.exp; }
+  }catch(e){}
+}
+function gdSaveCachedToken(){
+  try{
+    if(gdToken && gdTokenExp) localStorage.setItem(GD_TOKEN_KEY,JSON.stringify({token:gdToken,exp:gdTokenExp}));
+    else localStorage.removeItem(GD_TOKEN_KEY);
+  }catch(e){}
+}
 let gdClient=null, gdToken=null, gdTokenExp=0, gdResolve=null, gdReject=null;
+gdLoadCachedToken();
 function gdInit(){
   if(gdClient) return true;
   if(!GOOGLE_CLIENT_ID || !window.google || !google.accounts || !google.accounts.oauth2) return false;
@@ -2620,6 +2658,7 @@ function gdInit(){
       if(resp && resp.access_token){
         gdToken=resp.access_token;
         gdTokenExp=Date.now()+((resp.expires_in?resp.expires_in:3600)*1000)-60000;
+        gdSaveCachedToken();
         const r=gdResolve;gdResolve=gdReject=null;if(r)r(gdToken);
       }else{const j=gdReject;gdResolve=gdReject=null;if(j)j(resp||{error:"no_token"});}
     },
@@ -2640,7 +2679,7 @@ async function gdApi(url,opt){
   const t=await gdGetToken(false);
   const o=opt||{};o.headers=Object.assign({Authorization:"Bearer "+t},o.headers||{});
   const r=await fetch(url,o);
-  if(!r.ok){ if(r.status===401){gdToken=null;} throw new Error("Drive "+r.status); }
+  if(!r.ok){ if(r.status===401){gdToken=null;gdTokenExp=0;gdSaveCachedToken();} throw new Error("Drive "+r.status); }
   return r;
 }
 
@@ -2757,9 +2796,10 @@ function gdUpdateUI(){
 }
 
 // --- Envoi / restauration ---
-let gdPushTimer=null;
+let gdPushTimer=null,gdQueued=false;
 async function gdPush(){
   if(!gdMeta.enabled) return;
+  if(gdBusy){gdQueued=true;gdSyncPending=true;gdBadgeUpdate();return;} // un envoi est déjà en cours : on retentera juste après (voir finally)
   if(!netOnline){gdSyncPending=true;gdBadgeUpdate();return;}
   try{
     gdBusy=true;gdStatus("busy","Sauvegarde en cours…");gdBadgeUpdate();
@@ -2767,8 +2807,12 @@ async function gdPush(){
     await gdFindFile();
     await gdWrite(text);
     gdMeta.updatedAt=dataUpdatedAt;gdMeta.lastSync=Date.now();gdSaveMeta();
-    gdBusy=false;gdSyncPending=false;gdLastError=null;gdUpdateUI();
-  }catch(e){gdBusy=false;gdSyncPending=false;gdLastError="Sauvegarde Drive impossible — réessaie plus tard";gdFail(gdLastError);console.warn(e);}
+    gdSyncPending=false;gdLastError=null;
+  }catch(e){gdSyncPending=false;gdLastError="Sauvegarde Drive impossible — réessaie plus tard";gdFail(gdLastError);console.warn(e);}
+  finally{
+    gdBusy=false;gdUpdateUI();
+    if(gdQueued){gdQueued=false;gdPush();} // des modifications sont arrivées pendant l'envoi : on les synchronise maintenant
+  }
 }
 function gdSchedulePush(){
   if(!gdMeta.enabled) return;
@@ -2789,7 +2833,7 @@ async function gdPull(force){
     if(!localEmpty){
       const ok=await askConfirm({icon:"⤓",danger:true,title:"Restaurer depuis Google Drive ?",
         message:"La sauvegarde du "+ (remoteAt?new Date(remoteAt).toLocaleString("fr-FR"):"cloud") +
-        " va remplacer les données de ce téléphone. Action irréversible.",confirmText:"Restaurer"});
+        " va remplacer les données de ce téléphone. Rattrapable avec ↶ juste après, tant que tu ne recharges pas l'appli.",confirmText:"Restaurer"});
       if(!ok){gdUpdateUI();return false;}
     }
     gdBusy=true;gdStatus("busy","Restauration…");
@@ -2821,7 +2865,7 @@ async function gdConnect(){
 }
 function gdSignout(){
   try{ if(gdToken && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(gdToken,()=>{}); }catch(e){}
-  gdToken=null;gdTokenExp=0;
+  gdToken=null;gdTokenExp=0;gdSaveCachedToken();
   gdMeta={fileId:null,enabled:false,email:null,lastSync:null,updatedAt:gdMeta.updatedAt||0};gdSaveMeta();
   gdUpdateUI();toast("Google Drive déconnecté");
 }
@@ -2834,11 +2878,10 @@ function gdSignout(){
   gdUpdateUI();
 })();
 
-// Chaque sauvegarde locale déclenche un envoi (différé) vers Drive.
-if(typeof save==="function"){
-  const _origSave=save;
-  save=function(){ _origSave.apply(this,arguments); dataUpdatedAt=Date.now(); gdSchedulePush(); };
-}
+// Note : la synchro Drive est maintenant déclenchée directement par touch()/commit()
+// (voir gdMarkDataChanged plus haut dans le script), pas par save() — save() sert aussi
+// à la simple navigation (changer de mois, plier une section, changer de thème…) et ne
+// doit pas provoquer d'écriture Drive à chaque fois.
 
 // Au démarrage : si Drive était connecté, on tente une reconnexion silencieuse puis une synchro.
 function gdAutoStart(){
