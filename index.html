@@ -148,7 +148,11 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .month:active{background:var(--soft)}
 .monthDrop{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:4px;
   background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 30px -12px rgba(0,0,0,.4);
-  padding:6px;min-width:160px;max-height:280px;overflow-y:auto;z-index:70}
+  padding:6px;min-width:180px;max-width:min(86vw,300px);max-height:min(68vh,440px);z-index:70;display:flex;flex-direction:column}
+.monthDrop .mdScroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.monthDrop .mdYear{position:sticky;top:0;background:var(--card);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);font-weight:700;padding:9px 10px 4px;z-index:1}
+.monthDrop .mdYear:first-child{padding-top:2px}
 .monthDrop.hidden{display:none}
 .monthDropBackdrop{position:fixed;inset:0;background:rgba(20,26,22,.28);z-index:65}
 .monthDropBackdrop.hidden{display:none}
@@ -157,7 +161,7 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .monthDrop button.cur{background:var(--soft);color:var(--accent)}
 .monthDrop button:active{filter:brightness(.96)}
 .monthDrop .mdempty{color:var(--faint);font-weight:500;font-size:12.5px;padding:8px 10px;cursor:default}
-.monthDrop .mdnew{color:var(--accent);border-top:1px solid var(--line);margin-top:4px;padding-top:10px}
+.monthDrop .mdnew{color:var(--accent);border-top:1px solid var(--line);margin-top:4px;padding-top:10px;flex-shrink:0}
 
 .themebar{display:flex;gap:10px;overflow-x:auto;padding:2px 0 2px;scrollbar-width:none}
 .themebar::-webkit-scrollbar{display:none}
@@ -480,6 +484,8 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 .cmpItem .cv b{color:var(--ink)}
 .cmpItem .cv .ov{color:var(--red);font-weight:700}
 .blistRow{position:relative}
+.blistYear{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700;margin:8px 2px 0;padding-top:4px;border-top:1px solid var(--line)}
+.cmp>.blistYear:first-child{margin-top:0;padding-top:0;border-top:none}
 .blist{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--soft);border-radius:14px;padding:12px 46px 12px 14px;cursor:pointer;font:inherit;color:inherit}
 .blist:active{filter:brightness(.97)}
 .blist.cur{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
@@ -532,9 +538,6 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
 .cfBtn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .cfBtn.primary.danger{background:var(--red);border-color:var(--red)}
 .foot{text-align:center;color:var(--faint);font-size:11px;margin-top:22px;line-height:1.6}
-.app.compact .prog{display:none}
-.compactRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 2px 12px}
-.compactRow .clabel{font-size:12.5px;color:var(--muted);font-weight:600}
 .switch{border:1px solid var(--line);background:var(--soft);border-radius:99px;width:42px;height:24px;position:relative;cursor:pointer;flex-shrink:0}
 .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
 .switch.on{background:var(--accent-2);border-color:var(--accent-2)}
@@ -570,6 +573,52 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
 @keyframes wrapFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .wrapNav{position:absolute;inset:0;display:flex;z-index:3}
 .wrapNav button{flex:1;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* ---------- Sélecteur d'affichage (réglages) ---------- */
+.seg{display:flex;gap:6px;background:var(--soft);border:1px solid var(--line);border-radius:13px;padding:4px}
+.segBtn{flex:1;border:none;background:none;border-radius:10px;padding:9px 8px;font:inherit;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);transition:background .2s,color .2s,box-shadow .2s}
+.segBtn .segT{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.segBtn .segS{font-size:10.5px;font-weight:500;color:var(--faint);text-align:center;line-height:1.35}
+.segBtn.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.10)}
+.segBtn.on .segS{color:var(--muted)}
+.segBtn:active{transform:scale(.98)}
+
+/* ---------- Vue « Liste » des budgets : registre compact, une ligne par poste ---------- */
+.app[data-view="list"] .section .secBody>#fixedList,
+.app[data-view="list"] .section .secBody>#varList{margin:0}
+.rowList{background:transparent;border:none;border-radius:0;box-shadow:none;
+  padding:0;margin:0;position:relative;overflow:hidden;
+  touch-action:pan-y;will-change:transform;animation:panelIn .3s ease both}
+.rowList+.rowList{border-top:1px solid var(--line)}
+.rowList::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:99px;
+  background:var(--rowbar-color,var(--faint));opacity:.45;transition:background .25s,opacity .25s}
+.rowList.done::before{background:var(--green);opacity:1}
+.rowList.over::before{background:var(--red);opacity:1}
+.rowList.swipeReady{background:var(--red-soft)!important}
+/* Ligne unique : icône · nom · montant · ajout · chevron */
+.rlLine{display:flex;align-items:center;gap:11px;padding:12px 2px 8px 14px}
+.rowList .rowCatIcon{width:28px;height:28px;font-size:15px}
+.rlNameWrap{flex:1;min-width:0;display:flex}
+.rowList .nameIn{font-size:15px;font-weight:600;padding:0}
+.rlAmt{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.rlAmt.done{color:var(--ink)}
+.rlAmt.over{color:var(--red)}
+.rowList .quickBtn.rlQuick{width:26px;height:26px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:16px;line-height:1;flex-shrink:0}
+.rowList .toggle{margin-left:0;flex-shrink:0;padding:5px 9px}
+/* Barre d'usage fine, pleine largeur sous la ligne */
+.rowList .prog{height:5px;margin:0 2px 12px 14px}
+.rowList .rwarn{margin:0 2px 10px 14px}
+.rowList .details{margin:2px 2px 14px 14px}
+/* Zone d'édition du budget dans le détail */
+.rlEdit{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:10px}
+.rlEditLab{font-size:12.5px;color:var(--muted);font-weight:600}
+.rlEdit .planWrap{flex-shrink:0}
+.rlEdit .planIn{width:78px;font-size:15px}
+.rlDel{border:1px solid var(--line);background:var(--soft);color:var(--red);border-radius:99px;
+  padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.rlDel:active{transform:scale(.96);background:var(--red-soft)}
 </style>
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -600,9 +649,13 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
     <div class="slabel">Thème</div>
     <div class="themebar" id="themebar"></div>
     <div class="hr"></div>
-    <div class="slabel">Affichage</div>
-    <div class="compactRow"><span class="clabel">Mode compact (masquer les barres de progression)</span>
-      <button type="button" class="switch" id="compactSwitch" role="switch" aria-checked="false" aria-label="Mode compact"></button></div>
+    <div class="slabel">Affichage des budgets</div>
+    <div class="seg" id="viewSeg" role="tablist" aria-label="Affichage des budgets">
+      <button type="button" class="segBtn" data-view="cards" role="tab" aria-selected="true">
+        <span class="segT">🗂 Cartes</span><span class="segS">Détaillé, une carte par poste</span></button>
+      <button type="button" class="segBtn" data-view="list" role="tab" aria-selected="false">
+        <span class="segT">☰ Liste</span><span class="segS">Compact, tout d'un coup d'œil</span></button>
+    </div>
     <div class="hr"></div>
     <div class="slabel">Catégories</div>
     <div id="catList"></div>
@@ -823,19 +876,28 @@ function longDay(iso){const d=new Date(iso+"T00:00:00");
 const gv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const palette=()=>["--c1","--c2","--c3","--c4","--c5","--c6"].map(gv);
 
-let state={months:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),compact:false,savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false};
+let state={months:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false};
 let tab="budgets";
 const expanded=new Set();
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(d.theme)state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(typeof d.compact==="boolean")state.compact=d.compact;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(d.theme)state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="list"||d.budgetView==="cards")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
 function catById(id){return state.categories.find(c=>c.id===id)||NOCAT;}
-function applyCompact(){document.querySelector(".app").classList.toggle("compact",!!state.compact);
-  const sw=document.getElementById("compactSwitch");if(sw){sw.classList.toggle("on",!!state.compact);sw.setAttribute("aria-checked",state.compact?"true":"false");}}
-document.getElementById("compactSwitch").onclick=()=>{state.compact=!state.compact;applyCompact();save();};
+function applyBudgetView(){
+  const v=state.budgetView==="list"?"list":"cards";
+  const app=document.querySelector(".app");if(app)app.setAttribute("data-view",v);
+  document.querySelectorAll("#viewSeg .segBtn").forEach(b=>{
+    const on=b.dataset.view===v;b.classList.toggle("on",on);b.setAttribute("aria-selected",on?"true":"false");
+  });
+}
+document.querySelectorAll("#viewSeg .segBtn").forEach(b=>{
+  b.onclick=()=>{const v=b.dataset.view==="list"?"list":"cards";
+    if(v===state.budgetView){applyBudgetView();return;}
+    state.budgetView=v;applyBudgetView();save();render();};
+});
 
 function migrate(){
   if(!Array.isArray(state.categories)||state.categories.length===0)state.categories=DEFAULT_CATEGORIES.map(c=>({...c}));
@@ -883,7 +945,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],compact:state.compact,savings:state.savings,savingsMigrated:state.savingsMigrated}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,lines:[]};}
@@ -1137,21 +1199,29 @@ function entryEl(line,e){
 }
 function entryIssues(line,k){const [minD,maxD]=monthBounds(k);
   return line.entries.filter(e=>!(e.amount>0)||!e.date||e.date<minD||e.date>maxD).length;}
-function rowEl(line){
-  const wrap=document.createElement("div");wrap.className="row";wrap.dataset.id=line.id;
+function rowEl(line){return buildRow(line,"card");}
+/* Constructeur unique de ligne de dépense.
+   mode="card" : cartes détaillées (affichage historique).
+   mode="list" : registre compact à plat.
+   Les deux partagent EXACTEMENT la même logique (édition, dépenses, paiement,
+   catégorie, récurrence, dupliquer, supprimer, gestes) — seule la disposition change. */
+function buildRow(line,mode){
+  const isList=mode==="list";
+  const wrap=document.createElement("div");wrap.className=isList?"row rowList":"row";wrap.dataset.id=line.id;
   wrap.style.setProperty("--rowbar-color",line.type==="fixed"?gv("--accent-2"):gv("--faint"));
-  // Rang 1 : icône · nom · budget · supprimer
-  const top=document.createElement("div");top.className="rtop";
+  // Icône de catégorie
   const catIcon=document.createElement("span");catIcon.className="rowCatIcon";catIcon.textContent=catById(line.category||"").icon;
+  // Nom
   const name=document.createElement("input");name.className="nameIn";name.value=line.name;name.placeholder="Nom du poste";
   name.addEventListener("input",()=>{line.name=name.value;updateComputed();touch();});
+  // Budget prévu
   const pw=document.createElement("div");pw.className="planWrap";
   const plan=document.createElement("input");plan.className="planIn";plan.type="text";plan.inputMode="decimal";plan.autocomplete="off";
   plan.value=(+line.planned||0)===0?"":line.planned;plan.placeholder="0";
   plan.addEventListener("input",()=>{const v=parseAmt(plan.value);line.planned=v!=null?Math.max(0,v):0;updateComputed();touch();});
   const pc=document.createElement("span");pc.className="planCur";pc.textContent="€";pw.append(plan,pc);
-  const del=document.createElement("button");del.className="del";del.textContent="×";del.setAttribute("aria-label","Supprimer");
-  del.onclick=async()=>{
+  // Suppression (logique commune, présentée différemment selon le mode)
+  async function askDelete(){
     const nm=(line.name||"").trim();
     const ok=await askConfirm({
       icon:"🗑️",danger:true,
@@ -1161,19 +1231,19 @@ function rowEl(line){
     });
     if(!ok)return;
     deleteLine(line);
-  };
-  top.append(catIcon,name,pw,del);
+  }
+  const del=document.createElement("button");del.className="del";del.textContent="×";del.setAttribute("aria-label","Supprimer");del.onclick=askDelete;
   // Barre de progression
   const prog=document.createElement("div");prog.className="prog";prog.innerHTML='<i></i>';
-  // Rang 2 : statut concis · ajout rapide · détail
-  const meta=document.createElement("div");meta.className="rmeta";
-  meta.innerHTML='<span class="mtxt"></span>';
+  // Statut concis
+  const mtxt=document.createElement("span");mtxt.className="mtxt";
+  // Ajout rapide
   const quick=document.createElement("button");quick.className="quickBtn";quick.type="button";quick.textContent="+ Dépense";quick.title="Ajouter une dépense";
   quick.addEventListener("click",ev=>{ev.stopPropagation();line.entries.push({id:uid(),date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id);});
+  // Bouton détail
   const n=line.entries.length;
   const toggle=document.createElement("button");toggle.className="toggle";
   toggle.innerHTML='<span class="cnt">'+(n>0?n:"Détail")+'</span><span class="chev">⌄</span>';
-  meta.append(quick,toggle);
   const rwarn=document.createElement("div");rwarn.className="rwarn";
   // Détail (déplié) : options secondaires + dépenses + Payer
   const details=document.createElement("div");details.className="details";
@@ -1197,6 +1267,12 @@ function rowEl(line){
   const dup=document.createElement("button");dup.className="actBtn";dup.type="button";dup.innerHTML="⧉ <span>Dupliquer</span>";dup.setAttribute("aria-label","Dupliquer");
   dup.onclick=()=>{duplicateLine(line);};
   actions.append(dup);
+  // En vue Liste, la suppression vit dans le détail (la croix du haut est retirée pour un rendu épuré)
+  if(isList){
+    const rlDel=document.createElement("button");rlDel.type="button";rlDel.className="rlDel";
+    rlDel.innerHTML="🗑 <span>Supprimer</span>";rlDel.setAttribute("aria-label","Supprimer le poste");rlDel.onclick=askDelete;
+    actions.append(rlDel);
+  }
   const entries=document.createElement("div");entries.className="entries";
   line.entries.forEach(e=>entries.append(entryEl(line,e)));
   const foot=document.createElement("div");foot.className="detailFoot";
@@ -1219,19 +1295,44 @@ function rowEl(line){
   toggle.onclick=()=>{const hidden=details.classList.toggle("hidden");
     if(hidden){expanded.delete(line.id);toggle.classList.remove("open");quick.classList.remove("hidden");}
     else{expanded.add(line.id);toggle.classList.add("open");quick.classList.add("hidden");}save();};
-  wrap.append(top,prog,meta,rwarn,details);
+  // Assemblage selon le mode
+  if(isList){
+    // Édition du budget déplacée dans le détail (ligne repliée = pur aperçu)
+    const editRow=document.createElement("div");editRow.className="rlEdit";
+    const lab=document.createElement("span");lab.className="rlEditLab";lab.textContent="Budget prévu";
+    editRow.append(lab,pw);
+    details.insertBefore(editRow,details.firstChild);
+    // Ligne unique : icône · nom · montant compact · ajout rapide · chevron
+    quick.textContent="+";quick.classList.add("rlQuick");quick.title="Ajouter une dépense";quick.setAttribute("aria-label","Ajouter une dépense");
+    const line1=document.createElement("div");line1.className="rlLine";
+    const nameWrap=document.createElement("div");nameWrap.className="rlNameWrap";nameWrap.append(name);
+    const amt=document.createElement("span");amt.className="rlAmt";
+    line1.append(catIcon,nameWrap,amt,quick,toggle);
+    wrap.append(line1,prog,rwarn,details);
+  }else{
+    const top=document.createElement("div");top.className="rtop";
+    top.append(catIcon,name,pw,del);
+    const meta=document.createElement("div");meta.className="rmeta";
+    meta.append(mtxt,quick,toggle);
+    wrap.append(top,prog,meta,rwarn,details);
+  }
   attachRowGestures(wrap,line,()=>deleteLine(line));
   applyRowState(wrap,line);return wrap;
 }
 function applyRowState(el,line){
   const p=+line.planned||0,s=spent(line),over=s>p&&s>0,any=s>0;
-  el.className="row"+(any?(over?" over":" done"):"");
+  el.classList.remove("over","done");
+  if(any)el.classList.add(over?"over":"done");
   const pct=p>0?s/p*100:(s>0?100:0);
   const fill=el.querySelector(".prog>i");fill.style.width=Math.min(100,pct)+"%";fill.className=over?"over":"";
   const mt=el.querySelector(".mtxt");
-  if(over){mt.className="mtxt over";mt.innerHTML="<b>"+eur(s)+"</b> / "+eur(p)+" · +"+eur(s-p);}
-  else if(any){mt.className="mtxt";mt.innerHTML="<b>"+eur(s)+"</b> / "+eur(p)+" · reste "+eur(p-s);}
-  else{mt.className="mtxt";mt.innerHTML="Budget "+eur(p);}
+  if(mt){
+    if(over){mt.className="mtxt over";mt.innerHTML="<b>"+eur(s)+"</b> / "+eur(p)+" · +"+eur(s-p);}
+    else if(any){mt.className="mtxt";mt.innerHTML="<b>"+eur(s)+"</b> / "+eur(p)+" · reste "+eur(p-s);}
+    else{mt.className="mtxt";mt.innerHTML="Budget "+eur(p);}
+  }
+  const amt=el.querySelector(".rlAmt");
+  if(amt){amt.textContent=eur0(s)+" / "+eur0(p);amt.className="rlAmt"+(over?" over":(any?" done":""));}
   const payBtn=el.querySelector(".payBtn");
   if(payBtn){
     const covered=p>0&&!(round2(p-s)>0);
@@ -1784,7 +1885,10 @@ function renderBudgetsList(){
     return html;
   }
   html+='<p class="psub">'+keys.length+' mois enregistré'+(keys.length>1?"s":"")+' · touche un mois pour y aller</p><div class="cmp">';
+  let curYear=null;
   keys.forEach(k=>{
+    const y=k.slice(0,4);
+    if(y!==curYear){curYear=y;html+='<div class="blistYear">'+y+'</div>';}
     const t=totals(ensure(k)),cur=k===state.current;
     html+='<div class="blistRow">'
       +'<button type="button" class="blist cmpItem'+(cur?" cur":"")+'" data-mkey="'+k+'">'
@@ -2118,7 +2222,8 @@ function renderBudgets(){
   const matches=l=>!q||(l.name||"").toLowerCase().includes(q);
   const fixedList=document.getElementById("fixedList");fixedList.innerHTML="";
   const fixedAll=m.lines.filter(l=>l.type==="fixed");
-  const fixed=fixedAll.filter(matches);fixed.forEach(l=>fixedList.append(rowEl(l)));
+  const vmode=state.budgetView==="list"?"list":"card";
+  const fixed=fixedAll.filter(matches);fixed.forEach(l=>fixedList.append(buildRow(l,vmode)));
   if(fixed.length===0){const e=document.createElement("div");e.className="empty";
     if(q&&fixedAll.length>0){e.textContent="Aucune dépense fixe ne correspond à « "+budgetSearch.trim()+" ».";}
     else{
@@ -2130,7 +2235,7 @@ function renderBudgets(){
     fixedList.append(e);}
   const varList=document.getElementById("varList");varList.innerHTML="";
   const variAll=m.lines.filter(l=>l.type==="variable");
-  const vari=variAll.filter(matches);vari.forEach(l=>varList.append(rowEl(l)));
+  const vari=variAll.filter(matches);vari.forEach(l=>varList.append(buildRow(l,vmode)));
   if(vari.length===0){const e=document.createElement("div");e.className="empty";
     e.textContent=(q&&variAll.length>0)?"Aucune dépense variable ne correspond à « "+budgetSearch.trim()+" ».":"Ex. : Courses, Sorties, Imprévus… Ces dépenses se reportent aussi au mois suivant, avec le détail remis à zéro.";
     varList.append(e);}
@@ -2258,12 +2363,21 @@ function toggleMonthDrop(){
   const d=document.getElementById("monthDrop");
   const bd=document.getElementById("monthDropBackdrop");
   if(!d.classList.contains("hidden")){d.classList.add("hidden");bd.classList.add("hidden");return;}
-  const keys=existingKeys().slice().reverse();
-  let html=keys.length
-    ?keys.map(k=>'<button type="button" data-mkey="'+k+'" class="'+(k===state.current?"cur":"")+'">'+mLabel(k)+'</button>').join("")
-    :'<div class="mdempty">Aucun mois enregistré</div>';
-  html+='<button type="button" class="mdnew" id="mdNewBtn">+ Nouveau mois</button>';
-  d.innerHTML=html;
+  const keys=existingKeys().slice().reverse(); // décroissant : mois le plus récent d'abord
+  const monthName=k=>{const[y,m]=k.split("-").map(Number);const s=new Intl.DateTimeFormat("fr-FR",{month:"long"}).format(new Date(y,m-1,1));return s[0].toUpperCase()+s.slice(1);};
+  let inner="";
+  if(keys.length){
+    let curYear=null;
+    keys.forEach(k=>{
+      const y=k.slice(0,4);
+      if(y!==curYear){curYear=y;inner+='<div class="mdYear">'+y+'</div>';}
+      inner+='<button type="button" data-mkey="'+k+'" class="'+(k===state.current?"cur":"")+'">'+monthName(k)+'</button>';
+    });
+  }else{
+    inner='<div class="mdempty">Aucun mois enregistré</div>';
+  }
+  d.innerHTML='<div class="mdScroll">'+inner+'</div>'
+    +'<button type="button" class="mdnew" id="mdNewBtn">+ Nouveau mois</button>';
   d.classList.remove("hidden");
   bd.classList.remove("hidden");
   d.querySelectorAll("button[data-mkey]").forEach(b=>b.onclick=()=>{
@@ -2271,6 +2385,8 @@ function toggleMonthDrop(){
     if(k&&k!==state.current){state.current=k;save();render();}
   });
   const nb=document.getElementById("mdNewBtn");if(nb)nb.onclick=()=>{d.classList.add("hidden");bd.classList.add("hidden");goToNewMonth();};
+  // Sur une longue liste (plusieurs années), place le mois courant dans la vue
+  const cur=d.querySelector(".mdScroll .cur");if(cur)cur.scrollIntoView({block:"center"});
 }
 document.getElementById("monthLabel").onclick=e=>{e.stopPropagation();toggleMonthDrop();};
 document.getElementById("monthDropBackdrop").onclick=()=>{
@@ -2292,7 +2408,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;re
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],compact:state.compact,savings:state.savings});
+const snapshot=()=>JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -2302,13 +2418,13 @@ function updateUndoUI(){document.getElementById("undoBtn").disabled=hIndex<=0;
   document.getElementById("redoBtn").disabled=hIndex>=history.length-1;}
 function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.current=d.current;state.theme=d.theme;
   state.categories=Array.isArray(d.categories)&&d.categories.length?d.categories:DEFAULT_CATEGORIES.map(c=>({...c}));
-  state.compact=typeof d.compact==="boolean"?d.compact:state.compact;
+  state.budgetView=(d.budgetView==="list"||d.budgetView==="cards")?d.budgetView:state.budgetView;
   if(d.savings&&typeof d.savings==="object")state.savings=sanitizeGlobalSavings(d.savings);
   expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));}
 function undo(){if(hIndex<=0)return;clearTimeout(recTimer);hIndex--;restoreSnap(history[hIndex]);
-  applyTheme();applyCompact();renderThemebar();renderCategoriesSettings();save();render();updateUndoUI();toast("Annulé");}
+  applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();save();render();updateUndoUI();toast("Annulé");}
 function redo(){if(hIndex>=history.length-1)return;clearTimeout(recTimer);hIndex++;restoreSnap(history[hIndex]);
-  applyTheme();applyCompact();renderThemebar();renderCategoriesSettings();save();render();updateUndoUI();toast("Rétabli");}
+  applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();save();render();updateUndoUI();toast("Rétabli");}
 document.getElementById("undoBtn").onclick=undo;
 document.getElementById("redoBtn").onclick=redo;
 
@@ -2330,7 +2446,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],compact:state.compact,savings:state.savings,savingsMigrated:state.savingsMigrated},null,2);
+  const payload=JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -2404,11 +2520,11 @@ function importData(file){
     state.categories=sanitizeCategories(d.categories)||DEFAULT_CATEGORIES.map(c=>({...c}));
     if(typeof d.current==="string"&&/^\d{4}-\d{2}$/.test(d.current))state.current=d.current;
     if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;
-    if(typeof d.compact==="boolean")state.compact=d.compact;
+    if(d.budgetView==="list"||d.budgetView==="cards")state.budgetView=d.budgetView;
     if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
-    migrate();applyTheme();applyCompact();renderThemebar();renderCategoriesSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -2478,7 +2594,7 @@ window.addEventListener("beforeunload",e=>{
   if(hasInvalidFields()){e.preventDefault();e.returnValue="";return e.returnValue;}
 });
 
-applyTheme();applyCompact();renderThemebar();renderCategoriesSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ================= SAUVEGARDE AUTOMATIQUE — GOOGLE DRIVE =================
@@ -2532,7 +2648,7 @@ async function gdApi(url,opt){
 function gdSerialize(){
   dataUpdatedAt = Date.now();
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,current:state.current,
-    theme:state.theme,categories:state.categories,expanded:[...expanded],compact:state.compact,
+    theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated});
 }
 function gdApply(d){
@@ -2542,11 +2658,11 @@ function gdApply(d){
   state.categories=sanitizeCategories(d.categories)||DEFAULT_CATEGORIES.map(c=>({...c}));
   if(typeof d.current==="string"&&/^\d{4}-\d{2}$/.test(d.current))state.current=d.current;
   if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;
-  if(typeof d.compact==="boolean")state.compact=d.compact;
+  if(d.budgetView==="list"||d.budgetView==="cards")state.budgetView=d.budgetView;
   if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
-  migrate();applyTheme();applyCompact();renderThemebar();renderCategoriesSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
