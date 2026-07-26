@@ -372,6 +372,15 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 .row.over{border-color:var(--red);background:linear-gradient(180deg,var(--red-soft),var(--card) 60%)}
 .rtop{display:flex;align-items:center;gap:10px}
 .rowCatIcon{flex-shrink:0;width:26px;height:26px;border-radius:8px;background:var(--soft);display:grid;place-items:center;font-size:14px}
+button.rowCatIcon{border:none;padding:0;cursor:pointer;font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+button.rowCatIcon:active{transform:scale(.92)}
+.catPickOpt{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:1px solid var(--line);background:var(--soft);
+  color:var(--ink);border-radius:14px;padding:10px 12px;margin-bottom:8px;cursor:pointer;font-size:14.5px;font-weight:700}
+.catPickOpt .cpIcon{flex-shrink:0;width:32px;height:32px;border-radius:10px;background:var(--card);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:16px}
+.catPickOpt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
+.catPickOpt.sel .cpIcon{border-color:var(--accent)}
+.catPickOpt:active{filter:brightness(.96);transform:scale(.99)}
 .rcat{display:flex;align-items:center;gap:6px;margin:6px 0 2px;flex-wrap:wrap}
 .typeTag{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:99px;background:var(--soft);color:var(--muted);white-space:nowrap}
 .typeTag.fixed{color:var(--accent-2)}
@@ -906,6 +915,14 @@ html{scroll-behavior:smooth}
     <button class="modalCancel" type="button" id="nmCancel">Annuler</button>
   </div>
 </div>
+<div class="modalWrap hidden" id="catPickModal">
+  <div class="modalCard">
+    <h3>Changer la catégorie</h3>
+    <p class="modalSub" id="catPickSub"></p>
+    <div id="catPickList"></div>
+    <button class="modalCancel" type="button" id="catPickCancel">Annuler</button>
+  </div>
+</div>
 <div class="modalWrap hidden" id="confirmModal">
   <div class="modalCard confirmCard">
     <div class="confirmIcon" id="cfIcon">⚠️</div>
@@ -1295,6 +1312,25 @@ function entryEl(line,e){
 function entryIssues(line,k){const [minD,maxD]=monthBounds(k);
   return line.entries.filter(e=>e.amount==null||!Number.isFinite(+e.amount)||!e.date||e.date<minD||e.date>maxD).length;}
 function rowEl(line){return buildRow(line,"card");}
+/* ---------- Sélecteur rapide de catégorie (tap sur l'icône d'un poste) ---------- */
+function openCatPicker(line){
+  const sub=document.getElementById("catPickSub");
+  if(sub)sub.textContent=(line.name||"").trim()?"Poste : "+(line.name||"").trim():"";
+  const list=document.getElementById("catPickList");list.innerHTML="";
+  [NOCAT,...state.categories].forEach(c=>{
+    const b=document.createElement("button");b.type="button";
+    b.className="catPickOpt"+((line.category||"")===c.id?" sel":"");
+    b.innerHTML='<span class="cpIcon">'+c.icon+'</span><span>'+esc(c.name)+'</span>';
+    b.onclick=()=>{
+      line.category=c.id;touch();closeCatPicker();render();
+    };
+    list.append(b);
+  });
+  document.getElementById("catPickModal").classList.remove("hidden");
+}
+function closeCatPicker(){document.getElementById("catPickModal").classList.add("hidden");}
+document.getElementById("catPickCancel").onclick=closeCatPicker;
+document.getElementById("catPickModal").addEventListener("click",e=>{if(e.target.id==="catPickModal")closeCatPicker();});
 /* Constructeur unique de ligne de dépense.
    mode="card" : cartes détaillées (affichage historique).
    mode="list" : registre compact à plat.
@@ -1304,8 +1340,11 @@ function buildRow(line,mode){
   const isList=mode==="list";
   const wrap=document.createElement("div");wrap.className=isList?"row rowList":"row";wrap.dataset.id=line.id;
   wrap.style.setProperty("--rowbar-color",line.type==="fixed"?gv("--accent-2"):gv("--faint"));
-  // Icône de catégorie
-  const catIcon=document.createElement("span");catIcon.className="rowCatIcon";catIcon.textContent=catById(line.category||"").icon;
+  // Icône de catégorie — cliquable pour changer directement la catégorie (et donc l'icône)
+  const catIcon=document.createElement("button");catIcon.type="button";catIcon.className="rowCatIcon";
+  catIcon.textContent=catById(line.category||"").icon;
+  catIcon.title="Changer la catégorie";catIcon.setAttribute("aria-label","Changer la catégorie");
+  catIcon.addEventListener("click",ev=>{ev.stopPropagation();openCatPicker(line,catIcon);});
   // Nom
   const name=document.createElement("input");name.className="nameIn";name.value=line.name;name.placeholder="Nom du poste";
   name.addEventListener("input",()=>{line.name=name.value;updateComputed();touch();});
