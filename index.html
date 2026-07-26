@@ -410,7 +410,7 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 
 .sechead{display:flex;align-items:center;justify-content:space-between;margin:20px 4px 8px;gap:8px;flex-wrap:wrap;row-gap:6px}
 .sechead h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:700}
-.sechead .tot{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-left:auto;flex-shrink:1;min-width:0;text-align:right}
+.sechead .tot{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-left:auto;flex-shrink:1;min-width:0;text-align:right}
 .sechd-actions{flex-basis:100%;display:flex;align-items:center;justify-content:center;gap:8px}
 
 /* ---------- section cards (demarcation) ---------- */
@@ -421,7 +421,7 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 .sechd-l h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sec-ic{flex-shrink:0;width:27px;height:27px;border-radius:9px;background:var(--card);border:1px solid var(--line);
   display:grid;place-items:center;font-size:14px}
-.cnt{flex-shrink:0;font-family:var(--mono);font-size:10.5px;color:var(--faint);font-weight:700;background:var(--card);
+.cnt{flex-shrink:0;font-family:var(--mono);font-size:10.5px;color:var(--muted);font-weight:700;background:var(--card);
   border:1px solid var(--line);border-radius:99px;padding:2px 7px}
 .sechd-r{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
 .secToggle{flex-shrink:0;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:99px;
@@ -3556,6 +3556,21 @@ function gdAutoStart(){
 if(window.google && google.accounts) gdAutoStart();
 else window.addEventListener("load",()=>setTimeout(gdAutoStart,600));
 /* =============== FIN SAUVEGARDE GOOGLE DRIVE =============== */
+
+/* ---------- Repaint forcé au retour de l'app ---------- */
+// Bug connu iOS/Safari : quand l'appli est mise en veille (fermée sans être rechargée)
+// puis rouverte, certaines zones repliées pendant la veille sont mal repeintes tant
+// qu'aucun repaint n'est forcé. On force ce repaint dès que l'app redevient visible.
+function forceRepaint(){
+  const el=document.body,prev=el.style.transform;
+  el.style.transform="translateZ(0)";
+  void el.offsetHeight; // force le recalcul de style/layout
+  el.style.transform=prev;
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible")requestAnimationFrame(forceRepaint);
+});
+window.addEventListener("pageshow",()=>requestAnimationFrame(forceRepaint));
 
 /* ---------- PWA : hors-ligne, installation, stockage protégé ---------- */
 // 1) Service worker : permet de lancer l'appli sans connexion.
