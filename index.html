@@ -464,7 +464,72 @@ button.rowCatIcon:active{transform:scale(.92)}
 .badge.over{background:var(--red);color:#fff}
 .badge.ok{background:var(--soft);color:var(--green)}
 .badge.left{background:var(--soft);color:var(--muted)}
-.entries{margin-top:8px}
+/* ================= VUE JAUGES (flow) : grille de niveaux groupée par catégorie =================
+   Réutilise EXACTEMENT le même DOM que la vue Cartes (mêmes classes .row/.rtop/.prog/.rmeta),
+   donc toute la logique JS existante (édition, dépenses, validations, gestes) fonctionne à l'identique —
+   seul l'agencement visuel change ici, en CSS pur, ce qui le rend garanti multi-thème (variables --*). */
+.flowCatHead{grid-column:1/-1;display:flex;align-items:center;gap:8px;margin:18px 2px 8px;padding-top:2px}
+.flowCatHead:first-child{margin-top:2px}
+.fchIcon{width:24px;height:24px;border-radius:8px;background:var(--soft);display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.fchName{font-size:12.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.fchTot{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:600}
+.flowGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:11px;grid-column:1/-1}
+.app[data-view="flow"] #fixedList,.app[data-view="flow"] #varList{display:grid;grid-template-columns:1fr}
+.app[data-view="flow"] .row{margin-bottom:0;border-radius:16px;padding:13px 12px 11px;box-shadow:0 6px 18px -14px rgba(0,0,0,.4)}
+.app[data-view="flow"] .row::before{left:0;right:0;top:0;bottom:auto;width:auto;height:4px;border-radius:16px 16px 0 0}
+.app[data-view="flow"] .rtop{display:contents}
+.app[data-view="flow"] .rowCatIcon{order:1;width:32px;height:32px;border-radius:10px;font-size:16px;margin-bottom:6px}
+.app[data-view="flow"] .nameIn{order:2;font-size:13.5px;line-height:1.25;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;flex:1 1 100%;margin-bottom:2px}
+.app[data-view="flow"] .del{order:3;position:absolute;top:10px;right:10px;opacity:.0;transition:opacity .15s}
+.app[data-view="flow"] .row:hover .del,.app[data-view="flow"] .row:focus-within .del{opacity:1}
+.app[data-view="flow"] .planWrap{order:4;position:absolute;top:9px;right:34px;background:var(--soft);border-radius:8px;padding:1px 6px}
+.app[data-view="flow"] .planIn{width:44px;font-size:11.5px}
+.app[data-view="flow"] .planCur{font-size:10px}
+.app[data-view="flow"] .prog{order:5;height:11px;border-radius:6px;margin:8px 0 9px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+.app[data-view="flow"] .prog>i{border-radius:6px;background:linear-gradient(90deg,var(--accent-2),var(--accent));box-shadow:0 0 10px -2px var(--accent-2)}
+.app[data-view="flow"] .prog>i.over{background:linear-gradient(90deg,var(--red),#ff8a7a);box-shadow:0 0 10px -1px var(--red)}
+.app[data-view="flow"] .rmeta{order:6;flex-wrap:wrap;gap:6px}
+.app[data-view="flow"] .mtxt{font-size:11.5px}
+.app[data-view="flow"] .rmeta .payBtn,.app[data-view="flow"] .quickBtn,.app[data-view="flow"] .toggle{flex-shrink:0}
+.app[data-view="flow"] .rwarn{order:7}
+.app[data-view="flow"] .details{order:8;flex:1 1 100%}
+.app[data-view="flow"] .rowActions{margin-top:8px}
+/* Habillage assorti des sections Revenus / Épargne, même agencement, coins et bordures un peu plus doux */
+.app[data-view="flow"] .income{border-radius:16px}
+.app[data-view="flow"] .miniRow{background:var(--soft);border-radius:10px;padding:6px 10px;margin-bottom:6px}
+.app[data-view="flow"] .svRow{background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+/* Grille de jauges responsive : très petit écran (volet couvercle Z Fold), Z Fold déplié / tablette, puis PC.
+   auto-fill garde une taille de carte confortable et laisse le nombre de colonnes s'adapter tout seul. */
+@media (max-width:359px){
+  /* Volet couvercle Z Fold (~280px) et téléphones très étroits : 1 colonne, cartes resserrées pour éviter
+     que le badge de budget (en haut à droite) ne chevauche le nom sur 2 lignes. */
+  .flowGrid{grid-template-columns:1fr;gap:8px}
+  .app[data-view="flow"] .row{padding:11px 10px 9px}
+  .app[data-view="flow"] .rowCatIcon{width:28px;height:28px;font-size:14px;margin-bottom:4px}
+  .app[data-view="flow"] .nameIn{font-size:13px}
+  .app[data-view="flow"] .planWrap{right:30px}
+  .app[data-view="flow"] .planIn{width:38px;font-size:11px}
+}
+@media (min-width:640px) and (max-width:899px){
+  /* Z Fold déplié (~717px) et tablettes : cartes un peu plus larges pour ~3 colonnes confortables. */
+  .flowGrid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+}
+@media (min-width:900px) and (max-width:1499px){
+  /* PC / grands écrans : cartes plus généreuses pour éviter une grille trop dense et étriquée. */
+  .flowGrid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:13px}
+}
+@media (min-width:1500px){
+  .flowGrid{grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:14px}
+}
+/* Bascule de signe (+/-) pour saisir des montants négatifs (remboursement, régularisation…) */
+.signBtn{flex-shrink:0;width:22px;height:22px;border-radius:7px;border:1px solid var(--line);background:var(--soft);
+  color:var(--muted);font-family:var(--mono);font-size:13px;font-weight:700;cursor:pointer;display:grid;place-items:center;margin-right:2px}
+.signBtn:active{transform:scale(.92)}
+.signBtn.neg{color:var(--red);border-color:var(--red)}
+.amtIn.neg,.miniAmt.neg{color:var(--red)}
+.entries{margin-top:8px;max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin}
+/* En vue Jauges, les cartes sont plus petites : on réduit la hauteur de scroll du détail pour rester compact */
+.app[data-view="flow"] .entries{max-height:210px}
 .entry{display:flex;flex-direction:column;gap:6px;padding:9px 0;border-top:1px dashed var(--line);touch-action:pan-y;will-change:transform;position:relative}
 .entry.swipeReady{background:var(--red-soft);border-radius:8px}
 .quickAdd{display:flex;align-items:center;gap:6px;background:var(--soft);border:1.5px solid var(--accent-2);border-radius:12px;
@@ -642,42 +707,6 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
 .segBtn.on .segS{color:var(--muted)}
 .segBtn:active{transform:scale(.98)}
 
-/* ---------- Vue « Liste » des budgets : registre compact, une ligne par poste ---------- */
-.app[data-view="list"] .section .secBody>#fixedList,
-.app[data-view="list"] .section .secBody>#varList{margin:0}
-.rowList{background:transparent;border:none;border-radius:0;box-shadow:none;
-  padding:0;margin:0;position:relative;overflow:hidden;
-  touch-action:pan-y;will-change:transform;animation:panelIn .3s ease both}
-.rowList+.rowList{border-top:1px solid var(--line)}
-.rowList::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:99px;
-  background:var(--rowbar-color,var(--faint));opacity:.45;transition:background .25s,opacity .25s}
-.rowList.done::before{background:var(--green);opacity:1}
-.rowList.over::before{background:var(--red);opacity:1}
-.rowList.swipeReady{background:var(--red-soft)!important}
-/* Ligne unique : icône · nom · montant · ajout · chevron */
-.rlLine{display:flex;align-items:center;gap:11px;padding:12px 2px 8px 14px}
-.rowList .rowCatIcon{width:28px;height:28px;font-size:15px}
-.rlNameWrap{flex:1;min-width:0;display:flex}
-.rowList .nameIn{font-size:15px;font-weight:600;padding:0}
-.rlAmt{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);text-align:right;flex-shrink:0;white-space:nowrap}
-.rlAmt.done{color:var(--ink)}
-.rlAmt.over{color:var(--red)}
-.rowList .quickBtn.rlQuick{width:26px;height:26px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:16px;line-height:1;flex-shrink:0}
-.rowList .toggle{margin-left:0;flex-shrink:0;padding:5px 9px}
-/* Barre d'usage fine, pleine largeur sous la ligne */
-.rowList .prog{height:5px;margin:0 2px 12px 14px}
-.rowList .rwarn{margin:0 2px 10px 14px}
-.rowList .details{margin:2px 2px 14px 14px}
-/* Zone d'édition du budget dans le détail */
-.rlEdit{display:flex;align-items:center;justify-content:space-between;gap:10px;
-  background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:10px}
-.rlEditLab{font-size:12.5px;color:var(--muted);font-weight:600}
-.rlEdit .planWrap{flex-shrink:0}
-.rlEdit .planIn{width:78px;font-size:15px}
-.rlDel{border:1px solid var(--line);background:var(--soft);color:var(--red);border-radius:99px;
-  padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
-.rlDel:active{transform:scale(.96);background:var(--red-soft)}
-
 /* ================== COUCHE "WAHOU" : effets, transitions, mouvements ================== */
 /* Transition fluide entre thèmes (repose sur les variables CSS déjà en place, donc valable pour tous les thèmes) */
 .theme-transition,.theme-transition *{transition:background-color .5s ease,color .5s ease,border-color .5s ease,box-shadow .5s ease,fill .5s ease!important}
@@ -694,7 +723,7 @@ html{scroll-behavior:smooth}
   background:color-mix(in srgb, var(--paper) 80%, transparent)}
 
 /* Micro-interactions génériques (hover desktop uniquement, le tactile garde :active) */
-.iconbtn,.nav>button:not(.month),.settingsbtn,.row,.section,.bkbtn,.cfBtn,.modalOpt,.stat,.dsum,.income,.recap,.rowList{
+.iconbtn,.nav>button:not(.month),.settingsbtn,.row,.section,.bkbtn,.cfBtn,.modalOpt,.stat,.dsum,.income,.recap{
   transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s ease,border-color .3s ease,filter .15s ease,background .3s ease}
 @media (hover:hover) and (pointer:fine){
   .iconbtn:hover,.nav>button:not(.month):hover{transform:translateY(-2px) scale(1.03);box-shadow:0 8px 18px -10px rgba(0,0,0,.35);border-color:var(--accent-2)}
@@ -789,8 +818,8 @@ html{scroll-behavior:smooth}
     <div class="seg" id="viewSeg" role="tablist" aria-label="Affichage des budgets">
       <button type="button" class="segBtn" data-view="cards" role="tab" aria-selected="true">
         <span class="segT">🗂 Cartes</span><span class="segS">Détaillé, une carte par poste</span></button>
-      <button type="button" class="segBtn" data-view="list" role="tab" aria-selected="false">
-        <span class="segT">☰ Liste</span><span class="segS">Compact, tout d'un coup d'œil</span></button>
+      <button type="button" class="segBtn" data-view="flow" role="tab" aria-selected="false">
+        <span class="segT">🌡 Jauges</span><span class="segS">Grille de niveaux, groupée par catégorie</span></button>
     </div>
     <div class="hr"></div>
     <div class="slabel">Catégories</div>
@@ -1089,20 +1118,20 @@ let tab="budgets";
 const expanded=new Set();
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(d.theme)state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="list"||d.budgetView==="cards")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(d.theme)state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
 function catById(id){return state.categories.find(c=>c.id===id)||NOCAT;}
 function applyBudgetView(){
-  const v=state.budgetView==="list"?"list":"cards";
+  const v=state.budgetView==="flow"?"flow":"cards";
   const app=document.querySelector(".app");if(app)app.setAttribute("data-view",v);
   document.querySelectorAll("#viewSeg .segBtn").forEach(b=>{
     const on=b.dataset.view===v;b.classList.toggle("on",on);b.setAttribute("aria-selected",on?"true":"false");
   });
 }
 document.querySelectorAll("#viewSeg .segBtn").forEach(b=>{
-  b.onclick=()=>{const v=b.dataset.view==="list"?"list":"cards";
+  b.onclick=()=>{const v=b.dataset.view==="flow"?"flow":"cards";
     if(v===state.budgetView){applyBudgetView();return;}
     state.budgetView=v;applyBudgetView();save();render();};
 });
@@ -1409,10 +1438,15 @@ function entryEl(line,e){
   date.min=minD;date.max=maxD;
   date.addEventListener("change",()=>{let v=date.value;if(v){if(v<minD)v=minD;if(v>maxD)v=maxD;}date.value=v;e.date=v;validate();touch();});
   const aw=document.createElement("div");aw.className="amtWrap";
+  const sign=document.createElement("button");sign.type="button";sign.className="signBtn";sign.title="Inverser le signe (remboursement, régularisation…)";
+  sign.textContent="±";
   const amt=document.createElement("input");amt.className="amtIn";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=e.amount==null?"":e.amount;amt.placeholder="0";
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);e.amount=v!=null?(v):null;validate();updateComputed();touch();});
-  const cur=document.createElement("span");cur.className="amtCur";cur.textContent="€";aw.append(amt,cur);
+  const syncSign=()=>{const neg=(+e.amount||0)<0;amt.classList.toggle("neg",neg);sign.classList.toggle("neg",neg);};
+  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);e.amount=v!=null?(v):null;syncSign();validate();updateComputed();touch();});
+  sign.onclick=()=>{if(e.amount==null)return;e.amount=round2(-e.amount);amt.value=e.amount;syncSign();validate();updateComputed();touch();};
+  syncSign();
+  const cur=document.createElement("span");cur.className="amtCur";cur.textContent="€";aw.append(sign,amt,cur);
   const del=document.createElement("button");del.className="delE";del.textContent="×";
   del.onclick=()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();};
   top.append(date,aw,del);
@@ -1448,7 +1482,7 @@ function entryEl(line,e){
 }
 function entryIssues(line,k){const [minD,maxD]=monthBounds(k);
   return line.entries.filter(e=>e.amount==null||!Number.isFinite(+e.amount)||!e.date||e.date<minD||e.date>maxD).length;}
-function rowEl(line){return buildRow(line,"card");}
+function rowEl(line){return buildRow(line);}
 /* ---------- Sélecteur rapide de catégorie (tap sur l'icône d'un poste) ---------- */
 function openCatPicker(line){
   const sub=document.getElementById("catPickSub");
@@ -1468,14 +1502,9 @@ function openCatPicker(line){
 function closeCatPicker(){document.getElementById("catPickModal").classList.add("hidden");}
 document.getElementById("catPickCancel").onclick=closeCatPicker;
 document.getElementById("catPickModal").addEventListener("click",e=>{if(e.target.id==="catPickModal")closeCatPicker();});
-/* Constructeur unique de ligne de dépense.
-   mode="card" : cartes détaillées (affichage historique).
-   mode="list" : registre compact à plat.
-   Les deux partagent EXACTEMENT la même logique (édition, dépenses, paiement,
-   catégorie, récurrence, dupliquer, supprimer, gestes) — seule la disposition change. */
-function buildRow(line,mode){
-  const isList=mode==="list";
-  const wrap=document.createElement("div");wrap.className=isList?"row rowList":"row";wrap.dataset.id=line.id;
+/* Constructeur unique de ligne de dépense (cartes détaillées). */
+function buildRow(line){
+  const wrap=document.createElement("div");wrap.className="row";wrap.dataset.id=line.id;
   wrap.style.setProperty("--rowbar-color",line.type==="fixed"?gv("--accent-2"):gv("--faint"));
   // Icône de catégorie — cliquable pour changer directement la catégorie (et donc l'icône)
   const catIcon=document.createElement("button");catIcon.type="button";catIcon.className="rowCatIcon";
@@ -1533,18 +1562,11 @@ function buildRow(line,mode){
   };
   if(isFixed){
     // Poste fixe : toujours complet, pas de détail à déplier, pas de dupliquer — juste Payer.
-    if(isList){
-      const line1=document.createElement("div");line1.className="rlLine";
-      const nameWrap=document.createElement("div");nameWrap.className="rlNameWrap";nameWrap.append(name);
-      line1.append(catIcon,nameWrap,pw,payBtn,del);
-      wrap.append(line1,prog,rwarn);
-    }else{
-      const top=document.createElement("div");top.className="rtop";
-      top.append(catIcon,name,pw,del);
-      const meta=document.createElement("div");meta.className="rmeta";
-      meta.append(mtxt,payBtn);
-      wrap.append(top,prog,meta,rwarn);
-    }
+    const top=document.createElement("div");top.className="rtop";
+    top.append(catIcon,name,pw,del);
+    const meta=document.createElement("div");meta.className="rmeta";
+    meta.append(mtxt,payBtn);
+    wrap.append(top,prog,meta,rwarn);
     attachRowGestures(wrap,line,()=>deleteLine(line));
     applyRowState(wrap,line);return wrap;
   }
@@ -1572,12 +1594,6 @@ function buildRow(line,mode){
   const dup=document.createElement("button");dup.className="actBtn";dup.type="button";dup.innerHTML="⧉ <span>Dupliquer</span>";dup.setAttribute("aria-label","Dupliquer");
   dup.onclick=()=>{duplicateLine(line);};
   actions.append(dup);
-  // En vue Liste, la suppression vit dans le détail (la croix du haut est retirée pour un rendu épuré)
-  if(isList){
-    const rlDel=document.createElement("button");rlDel.type="button";rlDel.className="rlDel";
-    rlDel.innerHTML="🗑 <span>Supprimer</span>";rlDel.setAttribute("aria-label","Supprimer le poste");rlDel.onclick=askDelete;
-    actions.append(rlDel);
-  }
   const entries=document.createElement("div");entries.className="entries";
   line.entries.forEach(e=>entries.append(entryEl(line,e)));
   const foot=document.createElement("div");foot.className="detailFoot";
@@ -1589,27 +1605,11 @@ function buildRow(line,mode){
   toggle.onclick=()=>{const hidden=details.classList.toggle("hidden");
     if(hidden){expanded.delete(line.id);toggle.classList.remove("open");quick.classList.remove("hidden");}
     else{expanded.add(line.id);toggle.classList.add("open");quick.classList.add("hidden");}save();};
-  // Assemblage selon le mode
-  if(isList){
-    // Édition du budget déplacée dans le détail (ligne repliée = pur aperçu)
-    const editRow=document.createElement("div");editRow.className="rlEdit";
-    const lab=document.createElement("span");lab.className="rlEditLab";lab.textContent="Budget prévu";
-    editRow.append(lab,pw);
-    details.insertBefore(editRow,details.firstChild);
-    // Ligne unique : icône · nom · montant compact · ajout rapide · chevron
-    quick.textContent="+";quick.classList.add("rlQuick");quick.title="Ajouter une dépense";quick.setAttribute("aria-label","Ajouter une dépense");
-    const line1=document.createElement("div");line1.className="rlLine";
-    const nameWrap=document.createElement("div");nameWrap.className="rlNameWrap";nameWrap.append(name);
-    const amt=document.createElement("span");amt.className="rlAmt";
-    line1.append(catIcon,nameWrap,amt,quick,toggle);
-    wrap.append(line1,prog,rwarn,details);
-  }else{
-    const top=document.createElement("div");top.className="rtop";
-    top.append(catIcon,name,pw,del);
-    const meta=document.createElement("div");meta.className="rmeta";
-    meta.append(mtxt,quick,toggle);
-    wrap.append(top,prog,meta,rwarn,details);
-  }
+  const top=document.createElement("div");top.className="rtop";
+  top.append(catIcon,name,pw,del);
+  const meta=document.createElement("div");meta.className="rmeta";
+  meta.append(mtxt,quick,toggle);
+  wrap.append(top,prog,meta,rwarn,details);
   attachRowGestures(wrap,line,()=>deleteLine(line));
   applyRowState(wrap,line);return wrap;
 }
@@ -1624,8 +1624,6 @@ function applyRowState(el,line){
     if(over){mt.className="mtxt over";mt.innerHTML="<b>+"+eur(s-p)+"</b>";}
     else{mt.className="mtxt";mt.innerHTML="reste <b>"+eur(p-s)+"</b>";}
   }
-  const amt=el.querySelector(".rlAmt");
-  if(amt){amt.textContent=over?("+"+eur0(s-p)):("reste "+eur0(p-s));amt.className="rlAmt"+(over?" over":(any?" done":""));}
   const payBtn=el.querySelector(".payBtn");
   if(payBtn){
     const isFixed=line.type==="fixed";
@@ -1654,11 +1652,16 @@ function miniLineEl(item,onChange,onDelete){
   const name=document.createElement("input");name.className="miniName";name.value=item.name||"";name.placeholder="Ex. Salaire, Prime, Cadeau…";
   name.addEventListener("input",()=>{item.name=name.value;onChange();});
   const aw=document.createElement("div");aw.className="miniAmtWrap";
+  const sign=document.createElement("button");sign.type="button";sign.className="signBtn";sign.title="Inverser le signe (ex. une reprise ou une correction négative)";
+  sign.textContent="±";
   const amt=document.createElement("input");amt.className="miniAmt";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=(+item.amount||0)===0?"":item.amount;amt.placeholder="0";
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?(v):0;onChange();});
+  const syncSign=()=>{const neg=(+item.amount||0)<0;amt.classList.toggle("neg",neg);sign.classList.toggle("neg",neg);};
+  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?(v):0;syncSign();onChange();});
+  sign.onclick=()=>{item.amount=round2(-(+item.amount||0));amt.value=item.amount===0?"":item.amount;syncSign();onChange();};
+  syncSign();
   const cur=document.createElement("span");cur.className="miniCur";cur.textContent="€";
-  aw.append(amt,cur);
+  aw.append(sign,amt,cur);
   const del=document.createElement("button");del.type="button";del.className="miniDel";del.setAttribute("aria-label","Supprimer");del.textContent="×";
   del.onclick=onDelete;
   row.append(name,aw,del);
@@ -1670,11 +1673,16 @@ function savingsLineEl(item,onChange,onDelete,onToggleDeduct){
   const name=document.createElement("input");name.className="miniName";name.value=item.name||"";name.placeholder="Ex. Livret A, Virement, Cash…";
   name.addEventListener("input",()=>{item.name=name.value;onChange();});
   const aw=document.createElement("div");aw.className="miniAmtWrap";
+  const sign=document.createElement("button");sign.type="button";sign.className="signBtn";sign.title="Inverser le signe (ex. un retrait d'épargne)";
+  sign.textContent="±";
   const amt=document.createElement("input");amt.className="miniAmt";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=(+item.amount||0)===0?"":item.amount;amt.placeholder="0";
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?(v):0;onChange();});
+  const syncSign=()=>{const neg=(+item.amount||0)<0;amt.classList.toggle("neg",neg);sign.classList.toggle("neg",neg);};
+  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?(v):0;syncSign();onChange();});
+  sign.onclick=()=>{item.amount=round2(-(+item.amount||0));amt.value=item.amount===0?"":item.amount;syncSign();onChange();};
+  syncSign();
   const cur=document.createElement("span");cur.className="miniCur";cur.textContent="€";
-  aw.append(amt,cur);
+  aw.append(sign,amt,cur);
   const del=document.createElement("button");del.type="button";del.className="miniDel";del.setAttribute("aria-label","Supprimer");del.textContent="×";
   del.onclick=onDelete;
   top.append(name,aw,del);
@@ -2422,6 +2430,26 @@ function renderComparer(){
 
 
 /* ---------- RENDER ---------- */
+/* En vue Jauges (flow), les postes sont regroupés visuellement par catégorie
+   avec un petit en-tête + total ; la vue Cartes reste inchangée (liste à plat). */
+function appendLinesGrouped(container,lines,isFlow){
+  if(!isFlow){lines.forEach(l=>container.append(buildRow(l)));return;}
+  const order=[...state.categories,NOCAT];
+  const seen=new Set();
+  order.forEach(cat=>{
+    const group=lines.filter(l=>(l.category||"")===cat.id);
+    if(group.length===0)return;
+    seen.add(cat.id);
+    const head=document.createElement("div");head.className="flowCatHead";
+    const p=group.reduce((s,l)=>s+(+l.planned||0),0),s=group.reduce((s,l)=>s+spent(l),0);
+    head.innerHTML='<span class="fchIcon">'+cat.icon+'</span><span class="fchName">'+esc(cat.name)+'</span>'
+      +'<span class="fchTot">'+eur0(s)+' / '+eur0(p)+'</span>';
+    container.append(head);
+    const grid=document.createElement("div");grid.className="flowGrid";
+    group.forEach(l=>grid.append(buildRow(l)));
+    container.append(grid);
+  });
+}
 let budgetSearch="";
 function renderBudgets(){
   const m=ensure(state.current);
@@ -2430,8 +2458,9 @@ function renderBudgets(){
   const matches=l=>!q||(l.name||"").toLowerCase().includes(q);
   const fixedList=document.getElementById("fixedList");fixedList.innerHTML="";
   const fixedAll=m.lines.filter(l=>l.type==="fixed");
-  const vmode=state.budgetView==="list"?"list":"card";
-  const fixed=sortLines(fixedAll.filter(matches),"fixed");fixed.forEach(l=>fixedList.append(buildRow(l,vmode)));
+  const isFlow=state.budgetView==="flow";
+  const fixed=sortLines(fixedAll.filter(matches),"fixed");
+  appendLinesGrouped(fixedList,fixed,isFlow);
   if(fixed.length===0){const e=document.createElement("div");e.className="empty";
     if(q&&fixedAll.length>0){e.textContent="Aucune dépense fixe ne correspond à « "+budgetSearch.trim()+" ».";}
     else{
@@ -2443,7 +2472,8 @@ function renderBudgets(){
     fixedList.append(e);}
   const varList=document.getElementById("varList");varList.innerHTML="";
   const variAll=m.lines.filter(l=>l.type==="variable");
-  const vari=sortLines(variAll.filter(matches),"variable");vari.forEach(l=>varList.append(buildRow(l,vmode)));
+  const vari=sortLines(variAll.filter(matches),"variable");
+  appendLinesGrouped(varList,vari,isFlow);
   if(vari.length===0){const e=document.createElement("div");e.className="empty";
     e.textContent=(q&&variAll.length>0)?"Aucune dépense variable ne correspond à « "+budgetSearch.trim()+" ».":"Ex. : Courses, Sorties, Imprévus… Ces dépenses se reportent aussi au mois suivant, avec le détail remis à zéro.";
     varList.append(e);}
@@ -2731,7 +2761,7 @@ function updateUndoUI(){document.getElementById("undoBtn").disabled=hIndex<=0;
   document.getElementById("redoBtn").disabled=hIndex>=history.length-1;}
 function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.current=d.current;state.theme=d.theme;
   state.categories=Array.isArray(d.categories)&&d.categories.length?d.categories:DEFAULT_CATEGORIES.map(c=>({...c}));
-  state.budgetView=(d.budgetView==="list"||d.budgetView==="cards")?d.budgetView:state.budgetView;
+  state.budgetView=(d.budgetView==="cards"||d.budgetView==="flow")?d.budgetView:state.budgetView;
   if(d.savings&&typeof d.savings==="object")state.savings=sanitizeGlobalSavings(d.savings);
   expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));}
 function undo(){if(hIndex<=0)return;clearTimeout(recTimer);hIndex--;restoreSnap(history[hIndex]);
@@ -2833,7 +2863,7 @@ function importData(file){
     state.categories=sanitizeCategories(d.categories)||DEFAULT_CATEGORIES.map(c=>({...c}));
     if(typeof d.current==="string"&&/^\d{4}-\d{2}$/.test(d.current))state.current=d.current;
     if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;
-    if(d.budgetView==="list"||d.budgetView==="cards")state.budgetView=d.budgetView;
+    if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
     if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
@@ -2993,7 +3023,7 @@ function gdApply(d){
   state.categories=sanitizeCategories(d.categories)||DEFAULT_CATEGORIES.map(c=>({...c}));
   if(typeof d.current==="string"&&/^\d{4}-\d{2}$/.test(d.current))state.current=d.current;
   if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;
-  if(d.budgetView==="list"||d.budgetView==="cards")state.budgetView=d.budgetView;
+  if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
   if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
