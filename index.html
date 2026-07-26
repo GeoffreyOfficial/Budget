@@ -103,6 +103,12 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
 .app{width:100%;max-width:460px;padding:0 14px 100px;margin:0 auto}
 .hidden{display:none!important}
+@media (max-width:400px){
+  .app{padding:0 8px 100px}
+}
+@media (max-width:340px){
+  .app{padding:0 6px 100px}
+}
 @media (min-width:640px){
   .app{max-width:620px;padding:0 20px 100px}
 }
@@ -389,6 +395,11 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 .svDeductRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 2px 2px;cursor:pointer}
 .svDeductRow>span{font-size:12.5px;color:var(--muted);font-weight:600}
 .svDeductRow.hidden{display:none}
+.settingSwitchRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 2px}
+.settingSwitchRow+.settingSwitchRow{border-top:1px dashed var(--line)}
+.settingSwitchRow .ssTxt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.settingSwitchRow .ssTitle{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.settingSwitchRow .ssSub{display:block;font-size:11.5px;color:var(--faint);line-height:1.35}
 .svDeduct{display:inline-flex;align-items:center;gap:7px;margin:1px 0 3px;border:none;background:none;color:var(--muted);font-size:11.5px;font-weight:600;cursor:pointer;padding:2px 0}
 .svDeduct .svDot{width:26px;height:16px;border-radius:99px;background:var(--soft);border:1px solid var(--line);position:relative;transition:background .2s,border-color .2s;flex-shrink:0}
 .svDeduct .svDot::after{content:"";position:absolute;top:1px;left:1px;width:12px;height:12px;border-radius:50%;background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
@@ -410,7 +421,23 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 
 .sechead{display:flex;align-items:center;justify-content:space-between;margin:20px 4px 8px;gap:8px;flex-wrap:wrap;row-gap:6px}
 .sechead h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:700}
-.sechead .tot{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-left:auto;flex-shrink:1;min-width:0;text-align:right}
+.sechead .tot{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-left:auto;flex-shrink:1;min-width:0;text-align:right;display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.sechead .tot .totVal{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pctBadge{flex-shrink:0;font-family:var(--mono);font-size:10.5px;font-weight:800;padding:2px 6px;border-radius:99px;line-height:1.3}
+.pctBadge:empty{display:none}
+.pctBadge.pct-ok{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+.pctBadge.pct-warn{background:color-mix(in srgb,var(--money-out) 20%,transparent);color:var(--money-out)}
+.pctBadge.pct-over{background:var(--red-soft);color:var(--red)}
+.pctRing{--pct:0;--ringc:var(--muted);flex-shrink:0;width:15px;height:15px;border-radius:50%;position:relative;
+  background:conic-gradient(var(--ringc) calc(var(--pct)*1%),var(--line) 0)}
+.pctRing::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--card)}
+.pctRing.hidden{display:none}
+.pctRing.pct-ok{--ringc:var(--green)}
+.pctRing.pct-warn{--ringc:var(--money-out)}
+.pctRing.pct-over{--ringc:var(--red)}
+.noteBadge{flex-shrink:0;font-family:var(--mono);font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:99px;line-height:1.3;
+  background:var(--soft);color:var(--muted);white-space:nowrap}
+.noteBadge:empty{display:none}
 .sechd-actions{flex-basis:100%;display:flex;align-items:center;justify-content:center;gap:8px}
 
 /* ---------- section cards (demarcation) ---------- */
@@ -502,6 +529,13 @@ button.rowCatIcon:active{transform:scale(.92)}
 .planCur{font-family:var(--mono);font-size:13px;color:var(--muted)}
 .del{flex-shrink:0;width:24px;height:24px;border:none;background:transparent;color:var(--faint);font-size:17px;cursor:pointer;border-radius:6px}
 .del:active{color:var(--red)}
+.dragHandle{flex-shrink:0;width:20px;height:28px;border:none;background:transparent;color:var(--faint);
+  font-size:15px;letter-spacing:-1px;cursor:grab;display:grid;place-items:center;padding:0;touch-action:none;
+  -webkit-tap-highlight-color:transparent;border-radius:6px}
+.dragHandle:active{color:var(--ink);background:var(--soft)}
+.row.dragging{cursor:grabbing;box-shadow:0 16px 34px -12px rgba(0,0,0,.45);border-color:var(--accent-2);opacity:.96}
+.dragPlaceholder{border:2px dashed var(--line);border-radius:14px;background:var(--soft);margin-bottom:9px}
+.app[data-view="flow"] .dragHandle{display:none}
 .dupBtn{flex-shrink:0;width:24px;height:24px;border:none;background:transparent;color:var(--faint);font-size:14px;cursor:pointer;border-radius:6px;display:grid;place-items:center}
 .dupBtn:active{color:var(--accent-2)}
 .prog{height:7px;border-radius:99px;background:var(--soft);margin:10px 0 8px;overflow:hidden}
@@ -587,6 +621,31 @@ button.rowCatIcon:active{transform:scale(.92)}
 .signBtn:active{transform:scale(.92)}
 .signBtn.neg{color:var(--red);border-color:var(--red)}
 .amtIn.neg,.miniAmt.neg{color:var(--red)}
+/* ---------- AFFICHAGE COMPACT (réglage) ---------- */
+.app.compact .hero{padding:14px}
+.app.compact .big{font-size:28px}
+.app.compact .bar{margin:9px 0 8px;height:6px}
+.app.compact .stats{gap:6px}
+.app.compact .stat{padding:6px 8px}
+.app.compact .stat .k{font-size:10px}
+.app.compact .section{padding:9px 8px 9px;margin:14px 2px 4px;border-radius:14px}
+.app.compact .sechead{margin:14px 3px 6px}
+.app.compact .row{padding:9px 9px 9px 13px;margin-bottom:6px;border-radius:11px}
+.app.compact .rtop{gap:7px}
+.app.compact .nameIn{font-size:14px}
+.app.compact .planIn{font-size:13.5px;width:56px}
+.app.compact .prog{margin:7px 0 6px;height:5px}
+.app.compact .rmeta{gap:6px}
+.app.compact .mtxt{font-size:11.5px}
+.app.compact .payBtn,.app.compact .quickBtn,.app.compact .toggle{font-size:10.5px;padding:4px 8px}
+.app.compact .income{padding:9px 10px;margin:9px 2px 6px}
+.app.compact .miniRow{padding:6px 0}
+.app.compact .recap{padding:9px 10px 8px 11px;margin:9px 2px 4px}
+.app.compact .recap .rline{padding:3px 0;font-size:12.5px}
+.app.compact .entries{max-height:220px}
+.app.compact .entry{padding:6px 0;gap:4px}
+.app.compact .tabs{margin:10px 0 4px;padding:3px}
+.app.compact .detailToggleRow{margin-top:4px}
 .entries{margin-top:8px;max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin}
 /* En vue Jauges, les cartes sont plus petites : on réduit la hauteur de scroll du détail pour rester compact */
 .app[data-view="flow"] .entries{max-height:210px}
@@ -694,7 +753,7 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
 .drow .dn{font-size:12px;color:var(--muted);margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
 .drow .da{font-family:var(--mono);font-weight:700;font-size:13.5px;color:var(--ink)}
 
-.modalWrap{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:80;
+.modalWrap{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:300;
   animation:modalBgIn .25s ease both}
 .modalWrap.hidden{display:none}
 @keyframes modalBgIn{from{background:rgba(0,0,0,0)}to{background:rgba(0,0,0,.45)}}
@@ -944,6 +1003,28 @@ html{scroll-behavior:smooth}
       <button type="button" class="segBtn" data-view="flow" role="tab" aria-selected="false">
         <span class="segT">🌡 Jauges</span><span class="segS">Grille de niveaux, groupée par catégorie</span></button>
     </div>
+    <label class="settingSwitchRow" id="compactRow">
+      <span class="ssTxt"><span class="ssTitle">Affichage compact</span><span class="ssSub">Réduit les espacements et les tailles pour voir plus d'éléments à l'écran.</span></span>
+      <button type="button" class="switch" id="compactSwitch" role="switch" aria-checked="false" aria-label="Activer l'affichage compact"></button>
+    </label>
+    <div class="hr"></div>
+    <div class="slabel">Confirmation avant suppression</div>
+    <label class="settingSwitchRow" id="confirmDelBudgetRow">
+      <span class="ssTxt"><span class="ssTitle">Budget (poste)</span><span class="ssSub">Demander une confirmation pour supprimer un poste fixe ou variable.</span></span>
+      <button type="button" class="switch" id="confirmDelBudgetSwitch" role="switch" aria-checked="true" aria-label="Confirmer la suppression d'un budget"></button>
+    </label>
+    <label class="settingSwitchRow" id="confirmDelExpenseRow">
+      <span class="ssTxt"><span class="ssTitle">Dépense</span><span class="ssSub">Demander une confirmation pour supprimer une dépense enregistrée.</span></span>
+      <button type="button" class="switch" id="confirmDelExpenseSwitch" role="switch" aria-checked="false" aria-label="Confirmer la suppression d'une dépense"></button>
+    </label>
+    <label class="settingSwitchRow" id="confirmDelIncomeRow">
+      <span class="ssTxt"><span class="ssTitle">Revenu</span><span class="ssSub">Demander une confirmation pour supprimer une source de revenu.</span></span>
+      <button type="button" class="switch" id="confirmDelIncomeSwitch" role="switch" aria-checked="false" aria-label="Confirmer la suppression d'un revenu"></button>
+    </label>
+    <label class="settingSwitchRow" id="confirmDelSavingsRow">
+      <span class="ssTxt"><span class="ssTitle">Épargne</span><span class="ssSub">Demander une confirmation pour supprimer une ligne d'épargne.</span></span>
+      <button type="button" class="switch" id="confirmDelSavingsSwitch" role="switch" aria-checked="false" aria-label="Confirmer la suppression d'une épargne"></button>
+    </label>
     <div class="hr"></div>
     <div class="slabel">Calculette</div>
     <div class="szSeg" id="calcSizeSeg">
@@ -1043,6 +1124,7 @@ html{scroll-behavior:smooth}
     <div class="section sec-income" id="sectionIncome">
       <div class="sechead">
         <div class="sechd-l"><h2>Revenus</h2></div>
+        <div class="sechd-r"><span class="tot" id="incomeTot"><span class="totVal" id="incomeTotVal">0 €</span><span class="noteBadge" id="incomeSubBadge"></span></span></div>
       </div>
       <div class="income" id="incomeBox">
         <div class="incRow">
@@ -1073,7 +1155,7 @@ html{scroll-behavior:smooth}
     <div class="section sec-fixed" id="sectionFixed">
       <div class="sechead">
         <div class="sechd-l"><h2>Budget fixe</h2><span class="cnt" id="fixedCount"></span></div>
-        <span class="tot" id="fixedTot">0 / 0</span>
+        <span class="tot" id="fixedTot"><span class="totVal" id="fixedTotVal">0 / 0</span><span class="pctRing hidden" id="fixedPctRing"></span><span class="pctBadge" id="fixedPctBadge"></span></span>
         <div class="sechd-actions">
           <div class="sortWrap">
             <button type="button" class="sortBtn" id="sortBtnFixed" aria-label="Trier">⇅</button>
@@ -1091,7 +1173,7 @@ html{scroll-behavior:smooth}
     <div class="section sec-variable" id="sectionVar">
       <div class="sechead">
         <div class="sechd-l"><h2>Budget var</h2><span class="cnt" id="varCount"></span></div>
-        <span class="tot" id="varTot">0 / 0</span>
+        <span class="tot" id="varTot"><span class="totVal" id="varTotVal">0 / 0</span><span class="pctRing hidden" id="varPctRing"></span><span class="pctBadge" id="varPctBadge"></span></span>
         <div class="sechd-actions">
           <div class="sortWrap">
             <button type="button" class="sortBtn" id="sortBtnVar" aria-label="Trier">⇅</button>
@@ -1110,7 +1192,7 @@ html{scroll-behavior:smooth}
     <div class="section sec-savings" id="sectionSavings">
       <div class="sechead">
         <div class="sechd-l"><h2>Épargne</h2></div>
-        <div class="sechd-r"><span class="tot" id="savingsTot">0 €</span></div>
+        <div class="sechd-r"><span class="tot" id="savingsTot"><span class="totVal" id="savingsTotVal">0 €</span><span class="noteBadge" id="savingsDedBadge"></span></span></div>
       </div>
       <div class="income" id="savingsBox">
         <div class="incRow">
@@ -1342,12 +1424,12 @@ function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id o
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{}};
+let state={months:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false};
 let tab="budgets";
 const expanded=new Set();
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -1364,6 +1446,44 @@ document.querySelectorAll("#viewSeg .segBtn").forEach(b=>{
     if(v===state.budgetView){applyBudgetView();return;}
     state.budgetView=v;applyBudgetView();save();render();};
 });
+
+/* ---------- AFFICHAGE COMPACT ---------- */
+function applyCompact(){
+  const app=document.querySelector(".app");if(app)app.classList.toggle("compact",!!state.compact);
+  const sw=document.getElementById("compactSwitch");
+  if(sw){sw.classList.toggle("on",!!state.compact);sw.setAttribute("aria-checked",state.compact?"true":"false");}
+}
+document.getElementById("compactSwitch").onclick=()=>{
+  state.compact=!state.compact;applyCompact();save();
+};
+
+/* ---------- CONFIRMATION AVANT SUPPRESSION (réglages) ---------- */
+const DELETE_CONFIRM_SWITCHES={budget:"confirmDelBudgetSwitch",expense:"confirmDelExpenseSwitch",income:"confirmDelIncomeSwitch",savings:"confirmDelSavingsSwitch"};
+function renderDeleteConfirmSettings(){
+  for(const kind in DELETE_CONFIRM_SWITCHES){
+    const sw=document.getElementById(DELETE_CONFIRM_SWITCHES[kind]);if(!sw)continue;
+    const on=!!(state.confirmDelete&&state.confirmDelete[kind]);
+    sw.classList.toggle("on",on);sw.setAttribute("aria-checked",on?"true":"false");
+  }
+}
+for(const kind in DELETE_CONFIRM_SWITCHES){
+  const sw=document.getElementById(DELETE_CONFIRM_SWITCHES[kind]);
+  if(sw)sw.onclick=()=>{
+    if(!state.confirmDelete)state.confirmDelete=sanitizeConfirmDelete(null);
+    state.confirmDelete[kind]=!state.confirmDelete[kind];
+    renderDeleteConfirmSettings();save();
+  };
+}
+// Suppression conditionnée au réglage correspondant : si le réglage est désactivé, on supprime directement
+// (sans boîte de dialogue) ; sinon on demande confirmation via la modale existante (askConfirm).
+async function confirmThenDelete(kind,{title,message,icon="🗑️",confirmText="Supprimer"},doDelete){
+  if(state.confirmDelete&&state.confirmDelete[kind]){
+    const ok=await askConfirm({icon,danger:true,title,message,confirmText});
+    if(!ok)return false;
+  }
+  doDelete();
+  return true;
+}
 
 function migrate(){
   if(!Array.isArray(state.categories)||state.categories.length===0)state.categories=DEFAULT_CATEGORIES.map(c=>({...c}));
@@ -1400,6 +1520,14 @@ function migrate(){
   state.statsOrder=sanitizeStatsOrder(state.statsOrder);
   state.heroMetric=sanitizeHeroMetric(state.heroMetric);
   state.labels=sanitizeLabels(state.labels);
+  state.confirmDelete=sanitizeConfirmDelete(state.confirmDelete);
+  state.compact=!!state.compact;
+}
+function sanitizeConfirmDelete(o){
+  const def={budget:true,expense:false,income:false,savings:false};
+  const out={};
+  for(const k in def)out[k]=(o&&typeof o[k]==="boolean")?o[k]:def[k];
+  return out;
 }
 function sanitizeGlobalSavings(sv){
   const o={detailed:!!(sv&&sv.detailed),total:0,deduct:!!(sv&&sv.deduct),lines:[]};
@@ -1414,7 +1542,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,lines:[]};}
@@ -1525,6 +1653,26 @@ function attachSuggest(el,kind){
 }
 
 const round2=n=>{n=Number.isFinite(n)?n:0;return Math.round(n*100+(n>=0?1:-1)*1e-9)/100;};
+// Badge % + anneau de progression discret à côté d'un total "dépensé/prévu" : vert tant que
+// c'est raisonnable, orange en approche du budget, rouge en cas de dépassement. Rien n'est
+// affiché si aucun montant n'est prévu (planned<=0).
+function updatePctBadge(prefix,spentV,plannedV){
+  const badge=document.getElementById(prefix+"PctBadge"),ring=document.getElementById(prefix+"PctRing");
+  if(!(plannedV>0)){
+    if(badge){badge.textContent="";badge.className="pctBadge";}
+    if(ring){ring.classList.add("hidden");ring.className="pctRing hidden";}
+    return;
+  }
+  const pct=Math.round(spentV/plannedV*100);
+  const cls=pct>100?"pct-over":pct>=90?"pct-warn":"pct-ok";
+  if(badge){badge.textContent=pct+"%";badge.className="pctBadge "+cls;}
+  if(ring){ring.className="pctRing "+cls;ring.style.setProperty("--pct",Math.max(0,Math.min(100,pct)));}
+}
+// Somme des lignes de revenu négatives (régularisations, remboursements dus…) d'un mois détaillé.
+function incomeNegativeSum(m){
+  if(!m||!m.incomeDetailed)return 0;
+  return round2((m.incomeLines||[]).reduce((s,l)=>{const a=+l.amount||0;return a<0?s+a:s;},0));
+}
 function parseAmt(str){
   if(str==null)return null;
   let s=String(str).trim().replace(/\s+/g,"");
@@ -1716,7 +1864,7 @@ function renameMetric(id,val){
 }
 
 /* ---------- GESTES : swipe pour supprimer, appui long pour ajout rapide ---------- */
-function attachSwipeDelete(el,onDelete){
+function attachSwipeDelete(el,onDelete,kind){
   let startX=0,startY=0,dx=0,dragging=false,decided=null,pid=null;
   el.addEventListener("pointerdown",ev=>{
     if(ev.pointerType==="mouse"&&ev.button!==0)return;
@@ -1729,16 +1877,24 @@ function attachSwipeDelete(el,onDelete){
     if(decided===null&&(Math.abs(ddx)>8||Math.abs(ddy)>8))decided=Math.abs(ddx)>Math.abs(ddy)?"h":"v";
     if(decided==="h"){ev.preventDefault();dx=Math.min(0,ddx);el.style.transform="translateX("+dx+"px)";el.classList.toggle("swipeReady",dx<-70);}
   },{passive:false});
+  function snapBack(){
+    el.style.transition="transform .25s cubic-bezier(.16,1,.3,1)";
+    el.style.transform="translateX(0)";el.classList.remove("swipeReady");
+    setTimeout(()=>{el.style.transition="";},260);
+  }
   function end(){
     if(!dragging)return;dragging=false;
     if(decided==="h"&&dx<-70){
-      el.style.transition="transform .2s ease, opacity .2s ease";
-      el.style.transform="translateX(-100%)";el.style.opacity="0";
-      setTimeout(onDelete,190);
+      if(kind&&state.confirmDelete&&state.confirmDelete[kind]){
+        // Une confirmation est requise : on annule le glissement visuel et on laisse la modale décider.
+        snapBack();onDelete();
+      }else{
+        el.style.transition="transform .2s ease, opacity .2s ease";
+        el.style.transform="translateX(-100%)";el.style.opacity="0";
+        setTimeout(onDelete,190);
+      }
     }else if(decided==="h"){
-      el.style.transition="transform .25s cubic-bezier(.16,1,.3,1)";
-      el.style.transform="translateX(0)";el.classList.remove("swipeReady");
-      setTimeout(()=>{el.style.transition="";},260);
+      snapBack();
     }
     decided=null;dx=0;
   }
@@ -1789,16 +1945,24 @@ function attachRowGestures(wrap,line,onDelete){
     if(decided===null&&(Math.abs(ddx)>8||Math.abs(ddy)>8)){decided=Math.abs(ddx)>Math.abs(ddy)?"h":"v";clearLP();}
     if(decided==="h"){ev.preventDefault();dx=Math.min(0,ddx);wrap.style.transform="translateX("+dx+"px)";wrap.classList.toggle("swipeReady",dx<-76);}
   },{passive:false});
+  function snapBack(){
+    wrap.style.transition="transform .25s cubic-bezier(.16,1,.3,1)";
+    wrap.style.transform="translateX(0)";wrap.classList.remove("swipeReady");
+    setTimeout(()=>{wrap.style.transition="";},260);
+  }
   function end(){
     if(!dragging)return;dragging=false;clearLP();
     if(decided==="h"&&dx<-76){
-      wrap.style.transition="transform .2s ease, opacity .2s ease";
-      wrap.style.transform="translateX(-100%)";wrap.style.opacity="0";
-      setTimeout(onDelete,190);
+      if(state.confirmDelete&&state.confirmDelete.budget){
+        // Une confirmation est requise : on annule le glissement visuel et on laisse la modale décider.
+        snapBack();onDelete();
+      }else{
+        wrap.style.transition="transform .2s ease, opacity .2s ease";
+        wrap.style.transform="translateX(-100%)";wrap.style.opacity="0";
+        setTimeout(onDelete,190);
+      }
     }else if(decided==="h"){
-      wrap.style.transition="transform .25s cubic-bezier(.16,1,.3,1)";
-      wrap.style.transform="translateX(0)";wrap.classList.remove("swipeReady");
-      setTimeout(()=>{wrap.style.transition="";},260);
+      snapBack();
     }
     decided=null;dx=0;
   }
@@ -1827,7 +1991,10 @@ function entryEl(line,e){
   syncSign();
   const cur=document.createElement("span");cur.className="amtCur";cur.textContent="€";aw.append(sign,amt,cur);
   const del=document.createElement("button");del.className="delE";del.textContent="×";
-  del.onclick=()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();};
+  del.onclick=()=>{confirmThenDelete("expense",{
+    title:"Supprimer cette dépense ?",
+    message:"Cette ligne de dépense sera supprimée. Rattrapable avec ↶ juste après."
+  },()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();});};
   top.append(date,aw,del);
   const note=document.createElement("input");note.className="noteIn";note.value=e.note||"";note.placeholder="Étiquette (ex. Carrefour, Marché…)";
   note.addEventListener("input",()=>{e.note=note.value;touch();});
@@ -1835,7 +2002,12 @@ function entryEl(line,e){
   const warn=document.createElement("div");warn.className="ewarn";
   const dup=document.createElement("div");dup.className="dupwarn";
   box.append(top,note,warn,dup);
-  attachSwipeDelete(box,()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();});
+  attachSwipeDelete(box,()=>{
+    confirmThenDelete("expense",{
+      title:"Supprimer cette dépense ?",
+      message:"Cette ligne de dépense sera supprimée. Rattrapable avec ↶ juste après."
+    },()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();});
+  },"expense");
   function isDuplicate(){
     if(e.amount==null||!Number.isFinite(+e.amount)||!e.date)return false;
     const m=ensure(state.current),nm=(line.name||"").trim();
@@ -1883,9 +2055,76 @@ function closeCatPicker(){document.getElementById("catPickModal").classList.add(
 document.getElementById("catPickCancel").onclick=closeCatPicker;
 document.getElementById("catPickModal").addEventListener("click",e=>{if(e.target.id==="catPickModal")closeCatPicker();});
 /* Constructeur unique de ligne de dépense (cartes détaillées). */
+/* ---------- Glisser-déposer : réordonner manuellement les postes (vue Cartes uniquement,
+   la vue Jauges regroupe par catégorie et n'a pas d'ordre linéaire à réordonner) ---------- */
+let dragCtx=null;
+function attachDragHandle(handle,wrap){
+  handle.addEventListener("pointerdown",ev=>{
+    if(ev.pointerType==="mouse"&&ev.button!==0)return;
+    if(state.budgetView!=="cards")return;
+    if(budgetSearch.trim())return;
+    ev.preventDefault();
+    const container=wrap.parentNode;if(!container)return;
+    const rect=wrap.getBoundingClientRect();
+    const placeholder=document.createElement("div");
+    placeholder.className="dragPlaceholder";placeholder.style.height=rect.height+"px";
+    container.insertBefore(placeholder,wrap.nextSibling);
+    wrap.style.position="fixed";wrap.style.left=rect.left+"px";wrap.style.top=rect.top+"px";
+    wrap.style.width=rect.width+"px";wrap.style.zIndex="200";
+    wrap.classList.add("dragging");
+    if(navigator.vibrate)try{navigator.vibrate(10);}catch(err){}
+    dragCtx={wrap,container,placeholder,startY:ev.clientY,baseTop:rect.top};
+    document.addEventListener("pointermove",onDragMove);
+    document.addEventListener("pointerup",onDragEnd);
+    document.addEventListener("pointercancel",onDragEnd);
+  });
+}
+function onDragMove(ev){
+  if(!dragCtx)return;
+  const{wrap,container,placeholder,startY,baseTop}=dragCtx;
+  wrap.style.top=(baseTop+(ev.clientY-startY))+"px";
+  const siblings=[...container.children].filter(c=>c!==wrap&&c!==placeholder&&c.classList.contains("row"));
+  let target=null;
+  for(const sib of siblings){
+    const r=sib.getBoundingClientRect();
+    if(ev.clientY<r.top+r.height/2){target=sib;break;}
+  }
+  if(target){if(placeholder.nextSibling!==target)container.insertBefore(placeholder,target);}
+  else if(container.lastElementChild!==placeholder)container.appendChild(placeholder);
+}
+function onDragEnd(){
+  if(!dragCtx)return;
+  const{wrap,container,placeholder}=dragCtx;
+  container.insertBefore(wrap,placeholder);placeholder.remove();
+  wrap.style.position="";wrap.style.left="";wrap.style.top="";wrap.style.width="";wrap.style.zIndex="";
+  wrap.classList.remove("dragging");
+  document.removeEventListener("pointermove",onDragMove);
+  document.removeEventListener("pointerup",onDragEnd);
+  document.removeEventListener("pointercancel",onDragEnd);
+  const type=container.id==="fixedList"?"fixed":container.id==="varList"?"variable":null;
+  dragCtx=null;
+  if(type)persistManualOrder(type);
+}
+function persistManualOrder(type){
+  const container=document.getElementById(type==="fixed"?"fixedList":"varList");if(!container)return;
+  const ids=[...container.querySelectorAll(":scope > .row")].map(r=>r.dataset.id);
+  const m=ensure(state.current);
+  const linesOfType=m.lines.filter(l=>l.type===type);
+  const byId=new Map(linesOfType.map(l=>[l.id,l]));
+  const reordered=ids.map(id=>byId.get(id)).filter(Boolean);
+  if(reordered.length!==linesOfType.length)return; // rendu incohérent (recherche active, etc.) : on ne touche à rien
+  let idx=0;
+  m.lines=m.lines.map(l=>l.type===type?reordered[idx++]:l);
+  if(sectionSort[type].key!=="default")sectionSort[type]={key:"default",dir:1};
+  commit();render();
+}
 function buildRow(line){
   const wrap=document.createElement("div");wrap.className="row";wrap.dataset.id=line.id;
   wrap.style.setProperty("--rowbar-color",line.type==="fixed"?gv("--accent-2"):gv("--faint"));
+  // Poignée de glisser-déposer — réordonner manuellement les postes (vue Cartes)
+  const dragHandle=document.createElement("button");dragHandle.type="button";dragHandle.className="dragHandle";
+  dragHandle.innerHTML="⠿";dragHandle.title="Glisser pour réordonner";dragHandle.setAttribute("aria-label","Réordonner ce poste");
+  attachDragHandle(dragHandle,wrap);
   // Icône de catégorie — cliquable pour changer directement la catégorie (et donc l'icône)
   const catIcon=document.createElement("button");catIcon.type="button";catIcon.className="rowCatIcon";
   catIcon.textContent=catById(line.category||"").icon;
@@ -1908,14 +2147,10 @@ function buildRow(line){
   // Suppression (logique commune, présentée différemment selon le mode)
   async function askDelete(){
     const nm=(line.name||"").trim();
-    const ok=await askConfirm({
-      icon:"🗑️",danger:true,
+    await confirmThenDelete("budget",{
       title:"Supprimer "+(nm?'« '+nm+' »':"ce poste")+" ?",
-      message:"Ce poste et toutes ses dépenses enregistrées seront supprimés. Rattrapable avec ↶ juste après.",
-      confirmText:"Supprimer"
-    });
-    if(!ok)return;
-    deleteLine(line);
+      message:"Ce poste et toutes ses dépenses enregistrées seront supprimés. Rattrapable avec ↶ juste après."
+    },()=>deleteLine(line));
   }
   const del=document.createElement("button");del.className="del";del.textContent="×";del.setAttribute("aria-label","Supprimer");del.onclick=askDelete;
   // Barre de progression
@@ -1944,11 +2179,11 @@ function buildRow(line){
   if(isFixed){
     // Poste fixe : toujours complet, pas de détail à déplier, pas de dupliquer — juste Payer.
     const top=document.createElement("div");top.className="rtop";
-    top.append(catIcon,name,pw,del);
+    top.append(dragHandle,catIcon,name,pw,del);
     const meta=document.createElement("div");meta.className="rmeta";
     meta.append(mtxt,payBtn);
     wrap.append(top,prog,meta,rwarn);
-    attachRowGestures(wrap,line,()=>deleteLine(line));
+    attachRowGestures(wrap,line,askDelete);
     applyRowState(wrap,line);return wrap;
   }
   // Ajout rapide (postes variables uniquement)
@@ -1987,11 +2222,11 @@ function buildRow(line){
     if(hidden){expanded.delete(line.id);toggle.classList.remove("open");quick.classList.remove("hidden");}
     else{expanded.add(line.id);toggle.classList.add("open");quick.classList.add("hidden");}save();};
   const top=document.createElement("div");top.className="rtop";
-  top.append(catIcon,name,pw,del);
+  top.append(dragHandle,catIcon,name,pw,del);
   const meta=document.createElement("div");meta.className="rmeta";
   meta.append(mtxt,quick,toggle);
   wrap.append(top,prog,meta,rwarn,details);
-  attachRowGestures(wrap,line,()=>deleteLine(line));
+  attachRowGestures(wrap,line,askDelete);
   applyRowState(wrap,line);return wrap;
 }
 function applyRowState(el,line){
@@ -2102,7 +2337,10 @@ function renderIncomeBox(){
     m.incomeLines.forEach(l=>{
       list.append(miniLineEl(l,
         ()=>{touch();updateComputed();},
-        ()=>{m.incomeLines=m.incomeLines.filter(x=>x.id!==l.id);commit();render();}
+        ()=>{confirmThenDelete("income",{
+          title:"Supprimer "+(l.name?'« '+l.name+' »':"cette source de revenu")+" ?",
+          message:"Cette source de revenu sera supprimée. Rattrapable avec ↶ juste après."
+        },()=>{m.incomeLines=m.incomeLines.filter(x=>x.id!==l.id);commit();render();});}
       ));
     });
   }
@@ -2142,7 +2380,10 @@ function renderSavingsBox(){
     sv.lines.forEach(l=>{
       list.append(savingsLineEl(l,
         ()=>{touch();updateComputed();},
-        ()=>{sv.lines=sv.lines.filter(x=>x.id!==l.id);commit();render();},
+        ()=>{confirmThenDelete("savings",{
+          title:"Supprimer "+(l.name?'« '+l.name+' »':"cette ligne d'épargne")+" ?",
+          message:"Cette ligne d'épargne sera supprimée. Rattrapable avec ↶ juste après."
+        },()=>{sv.lines=sv.lines.filter(x=>x.id!==l.id);commit();render();});},
         ()=>{l.deduct=!l.deduct;commit();render();}
       ));
     });
@@ -2289,10 +2530,17 @@ function updateComputed(){
     const fixedLines=m.lines.filter(l=>l.type==="fixed"),varLines=m.lines.filter(l=>l.type==="variable");
     const fixedPlanned=fixedLines.reduce((s,l)=>s+(+l.planned||0),0),fixedSpent=fixedLines.reduce((s,l)=>s+spent(l),0);
     const varPlanned=varLines.reduce((s,l)=>s+(+l.planned||0),0),varSpent=varLines.reduce((s,l)=>s+spent(l),0);
-    document.getElementById("fixedTot").textContent=num2(fixedSpent)+"/"+num2(fixedPlanned);
-    document.getElementById("varTot").textContent=num2(varSpent)+"/"+num2(varPlanned);
+    document.getElementById("fixedTotVal").textContent=num2(fixedSpent)+"/"+num2(fixedPlanned);
+    document.getElementById("varTotVal").textContent=num2(varSpent)+"/"+num2(varPlanned);
+    updatePctBadge("fixed",fixedSpent,fixedPlanned);
+    updatePctBadge("var",varSpent,varPlanned);
   }
-  const stEl=document.getElementById("savingsTot");if(stEl)stEl.textContent=eur(t.savings);
+  const svTotVal=document.getElementById("savingsTotVal");if(svTotVal)svTotVal.textContent=eur(t.savings);
+  const svDedBadge=document.getElementById("savingsDedBadge");
+  if(svDedBadge)svDedBadge.textContent=t.deducted>0?("dont "+eur(t.deducted)+" déduits"):"";
+  const incTotVal=document.getElementById("incomeTotVal");if(incTotVal)incTotVal.textContent=eur(t.income);
+  const incSubBadge=document.getElementById("incomeSubBadge");
+  if(incSubBadge){const negSum=incomeNegativeSum(m);incSubBadge.textContent=negSum<0?("dont "+eur(-negSum)+" soustraits"):"";}
   const incIn=document.getElementById("incomeIn");
   if(incIn&&m.incomeDetailed&&document.activeElement!==incIn){const v=t.income;incIn.value=v===0?"":v;}
   const savInp=document.getElementById("savingsIn");
@@ -3141,7 +3389,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;re
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels});
+const snapshot=()=>JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -3162,11 +3410,12 @@ function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.curren
   if(d.savings&&typeof d.savings==="object")state.savings=sanitizeGlobalSavings(d.savings);
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);
   state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
+  state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;
   expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));}
 function undo(){if(hIndex<=0)return;clearTimeout(recTimer);hIndex--;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();save();render();updateUndoUI();toast("Annulé");}
+  applyTheme();applyBudgetView();applyCompact();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();save();render();updateUndoUI();toast("Annulé");}
 function redo(){if(hIndex>=history.length-1)return;clearTimeout(recTimer);hIndex++;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();save();render();updateUndoUI();toast("Rétabli");}
+  applyTheme();applyBudgetView();applyCompact();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();save();render();updateUndoUI();toast("Rétabli");}
 document.getElementById("undoBtn").onclick=undo;
 document.getElementById("redoBtn").onclick=redo;
 
@@ -3188,7 +3437,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels},null,2);
+  const payload=JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -3266,8 +3515,9 @@ function importData(file){
     if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
     state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
+    state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
-    migrate();applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();applyCompact();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -3341,7 +3591,7 @@ window.addEventListener("beforeunload",e=>{
   if(hasInvalidFields()){e.preventDefault();e.returnValue="";return e.returnValue;}
 });
 
-applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();applyCompact();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ================= SAUVEGARDE AUTOMATIQUE — GOOGLE DRIVE =================
@@ -3416,7 +3666,8 @@ function gdSerialize(){
   dataUpdatedAt = Date.now();
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,current:state.current,
     theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,
-    savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels});
+    savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
+    confirmDelete:state.confirmDelete,compact:state.compact});
 }
 function gdApply(d){
   const cleanMonths=sanitizeMonths(d.months);
@@ -3429,8 +3680,9 @@ function gdApply(d){
   if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
+  state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
-  migrate();applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();applyCompact();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
