@@ -121,6 +121,32 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   .app{max-width:1060px}
 }
 
+/* ---------- Bannière d'alerte : sauvegarde cloud non activée ---------- */
+.driveAlert{position:relative;display:flex;flex-direction:column;gap:11px;margin:12px 2px 0;padding:12px 13px;border-radius:14px;
+  background:linear-gradient(180deg,var(--red-soft),var(--card));border:1.5px solid var(--red);
+  box-shadow:0 8px 22px -12px color-mix(in srgb,var(--red) 60%,transparent);
+  animation:driveAlertIn .35s cubic-bezier(.16,1,.3,1) both,daPulse 2.6s ease-in-out .35s infinite}
+.driveAlert.hidden{display:none}
+@keyframes driveAlertIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes daPulse{0%,100%{box-shadow:0 8px 22px -14px color-mix(in srgb,var(--red) 55%,transparent)}
+  50%{box-shadow:0 12px 28px -10px color-mix(in srgb,var(--red) 80%,transparent)}}
+.daMain{display:flex;align-items:flex-start;gap:11px}
+.driveAlert .daIcon{flex-shrink:0;font-size:24px;line-height:1.1;animation:daShake 3.4s ease-in-out infinite}
+@keyframes daShake{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-11deg)}94%{transform:rotate(11deg)}}
+.driveAlert .daBody{flex:1;min-width:0;padding-right:24px}
+.driveAlert .daTitle{font-size:13.5px;font-weight:800;color:var(--red);margin-bottom:2px}
+.driveAlert .daText{font-size:11.5px;color:var(--muted);line-height:1.45}
+.driveAlert .daText b{color:var(--ink);font-weight:700}
+.driveAlert .daBtn{width:100%;border:none;background:var(--red);color:#fff;font-weight:800;
+  font-size:12.5px;border-radius:11px;padding:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;
+  box-shadow:0 6px 16px -8px color-mix(in srgb,var(--red) 70%,transparent)}
+.driveAlert .daBtn:active{filter:brightness(.9);transform:scale(.99)}
+.daClose{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:8px;border:1px solid var(--red);
+  background:var(--card);color:var(--red);font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center;z-index:1;
+  transition:transform .15s,filter .15s}
+.daClose:active{filter:brightness(.95);transform:scale(.94)}
+@media (prefers-reduced-motion:reduce){.driveAlert,.driveAlert .daIcon{animation:none}}
+
 .topbar{display:flex;flex-direction:column;position:sticky;top:0;z-index:40;background:var(--paper);box-shadow:0 6px 14px -10px rgba(0,0,0,.35);padding:calc(12px + env(safe-area-inset-top)) 2px 0}
 .topbarRow{display:flex;align-items:center;gap:8px;padding-bottom:8px}
 .syncbar{display:flex;justify-content:center;overflow:hidden;max-height:0;transition:max-height .2s ease}
@@ -238,9 +264,9 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .syncbadge.pending{color:var(--money-out)}.syncbadge.pending::before{background:var(--money-out)}
 .syncbadge.busy{color:var(--money-out)}.syncbadge.busy::before{background:var(--money-out)}
 .syncbadge.err{color:var(--red)}.syncbadge.err::before{background:var(--red)}
-.syncbadge.cta{color:var(--accent);border-color:var(--accent);cursor:pointer;font-weight:800}
-.syncbadge.cta::before{background:var(--accent)}
-.syncbadge.cta:active{filter:brightness(.94)}
+.syncbadge.cta{color:#fff;background:var(--red);border-color:var(--red);cursor:pointer;font-weight:800;animation:badgePulse 2s ease-in-out infinite}
+.syncbadge.cta::before{background:#fff}
+.syncbadge.cta:active{filter:brightness(.92)}
 @media (max-width:380px){.syncbadge{font-size:10px;padding:4px 7px}}
 .catrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .caticon{flex-shrink:0;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--soft);font-size:16px;cursor:pointer;display:grid;place-items:center}
@@ -741,6 +767,22 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
 .segBtn.on .segS{color:var(--muted)}
 .segBtn:active{transform:scale(.98)}
 
+/* ---------- Indicateurs d'en-tête (réglages) ---------- */
+.statOrder{display:flex;flex-direction:column;gap:8px}
+.statOrderRow{display:flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 9px}
+.statOrderRow.hero{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.soStar{flex-shrink:0;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--faint);font-size:15px;cursor:pointer;display:grid;place-items:center;transition:transform .15s,color .15s,border-color .15s}
+.soStar:active{transform:scale(.92)}
+.soStar.on{color:var(--accent);border-color:var(--accent);background:var(--soft)}
+.statOrderRow input.soName{flex:1;min-width:0;border:1px solid transparent;background:var(--card);color:var(--ink);border-radius:8px;padding:7px 9px;font-size:13.5px;font-weight:600;font-family:inherit;outline:none;transition:border-color .15s}
+.statOrderRow input.soName::placeholder{color:var(--faint);font-weight:500}
+.statOrderRow input.soName:focus-visible{border-color:var(--accent-2)}
+.soBtns{display:flex;gap:6px;flex-shrink:0}
+.soBtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;cursor:pointer;display:grid;place-items:center;transition:transform .15s,filter .15s}
+.soBtn:active{transform:scale(.94)}
+.soBtn:disabled{opacity:.32;cursor:default}
+.soBtn:disabled:active{transform:none}
+
 /* ================== COUCHE "WAHOU" : effets, transitions, mouvements ================== */
 /* Transition fluide entre thèmes (repose sur les variables CSS déjà en place, donc valable pour tous les thèmes) */
 .theme-transition,.theme-transition *{transition:background-color .5s ease,color .5s ease,border-color .5s ease,box-shadow .5s ease,fill .5s ease!important}
@@ -856,6 +898,10 @@ html{scroll-behavior:smooth}
         <span class="segT">🌡 Jauges</span><span class="segS">Grille de niveaux, groupée par catégorie</span></button>
     </div>
     <div class="hr"></div>
+    <div class="slabel">Indicateurs d'en-tête</div>
+    <div id="statOrderList" class="statOrder"></div>
+    <p class="bkhint">Touche ★ pour choisir l'indicateur mis en avant en grand (le « héros »), renomme chaque libellé en tapant dedans, et réordonne les cartes avec les flèches.</p>
+    <div class="hr"></div>
     <div class="slabel">Catégories</div>
     <div id="catList"></div>
     <button class="addbtn" id="addCatBtn" style="margin-top:2px">+ Catégorie</button>
@@ -895,6 +941,18 @@ html{scroll-behavior:smooth}
     </div>
   </div>
 
+  <div class="driveAlert hidden" id="driveAlert" role="alert" aria-live="polite">
+    <button type="button" class="daClose" id="driveAlertClose" aria-label="Masquer l'alerte">×</button>
+    <div class="daMain">
+      <div class="daIcon" aria-hidden="true">⚠️</div>
+      <div class="daBody">
+        <div class="daTitle">Sauvegarde automatique désactivée</div>
+        <div class="daText">Tes données ne sont enregistrées que sur <b>cet appareil</b>. Vidage du navigateur, perte, vol ou changement de téléphone&nbsp;: <b>tout serait perdu</b>. Connecte Google Drive pour une sauvegarde automatique et sécurisée.</div>
+      </div>
+    </div>
+    <button type="button" class="daBtn" id="driveAlertBtn">☁ Connecter Google Drive</button>
+  </div>
+
   <div id="monthView">
   <div class="hero" id="hero">
     <div class="beachDecor" aria-hidden="true">
@@ -904,7 +962,7 @@ html{scroll-behavior:smooth}
       <span class="bd bd4">🌴</span>
     </div>
     <div class="heroTop">
-      <div class="lbl">Reste réel</div>
+      <div class="lbl" id="heroLbl">Reste réel</div>
       <svg class="heroSpark hidden" id="heroSpark"></svg>
     </div>
     <div class="big" id="heroBig">0,00 €</div>
@@ -916,6 +974,7 @@ html{scroll-behavior:smooth}
       <div class="stat"><div class="k">Dépensé</div><div class="v" id="sSpent">0 €</div></div>
       <div class="stat"><div class="k">Solde provisoire</div><div class="v" id="sSolde">0 €</div></div>
       <div class="stat"><div class="k">Épargne</div><div class="v" id="sSavings">0 €</div></div>
+      <div class="stat"><div class="k">Épargne déduite</div><div class="v" id="sDeducted">0 €</div></div>
     </div>
   </div>
 
@@ -1153,12 +1212,50 @@ function longDay(iso){const d=new Date(iso+"T00:00:00");
 const gv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const palette=()=>["--c1","--c2","--c3","--c4","--c5","--c6"].map(gv);
 
-let state={months:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false};
+/* ---------- Indicateurs d'en-tête (hero) : ordre, renommage, héros au choix ----------
+   7 indicateurs au total. L'un d'eux est le « héros » (grande valeur mise en avant en haut) ;
+   les 6 autres s'affichent en cartes, dans l'ordre choisi. Chaque libellé est renommable. */
+const STAT_IDS=["reste","income","budget","spent","solde","savings","deducted"];
+const STAT_META={
+  reste:{el:"sReste",label:"Reste réel",
+    get:t=>t.remainReal,over:t=>t.remainReal<0,neg:t=>t.remainReal<0,
+    sub:t=>t.remainReal>=0?("disponible après dépenses"+(t.deducted>0?" et épargne déduite":"")):("au-dessus de tes revenus de "+eur(-t.remainReal))},
+  income:{el:"sIncome",label:"Revenus",
+    get:t=>t.income,over:t=>false,neg:t=>false,
+    sub:t=>"revenus du mois"},
+  budget:{el:"sBudget",label:"Budget total",
+    get:t=>round2(t.planned+t.deducted),over:t=>t.income>0&&round2(t.planned+t.deducted)>t.income,neg:t=>false,
+    sub:t=>"budget prévu"+(t.deducted>0?" (dont épargne déduite)":"")},
+  spent:{el:"sSpent",label:"Dépensé",
+    get:t=>t.spent,over:t=>t.income>0&&t.spent>t.income,neg:t=>false,
+    sub:t=>t.income>0?("soit "+Math.round(t.spent/t.income*100)+"% de tes revenus"):"dépensé ce mois-ci"},
+  solde:{el:"sSolde",label:"Solde provisoire",
+    get:t=>t.soldeProvisoire,over:t=>t.soldeProvisoire<0,neg:t=>t.soldeProvisoire<0,
+    sub:t=>t.soldeProvisoire>=0?"disponible une fois tout le budget dépensé":("budget au-dessus des revenus de "+eur(-t.soldeProvisoire))},
+  savings:{el:"sSavings",label:"Épargne",
+    get:t=>t.savings,over:t=>false,neg:t=>false,
+    sub:t=>t.deducted>0?("mis de côté · dont "+eur(t.deducted)+" déduits"):"mis de côté"},
+  deducted:{el:"sDeducted",label:"Épargne déduite",
+    get:t=>t.deducted,over:t=>false,neg:t=>false,
+    sub:t=>"retiré des revenus disponibles"}
+};
+function sanitizeStatsOrder(arr){
+  const out=[],seen=new Set();
+  if(Array.isArray(arr))for(const id of arr){if(STAT_META[id]&&!seen.has(id)){seen.add(id);out.push(id);}}
+  for(const id of STAT_IDS)if(!seen.has(id))out.push(id); // complète avec les indicateurs manquants (ex. nouveaux) à la fin
+  return out;
+}
+function sanitizeHeroMetric(x){return STAT_META[x]?x:"reste";}
+function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id of STAT_IDS){const v=o[id];
+  if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
+function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
+  return (typeof c==="string"&&c.trim())?c:m.label;}
+let state={months:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{}};
 let tab="budgets";
 const expanded=new Set();
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -1208,6 +1305,9 @@ function migrate(){
     }
     state.savingsMigrated=true;
   }
+  state.statsOrder=sanitizeStatsOrder(state.statsOrder);
+  state.heroMetric=sanitizeHeroMetric(state.heroMetric);
+  state.labels=sanitizeLabels(state.labels);
 }
 function sanitizeGlobalSavings(sv){
   const o={detailed:!!(sv&&sv.detailed),total:0,deduct:!!(sv&&sv.deduct),lines:[]};
@@ -1222,7 +1322,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,lines:[]};}
@@ -1448,6 +1548,65 @@ document.getElementById("addCatBtn").onclick=()=>{
   const inputs=document.querySelectorAll("#catList .catNameIn");const last=inputs[inputs.length-1];
   if(last){last.focus();last.select();}
 };
+
+/* ---------- INDICATEURS D'EN-TÊTE : cartes (tous sauf le héros), dans l'ordre choisi ---------- */
+function renderHeroStats(){
+  const wrap=document.querySelector(".stats");if(!wrap)return;
+  const heroId=sanitizeHeroMetric(state.heroMetric);
+  const cards=sanitizeStatsOrder(state.statsOrder).filter(id=>id!==heroId);
+  const sig=heroId+"|"+cards.map(id=>id+":"+metricLabel(id)).join(",");
+  if(wrap.dataset.sig===sig)return; // rien n'a changé : on ne reconstruit pas (évite de relancer l'animation à chaque recalcul)
+  wrap.dataset.sig=sig;
+  wrap.innerHTML=cards.map(id=>{const m=STAT_META[id];
+    return '<div class="stat"><div class="k">'+esc(metricLabel(id))+'</div><div class="v" id="'+m.el+'">0 €</div></div>';}).join("");
+}
+function renderStatOrderSettings(){
+  const wrap=document.getElementById("statOrderList");if(!wrap)return;
+  const order=sanitizeStatsOrder(state.statsOrder);state.statsOrder=order;
+  const heroId=sanitizeHeroMetric(state.heroMetric);
+  wrap.innerHTML="";
+  order.forEach((id,i)=>{
+    const isHero=id===heroId;
+    const row=document.createElement("div");row.className="statOrderRow"+(isHero?" hero":"");
+    const star=document.createElement("button");star.type="button";star.className="soStar"+(isHero?" on":"");
+    star.textContent=isHero?"★":"☆";star.title=isHero?"Indicateur mis en avant (héros)":"Mettre en avant en grand (héros)";
+    star.setAttribute("aria-label",star.title);star.setAttribute("aria-pressed",isHero?"true":"false");
+    star.onclick=()=>setHeroMetric(id);
+    const name=document.createElement("input");name.className="soName";name.type="text";name.value=metricLabel(id);
+    name.maxLength=24;name.autocomplete="off";name.setAttribute("aria-label","Renommer l'indicateur");
+    name.placeholder=STAT_META[id].label;
+    name.addEventListener("input",()=>renameMetric(id,name.value));
+    const btns=document.createElement("div");btns.className="soBtns";
+    const up=document.createElement("button");up.type="button";up.className="soBtn";up.textContent="↑";up.setAttribute("aria-label","Monter");if(i===0)up.disabled=true;up.onclick=()=>moveStat(i,-1);
+    const dn=document.createElement("button");dn.type="button";dn.className="soBtn";dn.textContent="↓";dn.setAttribute("aria-label","Descendre");if(i===order.length-1)dn.disabled=true;dn.onclick=()=>moveStat(i,1);
+    btns.append(up,dn);
+    row.append(star,name,btns);
+    wrap.append(row);
+  });
+}
+function moveStat(i,dir){
+  const order=sanitizeStatsOrder(state.statsOrder);
+  const j=i+dir;if(j<0||j>=order.length)return;
+  const tmp=order[i];order[i]=order[j];order[j]=tmp;
+  state.statsOrder=order;
+  commit(); // sauvegardé, annulable (↶) et synchronisé Drive
+  renderStatOrderSettings();renderHeroStats();updateComputed();
+}
+function setHeroMetric(id){
+  if(!STAT_META[id]||state.heroMetric===id)return;
+  state.heroMetric=id;
+  heroCurrentValue=null; // repart de la nouvelle valeur sans tween entre deux indicateurs différents
+  commit();
+  renderStatOrderSettings();renderHeroStats();updateComputed();
+}
+function renameMetric(id,val){
+  if(!STAT_META[id])return;
+  const v=(val||"").trim().slice(0,24);
+  if(!state.labels||typeof state.labels!=="object")state.labels={};
+  if(v&&v!==STAT_META[id].label)state.labels[id]=v;else delete state.labels[id];
+  touch(); // sauvegarde + historique (débounce) + Drive
+  renderHeroStats();updateComputed(); // met à jour la carte / le libellé du héros sans reconstruire la liste (garde le focus dans le champ)
+}
 
 /* ---------- GESTES : swipe pour supprimer, appui long pour ajout rapide ---------- */
 function attachSwipeDelete(el,onDelete){
@@ -1980,28 +2139,31 @@ function animateHeroValue(to){
   heroRAF=requestAnimationFrame(step);
 }
 function updateComputed(){
+  renderHeroStats();
   const m=ensure(state.current),t=totals(m);
   const incBox=document.getElementById("incomeBox");
   if(incBox)incBox.classList.toggle("warn",!(t.income>0));
-  const hero=document.getElementById("hero"),over=t.remainReal<0;
+  const heroId=sanitizeHeroMetric(state.heroMetric),hm=STAT_META[heroId];
+  const hero=document.getElementById("hero"),over=hm.over(t);
   hero.className="hero"+(over?" over":"");
-  animateHeroValue(t.remainReal);
-  document.getElementById("heroSub").textContent=t.remainReal>=0
-    ?("disponible après dépenses"+(t.deducted>0?" et épargne":""))
-    :("au-dessus de tes revenus de "+eur(-t.remainReal));
+  const lblEl=document.getElementById("heroLbl");if(lblEl)lblEl.textContent=metricLabel(heroId);
+  animateHeroValue(hm.get(t));
+  document.getElementById("heroSub").textContent=hm.sub(t);
   const pct=t.income>0?Math.min(100,t.spent/t.income*100):0;
   const bar=document.getElementById("heroBar");bar.style.width=Math.max(0,Math.min(100,pct))+"%";bar.className=over?"over":"";
-  document.getElementById("sIncome").textContent=eur(t.income);
-  const sb=document.getElementById("sBudget");if(sb)sb.textContent=eur(round2(t.planned+t.deducted));
-  document.getElementById("sSpent").textContent=eur(t.spent);
-  const sso=document.getElementById("sSolde");if(sso){sso.textContent=eur(t.soldeProvisoire);sso.className="v"+(t.soldeProvisoire<0?" red":"");}
-  const ssv=document.getElementById("sSavings");if(ssv)ssv.textContent=eur(t.savings);
+  // Valeurs des cartes (tous les indicateurs sauf le héros)
+  sanitizeStatsOrder(state.statsOrder).forEach(id=>{
+    if(id===heroId)return;
+    const def=STAT_META[id],el=document.getElementById(def.el);
+    if(!el)return;
+    el.textContent=eur(def.get(t));el.className="v"+(def.neg(t)?" red":"");
+  });
   const spark=document.getElementById("heroSpark");
   if(spark){
     const sparkKeys=Object.keys(state.months).filter(k=>k<=state.current).sort().slice(-6);
     if(sparkKeys.length>=2){
       spark.setAttribute("viewBox","0 0 76 26");
-      spark.innerHTML=miniSparkline(sparkKeys.map(k=>totals(state.months[k]).remainReal));
+      spark.innerHTML=miniSparkline(sparkKeys.map(k=>hm.get(totals(state.months[k]))));
       spark.classList.remove("hidden");
     }else{spark.innerHTML="";spark.classList.add("hidden");}
   }
@@ -2861,7 +3023,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;re
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings});
+const snapshot=()=>JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -2880,11 +3042,13 @@ function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.curren
   state.categories=Array.isArray(d.categories)&&d.categories.length?d.categories:DEFAULT_CATEGORIES.map(c=>({...c}));
   state.budgetView=(d.budgetView==="cards"||d.budgetView==="flow")?d.budgetView:state.budgetView;
   if(d.savings&&typeof d.savings==="object")state.savings=sanitizeGlobalSavings(d.savings);
+  state.statsOrder=sanitizeStatsOrder(d.statsOrder);
+  state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));}
 function undo(){if(hIndex<=0)return;clearTimeout(recTimer);hIndex--;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();save();render();updateUndoUI();toast("Annulé");}
+  applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();save();render();updateUndoUI();toast("Annulé");}
 function redo(){if(hIndex>=history.length-1)return;clearTimeout(recTimer);hIndex++;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();save();render();updateUndoUI();toast("Rétabli");}
+  applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();save();render();updateUndoUI();toast("Rétabli");}
 document.getElementById("undoBtn").onclick=undo;
 document.getElementById("redoBtn").onclick=redo;
 
@@ -2906,7 +3070,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated},null,2);
+  const payload=JSON.stringify({months:state.months,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -2983,8 +3147,9 @@ function importData(file){
     if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
     if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
+    state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
-    migrate();applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -3058,7 +3223,7 @@ window.addEventListener("beforeunload",e=>{
   if(hasInvalidFields()){e.preventDefault();e.returnValue="";return e.returnValue;}
 });
 
-applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ================= SAUVEGARDE AUTOMATIQUE — GOOGLE DRIVE =================
@@ -3133,7 +3298,7 @@ function gdSerialize(){
   dataUpdatedAt = Date.now();
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,current:state.current,
     theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,
-    savings:state.savings,savingsMigrated:state.savingsMigrated});
+    savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels});
 }
 function gdApply(d){
   const cleanMonths=sanitizeMonths(d.months);
@@ -3145,8 +3310,9 @@ function gdApply(d){
   if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
   if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
+  state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
-  migrate();applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
@@ -3186,7 +3352,17 @@ async function gdWrite(text){
 let gdBusy=false;
 let netOnline=navigator.onLine!==false;
 let gdSyncPending=false, gdLastError=null;
+let driveAlertDismissed=false; // masquée pour la session en cours seulement (revient au prochain lancement tant que Drive n'est pas connecté)
+function updateDriveAlert(){
+  // Bannière d'alerte bien visible : affichée tant que la sauvegarde cloud n'est pas active
+  // (Drive configuré mais non connecté), sauf si l'utilisateur l'a masquée pour cette session.
+  const al=document.getElementById("driveAlert");if(!al)return;
+  if(gdMeta.enabled)driveAlertDismissed=false; // reconnecté : on réarme l'alerte pour une éventuelle future déconnexion
+  const show=!!GOOGLE_CLIENT_ID && !gdMeta.enabled && !driveAlertDismissed;
+  al.classList.toggle("hidden",!show);
+}
 function gdBadgeUpdate(){
+  updateDriveAlert();
   const el=document.getElementById("syncBadge");if(!el)return;
   const bar=document.getElementById("syncBar");
   el.onclick=null;
@@ -3200,7 +3376,7 @@ function gdBadgeUpdate(){
     return;
   }
   if(!gdMeta.enabled){
-    set("cta","☁ Connecter Google Drive","Tes données ne sont sauvegardées que sur cet appareil. Appuie ici pour activer la sauvegarde automatique.");
+    set("cta","⚠ Connecter Google Drive","Tes données ne sont sauvegardées que sur cet appareil — risque de perte. Appuie ici pour activer la sauvegarde automatique.");
     el.onclick=()=>{
       document.getElementById("settings").classList.remove("hidden");
       const box=document.getElementById("gdBox");if(box)box.scrollIntoView({behavior:"smooth",block:"center"});
@@ -3251,11 +3427,12 @@ function gdStableStringify(o){
 function gdSnapshotOf(d){
   return{months:d.months||{},current:d.current||null,theme:d.theme||null,categories:d.categories||[],
     budgetView:d.budgetView||null,savings:d.savings||null,savingsMigrated:!!d.savingsMigrated,
+    statsOrder:sanitizeStatsOrder(d.statsOrder),heroMetric:sanitizeHeroMetric(d.heroMetric),labels:sanitizeLabels(d.labels),
     expanded:Array.isArray(d.expanded)?[...d.expanded].sort():[]};
 }
 function gdContentEquals(remote){
   const local={months:state.months,current:state.current,theme:state.theme,categories:state.categories,
-    budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,expanded:[...expanded]};
+    budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,expanded:[...expanded]};
   return gdStableStringify(gdSnapshotOf(local))===gdStableStringify(gdSnapshotOf(remote));
 }
 
@@ -3350,6 +3527,17 @@ function gdSignout(){
   const bind=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn;};
   bind("gdConnectBtn",gdConnect);bind("gdBackupBtn",()=>gdPush());
   bind("gdRestoreBtn",()=>gdPull(true));bind("gdSignoutBtn",gdSignout);
+  bind("driveAlertBtn",gdConnect);
+  bind("driveAlertClose",async()=>{
+    const ok=await askConfirm({
+      icon:"⚠️",danger:true,
+      title:"Masquer cette alerte ?",
+      message:"Sans Google Drive, tes données ne sont enregistrées que sur cet appareil. En cas de vidage du navigateur, de perte, de vol ou de changement de téléphone, elles seront définitivement perdues. L'alerte réapparaîtra au prochain lancement tant que la sauvegarde automatique n'est pas activée.",
+      confirmText:"J'ai compris, masquer",
+      cancelText:"Annuler"
+    });
+    if(ok){driveAlertDismissed=true;updateDriveAlert();}
+  });
   gdUpdateUI();
 })();
 
