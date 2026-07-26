@@ -176,6 +176,10 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .bkbtn{flex:1;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:11px;padding:11px;font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .15s,filter .15s}
 .bkbtn:active{filter:brightness(.96);transform:scale(.98)}
 .bkbtn.danger{width:100%;color:var(--red);border-color:var(--red);background:var(--red-soft)}
+.bkbtn.danger-solid{width:100%;color:#fff;border-color:var(--red);background:var(--red);font-weight:800;box-shadow:0 6px 16px -8px rgba(178,58,46,.55)}
+.bkbtn.danger-solid:active{background:var(--red);filter:brightness(.9)}
+.dangerZone{border:1px solid var(--red);background:var(--red-soft);border-radius:14px;padding:12px;margin-top:4px}
+.dangerZone .slabel{color:var(--red);margin-bottom:8px}
 .bkhint{font-size:12px;color:var(--faint);margin:10px 2px 0;line-height:1.55}
 .bkhint code{font-family:var(--mono);font-size:11px;background:var(--soft);padding:1px 5px;border-radius:5px}
 .gdrive #gdActions{flex-direction:column;margin-top:8px}
@@ -760,6 +764,12 @@ html{scroll-behavior:smooth}
     <button class="bkbtn danger" id="resetFixedBtn" style="margin-top:8px">⬇ Fixes + récurrentes + revenus du mois précédent</button>
     <button class="bkbtn danger" id="resetAllBtn" style="margin-top:8px">↻ Recopier tout le mois précédent</button>
     <p class="bkhint">« Réinitialiser » vide entièrement le mois affiché (revenus et dépenses remis à zéro, rien n'est repris). « Fixes + récurrentes » et « Recopier tout » effacent les dépenses enregistrées du mois affiché puis le recréent à partir du mois précédent — le premier ne reprend que les charges fixes, les dépenses variables marquées 🔁 récurrentes, et les revenus ; le second reprend aussi toutes les autres dépenses variables. Annulable avec ↶.</p>
+    <div class="hr"></div>
+    <div class="dangerZone">
+      <div class="slabel">⚠️ Zone à risque</div>
+      <button class="bkbtn danger-solid" id="deleteMonthBtn">🗑️ Supprimer définitivement ce mois</button>
+      <p class="bkhint">Contrairement aux réinitialisations ci-dessus (qui vident le mois mais le gardent), cette action retire complètement le mois affiché de ton historique — il n'apparaîtra plus nulle part (bilans, comparaisons, graphiques). Une confirmation te sera demandée avant toute suppression.</p>
+    </div>
   </div>
 
   <div id="monthView">
@@ -984,12 +994,12 @@ function migrate(){
 }
   if(typeof m.incomeDetailed!=="boolean")m.incomeDetailed=false;
   if(!Array.isArray(m.incomeLines))m.incomeLines=[];
-  for(const il of m.incomeLines){if(typeof il.id!=="string")il.id=uid();if(typeof il.name!=="string")il.name="";il.amount=Number.isFinite(+il.amount)?Math.max(0,+il.amount):0;}
+  for(const il of m.incomeLines){if(typeof il.id!=="string")il.id=uid();if(typeof il.name!=="string")il.name="";il.amount=Number.isFinite(+il.amount)?(+il.amount):0;}
   if(!m.savings||typeof m.savings!=="object")m.savings={detailed:false,total:0,lines:[]};
   m.savings.detailed=!!m.savings.detailed;
-  m.savings.total=Number.isFinite(+m.savings.total)?Math.max(0,+m.savings.total):0;
+  m.savings.total=Number.isFinite(+m.savings.total)?(+m.savings.total):0;
   if(!Array.isArray(m.savings.lines))m.savings.lines=[];
-  for(const sl of m.savings.lines){if(typeof sl.id!=="string")sl.id=uid();if(typeof sl.name!=="string")sl.name="";sl.amount=Number.isFinite(+sl.amount)?Math.max(0,+sl.amount):0;}
+  for(const sl of m.savings.lines){if(typeof sl.id!=="string")sl.id=uid();if(typeof sl.name!=="string")sl.name="";sl.amount=Number.isFinite(+sl.amount)?(+sl.amount):0;}
 }
   // Épargne globale (indépendante du mois)
   state.savings=sanitizeGlobalSavings(state.savings);
@@ -1007,11 +1017,11 @@ function migrate(){
 }
 function sanitizeGlobalSavings(sv){
   const o={detailed:!!(sv&&sv.detailed),total:0,deduct:!!(sv&&sv.deduct),lines:[]};
-  o.total=Number.isFinite(+(sv&&sv.total))?Math.max(0,+sv.total):0;
+  o.total=Number.isFinite(+(sv&&sv.total))?(+sv.total):0;
   if(sv&&Array.isArray(sv.lines))o.lines=sv.lines.map(sl=>({
     id:typeof sl.id==="string"?sl.id:uid(),
     name:typeof sl.name==="string"?sl.name:"",
-    amount:Number.isFinite(+sl.amount)?Math.max(0,+sl.amount):0,
+    amount:Number.isFinite(+sl.amount)?(+sl.amount):0,
     deduct:!!sl.deduct
   }));
   return o;
@@ -1067,20 +1077,20 @@ function parseAmt(str){
   const v=parseFloat(s);
   return Number.isFinite(v)?v:null;
 }
-const spent=l=>round2(l.entries.reduce((s,e)=>s+Math.max(0,+e.amount||0),0));
+const spent=l=>round2(l.entries.reduce((s,e)=>s+(+e.amount||0),0));
 function monthIncome(m){
-  if(m.incomeDetailed)return round2((m.incomeLines||[]).reduce((s,l)=>s+Math.max(0,+l.amount||0),0));
-  return Math.max(0,+m.income||0);
+  if(m.incomeDetailed)return round2((m.incomeLines||[]).reduce((s,l)=>s+(+l.amount||0),0));
+  return (+m.income||0);
 }
 function savingsTotalG(){const sv=state.savings||{lines:[]};
-  if(sv.detailed)return round2((sv.lines||[]).reduce((s,l)=>s+Math.max(0,+l.amount||0),0));
-  return Math.max(0,+sv.total||0);}
+  if(sv.detailed)return round2((sv.lines||[]).reduce((s,l)=>s+(+l.amount||0),0));
+  return (+sv.total||0);}
 function savingsDeductG(){const sv=state.savings||{lines:[]};
-  if(sv.detailed)return round2((sv.lines||[]).reduce((s,l)=>s+(l.deduct?Math.max(0,+l.amount||0):0),0));
-  return sv.deduct?Math.max(0,+sv.total||0):0;}
+  if(sv.detailed)return round2((sv.lines||[]).reduce((s,l)=>s+(l.deduct?(+l.amount||0):0),0));
+  return sv.deduct?(+sv.total||0):0;}
 function monthSavings(){return savingsTotalG();}
 function totals(m){let planned=0,sp=0,over=0,pFixed=0,pVar=0;
-  for(const l of m.lines){const p=Math.max(0,+l.planned||0);planned+=p;if(l.type==="fixed")pFixed+=p;else pVar+=p;const s=spent(l);sp+=s;if(s>p)over+=s-p;}
+  for(const l of m.lines){const p=(+l.planned||0);planned+=p;if(l.type==="fixed")pFixed+=p;else pVar+=p;const s=spent(l);sp+=s;if(s>p)over+=s-p;}
   planned=round2(planned);sp=round2(sp);over=round2(over);pFixed=round2(pFixed);pVar=round2(pVar);
   const income=monthIncome(m);
   const deducted=savingsDeductG();
@@ -1247,7 +1257,7 @@ function entryEl(line,e){
   const aw=document.createElement("div");aw.className="amtWrap";
   const amt=document.createElement("input");amt.className="amtIn";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=e.amount==null?"":e.amount;amt.placeholder="0";
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);e.amount=v!=null?Math.max(0,v):null;validate();updateComputed();touch();});
+  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);e.amount=v!=null?(v):null;validate();updateComputed();touch();});
   const cur=document.createElement("span");cur.className="amtCur";cur.textContent="€";aw.append(amt,cur);
   const del=document.createElement("button");del.className="delE";del.textContent="×";
   del.onclick=()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();};
@@ -1259,7 +1269,7 @@ function entryEl(line,e){
   box.append(top,note,warn,dup);
   attachSwipeDelete(box,()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();});
   function isDuplicate(){
-    if(!(e.amount>0)||!e.date)return false;
+    if(e.amount==null||!Number.isFinite(+e.amount)||!e.date)return false;
     const m=ensure(state.current),nm=(line.name||"").trim();
     for(const l of m.lines){
       if((l.name||"").trim()!==nm)continue;
@@ -1271,7 +1281,7 @@ function entryEl(line,e){
     return false;
   }
   function validate(){const msgs=[];
-    const badAmt=!(e.amount>0);const badDate=!e.date||e.date<minD||e.date>maxD;
+    const badAmt=e.amount==null||!Number.isFinite(+e.amount);const badDate=!e.date||e.date<minD||e.date>maxD;
     amt.classList.toggle("inv",badAmt);date.classList.toggle("inv",badDate);
     if(badAmt)msgs.push("Montant requis");
     if(badDate)msgs.push("Date hors du mois");
@@ -1283,7 +1293,7 @@ function entryEl(line,e){
   return box;
 }
 function entryIssues(line,k){const [minD,maxD]=monthBounds(k);
-  return line.entries.filter(e=>!(e.amount>0)||!e.date||e.date<minD||e.date>maxD).length;}
+  return line.entries.filter(e=>e.amount==null||!Number.isFinite(+e.amount)||!e.date||e.date<minD||e.date>maxD).length;}
 function rowEl(line){return buildRow(line,"card");}
 /* Constructeur unique de ligne de dépense.
    mode="card" : cartes détaillées (affichage historique).
@@ -1303,7 +1313,7 @@ function buildRow(line,mode){
   const pw=document.createElement("div");pw.className="planWrap";
   const plan=document.createElement("input");plan.className="planIn";plan.type="text";plan.inputMode="decimal";plan.autocomplete="off";
   plan.value=(+line.planned||0)===0?"":line.planned;plan.placeholder="0";
-  plan.addEventListener("input",()=>{const v=parseAmt(plan.value);line.planned=v!=null?Math.max(0,v):0;updateComputed();touch();});
+  plan.addEventListener("input",()=>{const v=parseAmt(plan.value);line.planned=v!=null?(v):0;updateComputed();touch();});
   const pc=document.createElement("span");pc.className="planCur";pc.textContent="€";pw.append(plan,pc);
   // Suppression (logique commune, présentée différemment selon le mode)
   async function askDelete(){
@@ -1409,7 +1419,7 @@ function applyRowState(el,line){
   el.classList.remove("over","done");
   if(any)el.classList.add(over?"over":"done");
   const pct=p>0?s/p*100:(s>0?100:0);
-  const fill=el.querySelector(".prog>i");fill.style.width=Math.min(100,pct)+"%";fill.className=over?"over":"";
+  const fill=el.querySelector(".prog>i");fill.style.width=Math.max(0,Math.min(100,pct))+"%";fill.className=over?"over":"";
   const mt=el.querySelector(".mtxt");
   if(mt){
     if(over){mt.className="mtxt over";mt.innerHTML="<b>"+eur(s)+"</b> / "+eur(p)+" · +"+eur(s-p);}
@@ -1446,7 +1456,7 @@ function miniLineEl(item,onChange,onDelete){
   const aw=document.createElement("div");aw.className="miniAmtWrap";
   const amt=document.createElement("input");amt.className="miniAmt";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=(+item.amount||0)===0?"":item.amount;amt.placeholder="0";
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?Math.max(0,v):0;onChange();});
+  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?(v):0;onChange();});
   const cur=document.createElement("span");cur.className="miniCur";cur.textContent="€";
   aw.append(amt,cur);
   const del=document.createElement("button");del.type="button";del.className="miniDel";del.setAttribute("aria-label","Supprimer");del.textContent="×";
@@ -1462,7 +1472,7 @@ function savingsLineEl(item,onChange,onDelete,onToggleDeduct){
   const aw=document.createElement("div");aw.className="miniAmtWrap";
   const amt=document.createElement("input");amt.className="miniAmt";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=(+item.amount||0)===0?"":item.amount;amt.placeholder="0";
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?Math.max(0,v):0;onChange();});
+  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?(v):0;onChange();});
   const cur=document.createElement("span");cur.className="miniCur";cur.textContent="€";
   aw.append(amt,cur);
   const del=document.createElement("button");del.type="button";del.className="miniDel";del.setAttribute("aria-label","Supprimer");del.textContent="×";
@@ -1591,7 +1601,7 @@ function applySectionFolds(){
 }
 document.getElementById("savingsIn").addEventListener("input",e=>{
   if(state.savings.detailed)return;
-  const v=parseAmt(e.target.value);state.savings.total=v!=null?Math.max(0,v):0;
+  const v=parseAmt(e.target.value);state.savings.total=v!=null?(v):0;
   updateComputed();touch();
 });
 function renderRecap(){
@@ -1656,7 +1666,7 @@ function updateComputed(){
     ?("disponible après dépenses"+(t.deducted>0?" et épargne":""))
     :("au-dessus de tes revenus de "+eur(-t.remainReal));
   const pct=t.income>0?Math.min(100,t.spent/t.income*100):0;
-  const bar=document.getElementById("heroBar");bar.style.width=pct+"%";bar.className=over?"over":"";
+  const bar=document.getElementById("heroBar");bar.style.width=Math.max(0,Math.min(100,pct))+"%";bar.className=over?"over":"";
   document.getElementById("sIncome").textContent=eur(t.income);
   const sb=document.getElementById("sBudget");if(sb)sb.textContent=eur(round2(t.planned+t.deducted));
   document.getElementById("sSpent").textContent=eur(t.spent);
@@ -1722,11 +1732,19 @@ function donutSVG(items){
 }
 function barsSVG(vals,labels,todayIdx){
   const N=vals.length,W=Math.max(320,N*11),H=140,padB=16,padT=10,padX=6;
-  const max=Math.max(1,...vals),cw=(W-padX*2)/N,bw=Math.min(cw*0.6,14);
-  const acc=gv("--accent"),acc2=gv("--accent-2");let bars="";
-  for(let i=0;i<N;i++){const h=vals[i]/max*(H-padB-padT),x=padX+i*cw+(cw-bw)/2,y=H-padB-h;
-    const col=vals[i]<=0?gv("--line"):(i===todayIdx?acc2:acc);
-    bars+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(0,h).toFixed(1)+'" rx="2" fill="'+col+'"/>';}
+  const maxV=Math.max(1,...vals,0),minV=Math.min(0,...vals);
+  const range=(maxV-minV)||1;
+  const cw=(W-padX*2)/N,bw=Math.min(cw*0.6,14);
+  const usableH=H-padB-padT;
+  const yFor=v=>padT+(maxV-v)/range*usableH;
+  const zeroY=yFor(0);
+  const acc=gv("--accent"),acc2=gv("--accent-2"),red=gv("--red"),cLine=gv("--line");let bars="";
+  if(minV<0)bars+='<line x1="'+padX.toFixed(1)+'" y1="'+zeroY.toFixed(1)+'" x2="'+(W-padX).toFixed(1)+'" y2="'+zeroY.toFixed(1)+'" stroke="'+cLine+'" stroke-width="1"/>';
+  for(let i=0;i<N;i++){
+    const x=padX+i*cw+(cw-bw)/2,vY=yFor(vals[i]);
+    const y=Math.min(vY,zeroY),h=Math.abs(vY-zeroY);
+    const col=vals[i]<0?red:(vals[i]===0?cLine:(i===todayIdx?acc2:acc));
+    bars+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="2" fill="'+col+'"/>';}
   let ticks="";[0,Math.floor(N/2),N-1].forEach(i=>{const x=padX+i*cw+cw/2;
     ticks+='<text x="'+x.toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle" class="axl">'+labels[i]+'</text>';});
   return '<svg class="bars" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+bars+ticks+'</svg>';
@@ -1749,12 +1767,12 @@ function renderMonthSummary(){
     cats.forEach(x=>{
       const over=x.spent>x.planned&&x.planned>0;
       const pct=x.planned>0?x.spent/x.planned*100:(x.spent>0?100:0);
-      const detail=x.lines.filter(l=>spent(l)>0||(+l.planned||0)>0)
+      const detail=x.lines.filter(l=>l.entries.length>0||(+l.planned||0)!==0)
         .sort((a,b)=>spent(b)-spent(a))
         .map(l=>'<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12.5px"><span style="color:var(--muted)">'+esc((l.name||"").trim()||"Dépense")+'</span><span style="font-family:var(--mono);color:var(--ink)">'+eur0(spent(l))+'</span></div>').join("");
       html+='<div class="cmpItem"><div class="cmptop"><span class="cn">'+x.cat.icon+' '+esc(x.cat.name)+'</span>'
         +'<span class="cv"><b>'+eur0(x.spent)+'</b> / '+eur0(x.planned)+(over?' <span class="ov">+'+eur0(x.spent-x.planned)+'</span>':'')+'</span></div>'
-        +'<div class="track"><i class="'+(over?"over":"")+'" style="width:'+Math.min(100,pct)+'%"></i></div>'
+        +'<div class="track"><i class="'+(over?"over":"")+'" style="width:'+Math.max(0,Math.min(100,pct))+'%"></i></div>'
         +detail+'</div>';
     });
     html+='</div></div>';
@@ -1791,7 +1809,7 @@ function renderCompetition(){
     const prevRow=past[past.length-1];
     const prevMonth=state.months[prevRow.k];
     const dayNow=today.getDate();
-    const prevToDate=round2(prevMonth.lines.reduce((s,l)=>s+l.entries.filter(e=>e.date&&parseInt(e.date.slice(8,10),10)<=dayNow).reduce((s2,e)=>s2+Math.max(0,+e.amount||0),0),0));
+    const prevToDate=round2(prevMonth.lines.reduce((s,l)=>s+l.entries.filter(e=>e.date&&parseInt(e.date.slice(8,10),10)<=dayNow).reduce((s2,e)=>s2+(+e.amount||0),0),0));
     const curToDate=cur.t.spent;
     if(prevToDate>0){
       const diff=round2(curToDate-prevToDate),pct=Math.round(Math.abs(diff)/prevToDate*100),better=diff<0;
@@ -1893,7 +1911,7 @@ function renderTopExpenses(){
       +'<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:4px">'
       +'<span style="color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(i+1)+'. '+x.cat.icon+' '+esc(x.poste)+(x.note?' — '+esc(x.note):'')+'</span>'
       +'<span style="font-family:var(--mono);font-weight:700;color:var(--ink);flex-shrink:0">'+eur0(x.amt)+'</span></div>'
-      +'<div class="track"><i style="width:'+pct+'%"></i></div></div>';
+      +'<div class="track"><i style="width:'+Math.max(0,Math.min(100,pct))+'%"></i></div></div>';
   });
   html+='</div>';
   return html;
@@ -1931,7 +1949,7 @@ function renderAnalyse(){
   withBudget.forEach(l=>{const p=+l.planned||0,s=spent(l),over=s>p&&s>0,pct=p>0?s/p*100:100;
     p2+='<div class="cmpItem"><div class="cmptop"><span class="cn">'+esc((l.name||"").trim()||"Dépense")+'</span>'
       +'<span class="cv"><b>'+eur0(s)+'</b> / '+eur0(p)+(over?' <span class="ov">+'+eur0(s-p)+'</span>':'')+'</span></div>'
-      +'<div class="track"><i class="'+(over?"over":"")+'" style="width:'+Math.min(100,pct)+'%"></i></div></div>';});
+      +'<div class="track"><i class="'+(over?"over":"")+'" style="width:'+Math.max(0,Math.min(100,pct))+'%"></i></div></div>';});
   p2+='</div></div>';
   c.insertAdjacentHTML("beforeend",p2);
   withChartSkeleton(c);
@@ -1946,16 +1964,24 @@ function median(arr){
 let cmpPoste=null,cmpCat=null,cmpYear=null,cmpA=null,cmpB=null,cmpSpan=1;
 function groupedBars(data){
   const N=data.length;if(N===0)return'<p class="empty">Pas encore de mois à comparer.</p>';
-  const max=Math.max(1,...data.flatMap(d=>[d.rev,d.dep]));
+  const vals=data.flatMap(d=>[d.rev,d.dep]);
+  const maxV=Math.max(1,...vals,0),minV=Math.min(0,...vals);
+  const range=(maxV-minV)||1;
   const W=Math.max(300,N*58),H=170,padB=26,padT=14,padX=8;
   const gw=(W-padX*2)/N,bw=Math.min(gw*0.30,20),gap=4;
-  const cIn=gv("--money-in"),cOut=gv("--money-out"),cRed=gv("--red"),cMut=gv("--muted"),cFaint=gv("--faint");
+  const usableH=H-padB-padT;
+  const yFor=v=>padT+(maxV-v)/range*usableH;
+  const zeroY=yFor(0);
+  const cIn=gv("--money-in"),cOut=gv("--money-out"),cRed=gv("--red"),cMut=gv("--muted"),cFaint=gv("--faint"),cLine=gv("--line");
   let s="";
+  if(minV<0)s+='<line x1="'+padX.toFixed(1)+'" y1="'+zeroY.toFixed(1)+'" x2="'+(W-padX).toFixed(1)+'" y2="'+zeroY.toFixed(1)+'" stroke="'+cLine+'" stroke-width="1"/>';
   data.forEach((d,i)=>{const cx=padX+i*gw+gw/2;
-    const rh=d.rev/max*(H-padB-padT),dh=d.dep/max*(H-padB-padT);
     const x1=cx-bw-gap/2,x2=cx+gap/2;const over=d.dep>d.rev&&d.rev>0;
-    s+='<rect x="'+x1.toFixed(1)+'" y="'+(H-padB-rh).toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,rh).toFixed(1)+'" rx="3" fill="'+cIn+'"/>';
-    s+='<rect x="'+x2.toFixed(1)+'" y="'+(H-padB-dh).toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,dh).toFixed(1)+'" rx="3" fill="'+(over?cRed:cOut)+'"/>';
+    const revY=yFor(d.rev),depY=yFor(d.dep);
+    const ry=Math.min(revY,zeroY),rh=Math.abs(revY-zeroY);
+    const dy=Math.min(depY,zeroY),dh=Math.abs(depY-zeroY);
+    s+='<rect x="'+x1.toFixed(1)+'" y="'+ry.toFixed(1)+'" width="'+bw+'" height="'+rh.toFixed(1)+'" rx="3" fill="'+cIn+'"/>';
+    s+='<rect x="'+x2.toFixed(1)+'" y="'+dy.toFixed(1)+'" width="'+bw+'" height="'+dh.toFixed(1)+'" rx="3" fill="'+(over?cRed:cOut)+'"/>';
     s+='<text x="'+cx.toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle" font-size="11" fill="'+(d.cur?cMut:cFaint)+'" font-weight="'+(d.cur?"700":"400")+'">'+d.label+'</text>';
   });
   return'<svg class="gbars" viewBox="0 0 '+W+' '+H+'">'+s+'</svg>';
@@ -2261,7 +2287,7 @@ function renderJour(){
     const day=parseInt(e.date.slice(8,10),10);if(day>=1&&day<=N)perDay[day-1]+=amt;
     flat.push({date:e.date,amount:amt,note:e.note||"",poste:(l.name||"").trim()||"Dépense"});}));
   const totalMonth=perDay.reduce((a,b)=>a+b,0);
-  const activeDays=perDay.filter(v=>v>0).length;
+  const activeDays=perDay.filter(v=>v!==0).length;
   const avg=activeDays?totalMonth/activeDays:0;
   const maxIdx=perDay.indexOf(Math.max(...perDay));
   const today=new Date();const todayIdx=mKey(today)===state.current?today.getDate()-1:-1;
@@ -2271,7 +2297,7 @@ function renderJour(){
     '<div class="daysum">'
     +'<div class="dsum"><div class="k">Total mois</div><div class="v">'+eur0(totalMonth)+'</div></div>'
     +'<div class="dsum"><div class="k">Moy./jour actif</div><div class="v">'+eur0(avg)+'</div></div>'
-    +'<div class="dsum"><div class="k">Plus gros jour</div><div class="v">'+(totalMonth>0?eur0(perDay[maxIdx]):"—")+'</div></div>'
+    +'<div class="dsum"><div class="k">Plus gros jour</div><div class="v">'+(flat.length>0?eur0(perDay[maxIdx]):"—")+'</div></div>'
     +'</div>');
 
   if(todayIdx>=0&&today.getDate()<N){
@@ -2285,12 +2311,12 @@ function renderJour(){
   }
 
   let panel='<div class="panel"><h3>Dépenses par jour</h3><p class="psub">'+mLabel(state.current)+'</p>';
-  panel+= totalMonth>0 ? barsSVG(perDay,labels,todayIdx) : '<p class="empty" style="padding:8px 0 0">Aucune dépense datée ce mois-ci.</p>';
+  panel+= flat.length>0 ? barsSVG(perDay,labels,todayIdx) : '<p class="empty" style="padding:8px 0 0">Aucune dépense datée ce mois-ci.</p>';
   panel+='</div>';
   c.insertAdjacentHTML("beforeend",panel);
 
   // liste groupée par jour (récent -> ancien)
-  const byDate={};flat.filter(f=>f.amount>0).forEach(f=>{(byDate[f.date]=byDate[f.date]||[]).push(f);});
+  const byDate={};flat.forEach(f=>{(byDate[f.date]=byDate[f.date]||[]).push(f);});
   const dates=Object.keys(byDate).sort().reverse();
   if(dates.length){
     let list='<div>';
@@ -2435,11 +2461,17 @@ function goToNewMonth(){goToMonth(nextKeyAfterLatest());}
 async function deleteMonth(key){
   if(!key||!state.months[key])return;
   const t=totals(state.months[key]);
+  const hasData=t.income>0||t.spent>0||t.savings>0||(state.months[key].lines&&state.months[key].lines.length>0);
+  const driveOn=!!(typeof gdMeta!=="undefined"&&gdMeta&&gdMeta.enabled);
   const ok=await askConfirm({
-    icon:"🗑️",danger:true,
-    title:"Supprimer "+mLabel(key)+" ?",
-    message:"Tout le contenu de ce mois ("+eur0(t.income)+" de revenus, "+eur0(t.spent)+" de dépenses) sera supprimé. Rattrapable avec ↶ juste après, tant que tu ne recharges pas l'appli.",
-    confirmText:"Supprimer le mois"
+    icon:"⚠️",danger:true,
+    title:"Supprimer "+mLabel(key)+" — action à risque",
+    message:(hasData
+        ?("Tout le contenu de ce mois sera définitivement effacé : "+eur0(t.income)+" de revenus, "+eur0(t.spent)+" de dépenses et "+eur0(t.savings)+" d'épargne. ")
+        :"Ce mois sera définitivement retiré de ton historique. ")
+      +(driveOn?"La suppression sera aussi synchronisée sur Google Drive dès la prochaine sauvegarde automatique. ":"")
+      +"Rattrapable uniquement avec ↶ juste après, et seulement tant que tu ne recharges pas l'appli — passé ce délai, c'est perdu pour de bon.",
+    confirmText:"Oui, supprimer définitivement"
   });
   if(!ok)return;
   delete state.months[key];
@@ -2492,7 +2524,7 @@ document.getElementById("addFixed").onclick=()=>addLine("fixed");
 document.getElementById("addVar").onclick=()=>addLine("variable");
 document.getElementById("incomeIn").addEventListener("input",e=>{const m=ensure(state.current);
   if(m.incomeDetailed)return;
-  const v=parseAmt(e.target.value);m.income=v!=null?Math.max(0,v):0;
+  const v=parseAmt(e.target.value);m.income=v!=null?(v):0;
   updateComputed();touch();});
 document.getElementById("paletteBtn").onclick=()=>document.getElementById("settings").classList.toggle("hidden");
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});
@@ -2556,16 +2588,16 @@ function sanitizeMonths(raw){
   for(const k in raw){
     if(!/^\d{4}-\d{2}$/.test(k))continue; // clé de mois invalide -> ignorée
     const m=raw[k];if(!m||typeof m!=="object")continue;
-    const income=Number.isFinite(+m.income)?Math.max(0,+m.income):0;
+    const income=Number.isFinite(+m.income)?(+m.income):0;
     const linesIn=Array.isArray(m.lines)?m.lines:[];
     const lines=linesIn.map(l=>{
       if(!l||typeof l!=="object")return null;
       const type=l.type==="fixed"||l.type==="variable"?l.type:"variable";
-      const planned=Number.isFinite(+l.planned)?Math.max(0,+l.planned):0;
+      const planned=Number.isFinite(+l.planned)?(+l.planned):0;
       const entriesIn=Array.isArray(l.entries)?l.entries:[];
       const entries=entriesIn.map(e=>{
         if(!e||typeof e!=="object")return null;
-        const amount=e.amount==null||e.amount===""?null:(Number.isFinite(+e.amount)?Math.max(0,+e.amount):null);
+        const amount=e.amount==null||e.amount===""?null:(Number.isFinite(+e.amount)?(+e.amount):null);
         const date=typeof e.date==="string"?e.date:"";
         const note=typeof e.note==="string"?e.note:"";
         return{id:typeof e.id==="string"?e.id:uid(),date,amount,note};
@@ -2576,17 +2608,17 @@ function sanitizeMonths(raw){
     const incomeLinesIn=Array.isArray(m.incomeLines)?m.incomeLines:[];
     const incomeLines=incomeLinesIn.map(l=>{
       if(!l||typeof l!=="object")return null;
-      const amount=Number.isFinite(+l.amount)?Math.max(0,+l.amount):0;
+      const amount=Number.isFinite(+l.amount)?(+l.amount):0;
       return{id:typeof l.id==="string"?l.id:uid(),name:typeof l.name==="string"?l.name:"",amount};
     }).filter(Boolean);
     const svRaw=m.savings&&typeof m.savings==="object"?m.savings:{};
     const svLinesIn=Array.isArray(svRaw.lines)?svRaw.lines:[];
     const svLines=svLinesIn.map(l=>{
       if(!l||typeof l!=="object")return null;
-      const amount=Number.isFinite(+l.amount)?Math.max(0,+l.amount):0;
+      const amount=Number.isFinite(+l.amount)?(+l.amount):0;
       return{id:typeof l.id==="string"?l.id:uid(),name:typeof l.name==="string"?l.name:"",amount};
     }).filter(Boolean);
-    const savings={detailed:!!svRaw.detailed,total:Number.isFinite(+svRaw.total)?Math.max(0,+svRaw.total):0,lines:svLines};
+    const savings={detailed:!!svRaw.detailed,total:Number.isFinite(+svRaw.total)?(+svRaw.total):0,lines:svLines};
     out[k]={income,incomeDetailed,incomeLines,lines,savings};
   }
   return out;
@@ -2675,6 +2707,10 @@ document.getElementById("resetAllBtn").onclick=async()=>{
   if(!ok)return;
   rebuildFromPrev("all");commit();render();
   document.getElementById("settings").classList.add("hidden");toast("Mois recopié ✓");
+};
+document.getElementById("deleteMonthBtn").onclick=async()=>{
+  await deleteMonth(state.current);
+  document.getElementById("settings").classList.add("hidden");
 };
 
 function hasInvalidFields(){
