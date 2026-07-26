@@ -868,7 +868,7 @@ html{scroll-behavior:smooth}
   opacity:0;transform:scale(.92) translateY(6px);transform-origin:bottom right;
   pointer-events:none;transition:opacity .15s,transform .15s}
 .calcPopup.open{opacity:1;transform:scale(1) translateY(0);pointer-events:auto}
-.calcPopup.dragging{transition:none}
+.calcPopup.dragging{transition:none;opacity:.35}
 .calcHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:grab;touch-action:none;user-select:none}
 .calcHead.dragging{cursor:grabbing}
 .calcHead .t{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
@@ -887,6 +887,23 @@ html{scroll-behavior:smooth}
   padding:11px;font-weight:700;font-size:13px;cursor:pointer}
 .calcInsert:disabled{opacity:.35}
 .copyable-active{background:color-mix(in srgb,var(--accent-2) 22%,var(--soft))!important;transform:scale(1.04);transition:background .15s,transform .1s}
+
+/* ----- Tailles de la calculette (réglable dans Réglages) ----- */
+.calcPopup.sz-sm{width:222px}
+.calcPopup.sz-sm .calcDisplay .val{font-size:20px}
+.calcPopup.sz-sm .calcDisplay .expr{font-size:11px}
+.calcPopup.sz-sm .calcGrid button{font-size:14px;padding:11px 0}
+.calcPopup.sz-sm .calcInsert{font-size:12px;padding:9px}
+.calcPopup.sz-lg{width:322px}
+.calcPopup.sz-lg .calcDisplay .val{font-size:30px}
+.calcPopup.sz-lg .calcDisplay .expr{font-size:13px}
+.calcPopup.sz-lg .calcGrid{gap:9px}
+.calcPopup.sz-lg .calcGrid button{font-size:19px;padding:16px 0}
+.calcPopup.sz-lg .calcInsert{font-size:14px;padding:13px}
+.szSeg{display:flex;gap:6px}
+.szSeg button{flex:1;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:10px;
+  padding:9px 0;font-size:12.5px;font-weight:700;cursor:pointer}
+.szSeg button.active{background:var(--accent);border-color:var(--accent);color:#fff}
 </style>
 </head>
 <body>
@@ -926,6 +943,13 @@ html{scroll-behavior:smooth}
         <span class="segT">🗂 Cartes</span><span class="segS">Détaillé, une carte par poste</span></button>
       <button type="button" class="segBtn" data-view="flow" role="tab" aria-selected="false">
         <span class="segT">🌡 Jauges</span><span class="segS">Grille de niveaux, groupée par catégorie</span></button>
+    </div>
+    <div class="hr"></div>
+    <div class="slabel">Calculette</div>
+    <div class="szSeg" id="calcSizeSeg">
+      <button type="button" data-sz="sm">Petite</button>
+      <button type="button" data-sz="md">Moyenne</button>
+      <button type="button" data-sz="lg">Grande</button>
     </div>
     <div class="hr"></div>
     <div class="slabel">Indicateurs d'en-tête</div>
@@ -1426,6 +1450,8 @@ function collectNames(kind){
   }else if(kind==="savings"){
     for(const mk in state.months){const sv=state.months[mk].savings;if(sv&&Array.isArray(sv.lines))for(const sl of sv.lines)add(sl.name);}
     if(state.savings&&Array.isArray(state.savings.lines))for(const sl of state.savings.lines)add(sl.name);
+  }else if(kind==="note"){
+    for(const mk in state.months)for(const l of state.months[mk].lines)for(const e of l.entries)add(e.note);
   }
   // Les plus utilisés d'abord, puis ordre alphabétique
   return [...map.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,"fr")).map(o=>o.name);
@@ -1450,22 +1476,31 @@ function getSuggBox(){
 function placeSuggest(el){
   const box=getSuggBox(),r=el.getBoundingClientRect();
   const vv=window.visualViewport;
+  // getBoundingClientRect() est exprimé dans le viewport visuel, mais la boîte est en
+  // position:fixed (donc ancrée au viewport de layout) : quand le clavier s'ouvre sur mobile,
+  // ces deux repères se décalent (offsetTop/offsetLeft) — sans cette correction la boîte
+  // se retrouve plaquée en haut de l'écran, hors de la zone visible.
+  const offX=vv?vv.offsetLeft:0, offY=vv?vv.offsetTop:0;
   const viewW=vv?vv.width:window.innerWidth, viewH=vv?vv.height:window.innerHeight;
-  const spaceBelow=viewH-r.bottom-8, spaceAbove=r.top-8;
+  const spaceBelow=viewH-(r.bottom-offY)-8, spaceAbove=(r.top-offY)-8;
   const openAbove=spaceBelow<160&&spaceAbove>spaceBelow;
   const maxH=Math.max(120,Math.min(260,Math.round(openAbove?spaceAbove:spaceBelow)));
   box.style.maxHeight=maxH+"px";
   box.style.width=Math.round(Math.max(r.width,180))+"px";
-  const left=Math.min(r.left,viewW-box.offsetWidth-8);
-  box.style.left=Math.round(Math.max(8,left))+"px";
+  const left=Math.min(r.left,viewW+offX-box.offsetWidth-8);
+  box.style.left=Math.round(Math.max(8+offX,left))+"px";
   box.style.top=Math.round(openAbove?(r.top-4-maxH):(r.bottom+4))+"px";
 }
 function onSuggestReposition(){if(suggActiveEl)placeSuggest(suggActiveEl);}
 function closeSuggest(){
   const box=getSuggBox();box.classList.add("hidden");box.innerHTML="";suggItems=[];suggActiveEl=null;
   window.removeEventListener("scroll",onSuggestReposition,true);window.removeEventListener("resize",onSuggestReposition);
+  if(window.visualViewport){
+    window.visualViewport.removeEventListener("resize",onSuggestReposition);
+    window.visualViewport.removeEventListener("scroll",onSuggestReposition);
+  }
 }
-const SUGG_LABEL={expense:"Postes existants",income:"Revenus existants",savings:"Épargne existante"};
+const SUGG_LABEL={expense:"Postes existants",income:"Revenus existants",savings:"Épargne existante",note:"Dépenses existantes"};
 function openSuggest(el,kind){
   const q=(el.value||"").trim().toLowerCase();
   const all=collectNames(kind);
@@ -1477,6 +1512,10 @@ function openSuggest(el,kind){
     +filtered.map((n,i)=>'<button type="button" class="suggItem" data-i="'+i+'">'+esc(n)+'</button>').join("");
   placeSuggest(el);box.classList.remove("hidden");
   window.addEventListener("scroll",onSuggestReposition,true);window.addEventListener("resize",onSuggestReposition);
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("resize",onSuggestReposition);
+    window.visualViewport.addEventListener("scroll",onSuggestReposition);
+  }
 }
 function attachSuggest(el,kind){
   el.setAttribute("autocomplete","off"); // évite que l'autocomplétion native du navigateur double celle-ci
@@ -1792,6 +1831,7 @@ function entryEl(line,e){
   top.append(date,aw,del);
   const note=document.createElement("input");note.className="noteIn";note.value=e.note||"";note.placeholder="Étiquette (ex. Carrefour, Marché…)";
   note.addEventListener("input",()=>{e.note=note.value;touch();});
+  attachSuggest(note,"note");
   const warn=document.createElement("div");warn.className="ewarn";
   const dup=document.createElement("div");dup.className="dupwarn";
   box.append(top,note,warn,dup);
@@ -3917,6 +3957,29 @@ let popupMovedManually=false;
     handle.classList.remove("dragging");calcPopup.classList.remove("dragging");
   });
 })();
+
+/* ----- Taille de la calculette (réglage, stocké séparément des données du budget) ----- */
+const CALC_SIZE_KEY="budget-calc-size";
+function applyCalcSize(sz){
+  calcPopup.classList.remove("sz-sm","sz-lg");
+  if(sz==="sm"||sz==="lg") calcPopup.classList.add("sz-"+sz);
+  document.querySelectorAll("#calcSizeSeg button").forEach(b=>{
+    b.classList.toggle("active",b.dataset.sz===sz);
+  });
+}
+let calcSize="md";
+try{
+  const saved=localStorage.getItem(CALC_SIZE_KEY);
+  if(saved==="sm"||saved==="md"||saved==="lg") calcSize=saved;
+}catch(_){}
+applyCalcSize(calcSize);
+document.querySelectorAll("#calcSizeSeg button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    calcSize=b.dataset.sz;
+    applyCalcSize(calcSize);
+    try{localStorage.setItem(CALC_SIZE_KEY,calcSize);}catch(_){}
+  });
+});
 
 renderCalc();
 })();
