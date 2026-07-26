@@ -171,7 +171,17 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .monthDrop .mdempty{color:var(--faint);font-weight:500;font-size:12.5px;padding:8px 10px;cursor:default}
 .monthDrop .mdnew{color:var(--accent);border-top:1px solid var(--line);margin-top:4px;padding-top:10px;flex-shrink:0}
 
-.themebar{display:flex;gap:10px;overflow-x:auto;padding:2px 0 2px;scrollbar-width:none}
+.suggBox{position:fixed;z-index:150;background:var(--card);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 12px 30px -12px rgba(0,0,0,.4);padding:5px;max-height:224px;overflow-y:auto;overscroll-behavior:contain}
+.suggBox.hidden{display:none}
+.suggItem{display:block;width:100%;text-align:left;border:none;background:none;color:var(--ink);
+  font:inherit;font-size:13.5px;font-weight:600;padding:10px 11px;border-radius:8px;cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.suggItem:active{background:var(--soft)}
+
+.themebar{display:flex;gap:10px;overflow-x:auto;padding:2px 0 2px;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%)}
 .themebar::-webkit-scrollbar{display:none}
 .sw{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;cursor:pointer;color:var(--muted);font-size:11px;font-weight:600}
 .sw .dot{width:30px;height:30px;border-radius:50%;box-shadow:0 0 0 2px var(--paper),0 0 0 4px transparent;transition:box-shadow .2s}
@@ -249,8 +259,8 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--hero-a),var(--hero-b));
   background-size:200% 200%;animation:heroDrift 12s ease-in-out infinite;
   border-radius:20px;padding:20px;color:var(--hero-ink);box-shadow:0 12px 26px -16px rgba(0,0,0,.55);transition:background-color .35s}
-.hero.over{background:linear-gradient(135deg,#C0392B,#7E241B);background-size:200% 200%;animation:glow 2.2s ease-in-out infinite}
-@keyframes glow{0%,100%{box-shadow:0 12px 26px -16px rgba(192,57,43,.55)}50%{box-shadow:0 14px 34px -12px rgba(192,57,43,.85)}}
+.hero.over{background:linear-gradient(135deg,color-mix(in srgb,var(--red) 55%,black),color-mix(in srgb,var(--red) 25%,black));background-size:200% 200%;animation:glow 2.2s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 12px 26px -16px color-mix(in srgb,var(--red) 45%,black)}50%{box-shadow:0 14px 34px -12px color-mix(in srgb,var(--red) 65%,black)}}
 @keyframes heroDrift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes donutPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
@@ -266,10 +276,10 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .beachDecor{display:none}
 [data-theme="plage"] .beachDecor{display:block;position:absolute;inset:0;pointer-events:none;z-index:-1}
 [data-theme="plage"] .beachDecor .bd{position:absolute;opacity:.24;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}
-[data-theme="plage"] .bd1{top:10px;right:16px;font-size:30px;animation:bdBob 5.5s ease-in-out infinite}
-[data-theme="plage"] .bd2{bottom:12px;right:56px;font-size:26px;transform-origin:50% 80%;animation:bdSurf 4.5s ease-in-out infinite .3s}
-[data-theme="plage"] .bd3{bottom:16px;left:18px;font-size:21px;opacity:.2;animation:bdBob 6s ease-in-out infinite .9s}
-[data-theme="plage"] .bd4{top:16px;left:22px;font-size:22px;opacity:.16;animation:bdBob 6.5s ease-in-out infinite 1.5s}
+[data-theme="plage"] .bd1{top:calc(10px + var(--jx,0px));right:calc(16px + var(--jy,0px));font-size:30px;animation:bdBob 5.5s ease-in-out infinite}
+[data-theme="plage"] .bd2{bottom:calc(12px + var(--jx,0px));right:calc(56px + var(--jy,0px));font-size:26px;transform-origin:50% 80%;animation:bdSurf 4.5s ease-in-out infinite .3s}
+[data-theme="plage"] .bd3{bottom:calc(16px + var(--jx,0px));left:calc(18px + var(--jy,0px));font-size:21px;opacity:.2;animation:bdBob 6s ease-in-out infinite .9s}
+[data-theme="plage"] .bd4{top:calc(16px + var(--jx,0px));left:calc(22px + var(--jy,0px));font-size:22px;opacity:.16;animation:bdBob 6.5s ease-in-out infinite 1.5s}
 @keyframes bdBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes bdSurf{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
 @media (prefers-reduced-motion: reduce){
@@ -1063,7 +1073,7 @@ html{scroll-behavior:smooth}
 const KEY="carnet-budget-v1";
 const uid=()=>Math.random().toString(36).slice(2,10);
 const SUGG=["Loyer","Internet","Assurance","Électricité","Téléphone","Abonnements","Transport","Crédit"];
-const THEMES=[["forest","Forêt","#1E4D3B"],["ocean","Océan","#0E4C6B"],["plum","Prune","#5B2A6B"],["sand","Sable","#9A5B33"],["plage","Plage","#0F9AA6"],["midnight","Nuit","#3DD6A0"],["carbon","Carbone","#5AA9FF"],["nocturne","Nocturne","#B98BFF"],["ember","Braise","#F5A65B"],["slate","Ardoise","#4FD1C5"]];
+const THEMES=[["forest","Forêt","#1E4D3B"],["ocean","Océan","#0E4C6B"],["plum","Prune","#5B2A6B"],["sand","Sable","#9A5B33"],["plage","Plage","#0B6E77"],["midnight","Nuit","#3DD6A0"],["carbon","Carbone","#5AA9FF"],["nocturne","Nocturne","#B98BFF"],["ember","Braise","#F5A65B"],["slate","Ardoise","#4FD1C5"]];
 const NOCAT={id:"",name:"Sans catégorie",icon:"🏷️"};
 const DEFAULT_CATEGORIES=[
   {id:"logement",name:"Logement",icon:"🏠"},{id:"courses",name:"Courses",icon:"🛒"},
@@ -1144,7 +1154,7 @@ let tab="budgets";
 const expanded=new Set();
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(d.theme)state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -1232,6 +1242,68 @@ function ensure(k){if(!state.months[k])state.months[k]=buildMonth(k);
   if(!m.savings||typeof m.savings!=="object")m.savings=emptySavings();
   if(!Array.isArray(m.savings.lines))m.savings.lines=[];
   return m;}
+/* ---------- Suggestions de noms (autocomplétion maison, par catégorie, jamais mélangées) ---------- */
+function collectNames(kind){
+  const map=new Map(); // nom normalisé -> {name affiché, nb d'occurrences}
+  const add=n=>{n=(n||"").trim();if(!n)return;const k=n.toLowerCase();
+    let e=map.get(k);if(!e){e={name:n,count:0};map.set(k,e);}e.count++;};
+  if(kind==="expense"){
+    for(const mk in state.months)for(const l of state.months[mk].lines)add(l.name);
+  }else if(kind==="income"){
+    for(const mk in state.months)for(const il of (state.months[mk].incomeLines||[]))add(il.name);
+  }else if(kind==="savings"){
+    for(const mk in state.months){const sv=state.months[mk].savings;if(sv&&Array.isArray(sv.lines))for(const sl of sv.lines)add(sl.name);}
+    if(state.savings&&Array.isArray(state.savings.lines))for(const sl of state.savings.lines)add(sl.name);
+  }
+  // Les plus utilisés d'abord, puis ordre alphabétique
+  return [...map.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,"fr")).map(o=>o.name);
+}
+// Une seule boîte de suggestions partagée (réutilisée pour tous les champs) : évite de créer
+// un nouvel élément flottant à chaque rendu de ligne, ce qui finirait par accumuler des dizaines
+// d'éléments invisibles dans le DOM au fil des re-rendus.
+let suggBoxEl=null,suggItems=[],suggActiveEl=null;
+function getSuggBox(){
+  if(!suggBoxEl){
+    suggBoxEl=document.createElement("div");suggBoxEl.className="suggBox hidden";document.body.appendChild(suggBoxEl);
+    suggBoxEl.addEventListener("mousedown",ev=>ev.preventDefault()); // empêche le blur de fermer avant le tap
+    suggBoxEl.addEventListener("click",ev=>{
+      const btn=ev.target.closest(".suggItem");if(!btn||!suggActiveEl)return;
+      const n=suggItems[+btn.dataset.i];if(n==null)return;
+      suggActiveEl.value=n;suggActiveEl.dispatchEvent(new Event("input",{bubbles:true}));
+      closeSuggest();
+    });
+  }
+  return suggBoxEl;
+}
+function placeSuggest(el){
+  const box=getSuggBox(),r=el.getBoundingClientRect();
+  box.style.left=Math.round(r.left)+"px";
+  box.style.top=Math.round(r.bottom+4)+"px";
+  box.style.width=Math.round(Math.max(r.width,160))+"px";
+}
+function onSuggestReposition(){if(suggActiveEl)placeSuggest(suggActiveEl);}
+function closeSuggest(){
+  const box=getSuggBox();box.classList.add("hidden");box.innerHTML="";suggItems=[];suggActiveEl=null;
+  window.removeEventListener("scroll",onSuggestReposition,true);window.removeEventListener("resize",onSuggestReposition);
+}
+function openSuggest(el,kind){
+  const q=(el.value||"").trim().toLowerCase();
+  const all=collectNames(kind);
+  const filtered=(q?all.filter(n=>n.toLowerCase().includes(q)&&n.toLowerCase()!==q):all).slice(0,6);
+  if(!filtered.length){closeSuggest();return;}
+  suggItems=filtered;suggActiveEl=el;
+  const box=getSuggBox();
+  box.innerHTML=filtered.map((n,i)=>'<button type="button" class="suggItem" data-i="'+i+'">'+esc(n)+'</button>').join("");
+  placeSuggest(el);box.classList.remove("hidden");
+  window.addEventListener("scroll",onSuggestReposition,true);window.addEventListener("resize",onSuggestReposition);
+}
+function attachSuggest(el,kind){
+  el.setAttribute("autocomplete","off"); // évite que l'autocomplétion native du navigateur double celle-ci
+  el.addEventListener("focus",()=>openSuggest(el,kind));
+  el.addEventListener("input",()=>openSuggest(el,kind));
+  el.addEventListener("blur",()=>setTimeout(()=>{if(suggActiveEl===el)closeSuggest();},150));
+}
+
 const round2=n=>{n=Number.isFinite(n)?n:0;return Math.round(n*100+(n>=0?1:-1)*1e-9)/100;};
 function parseAmt(str){
   if(str==null)return null;
@@ -1291,7 +1363,9 @@ function renderThemebar(){const bar=document.getElementById("themebar");bar.inne
       const go=()=>{state.theme=id;applyTheme();save();renderThemebar();render();};
       if(document.startViewTransition){document.startViewTransition(go);}
       else{document.documentElement.classList.add("theme-transition");go();setTimeout(()=>document.documentElement.classList.remove("theme-transition"),520);}
-    };bar.append(b);});}
+    };bar.append(b);});
+  const cur=bar.querySelector(".sw.on");
+  if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});}
 
 /* ---------- CATÉGORIES (réglages) ---------- */
 let openIconPickerId=null;
@@ -1544,6 +1618,7 @@ function buildRow(line){
   name.addEventListener("input",()=>{line.name=name.value;autoSizeName();updateComputed();touch();});
   name.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();name.blur();}});
   requestAnimationFrame(autoSizeName);
+  attachSuggest(name,"expense");
   // Budget prévu
   const pw=document.createElement("div");pw.className="planWrap";
   const plan=document.createElement("input");plan.className="planIn";plan.type="text";plan.inputMode="decimal";plan.autocomplete="off";
@@ -1677,6 +1752,7 @@ function miniLineEl(item,onChange,onDelete){
   const row=document.createElement("div");row.className="miniRow";
   const name=document.createElement("input");name.className="miniName";name.value=item.name||"";name.placeholder="Ex. Salaire, Prime, Cadeau…";
   name.addEventListener("input",()=>{item.name=name.value;onChange();});
+  attachSuggest(name,"income");
   const aw=document.createElement("div");aw.className="miniAmtWrap";
   const sign=document.createElement("button");sign.type="button";sign.className="signBtn";sign.title="Inverser le signe (ex. une reprise ou une correction négative)";
   sign.textContent="±";
@@ -1698,6 +1774,7 @@ function savingsLineEl(item,onChange,onDelete,onToggleDeduct){
   const top=document.createElement("div");top.className="miniRow svTop";
   const name=document.createElement("input");name.className="miniName";name.value=item.name||"";name.placeholder="Ex. Livret A, Virement, Cash…";
   name.addEventListener("input",()=>{item.name=name.value;onChange();});
+  attachSuggest(name,"savings");
   const aw=document.createElement("div");aw.className="miniAmtWrap";
   const sign=document.createElement("button");sign.type="button";sign.className="signBtn";sign.title="Inverser le signe (ex. un retrait d'épargne)";
   sign.textContent="±";
@@ -2764,7 +2841,8 @@ document.getElementById("incomeIn").addEventListener("input",e=>{const m=ensure(
   if(m.incomeDetailed)return;
   const v=parseAmt(e.target.value);m.income=v!=null?(v):0;
   updateComputed();touch();});
-document.getElementById("paletteBtn").onclick=()=>document.getElementById("settings").classList.remove("hidden");
+document.getElementById("paletteBtn").onclick=()=>{document.getElementById("settings").classList.remove("hidden");
+  const cur=document.querySelector("#themebar .sw.on");if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});};
 document.getElementById("settingsCloseBtn").onclick=()=>document.getElementById("settings").classList.add("hidden");
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});
 
@@ -2980,7 +3058,9 @@ const GD_KEY   = "budget-drive"; // méta locale (fichier, email, dernière sync
 const GD_TOKEN_KEY = "budget-drive-token"; // cache du jeton d'accès (survit aux refresh/relances)
 
 let gdMeta = (()=>{try{return JSON.parse(localStorage.getItem(GD_KEY))||{};}catch(e){return {};}})();
-function gdSaveMeta(){try{localStorage.setItem(GD_KEY,JSON.stringify(gdMeta));}catch(e){}}
+let gdMetaSaveFailWarned=false;
+function gdSaveMeta(){try{localStorage.setItem(GD_KEY,JSON.stringify(gdMeta));gdMetaSaveFailWarned=false;}
+  catch(e){if(!gdMetaSaveFailWarned){gdMetaSaveFailWarned=true;toast("⚠ Impossible d'enregistrer l'état de la synchro Drive localement");}}}
 let dataUpdatedAt = gdMeta.updatedAt || 0;
 
 // --- Jetons Google (Google Identity Services) ---
@@ -3314,6 +3394,14 @@ window.addEventListener("appinstalled",()=>{
   const btn=document.getElementById("installBtn");if(btn)btn.classList.add("hidden");
   if(typeof toast==="function")toast("Budget installé ✓");
 });
+
+/* Décorations plage : petite variation aléatoire de position par session (coût négligeable, pure esthétique) */
+(function(){
+  document.querySelectorAll(".beachDecor .bd").forEach(el=>{
+    el.style.setProperty("--jx",(Math.random()*10-5).toFixed(1)+"px");
+    el.style.setProperty("--jy",(Math.random()*10-5).toFixed(1)+"px");
+  });
+})();
 
 /* ---------- Effet "ripple" au tap/clic sur les éléments interactifs ---------- */
 (function(){
