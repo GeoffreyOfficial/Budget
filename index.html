@@ -273,8 +273,8 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .tab{flex:1;border:none;background:none;padding:9px 4px;border-radius:9px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,box-shadow .25s}
 .tab:active{transform:scale(.97)}
 .tab.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.cmptable{margin-top:4px}
-.ctr{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:9px 10px;border-radius:10px;font-size:12.5px}
+.cmptable{margin-top:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-inline:-2px;padding-inline:2px}
+.ctr{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:9px 10px;border-radius:10px;font-size:12.5px;min-width:400px}
 .ctr.head{color:var(--muted);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;padding:6px 10px}
 .ctr:nth-child(even){background:var(--soft)}
 .ctr>span{min-width:0}
@@ -350,7 +350,7 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 
 .sechead{display:flex;align-items:center;justify-content:space-between;margin:20px 4px 8px;gap:8px;flex-wrap:wrap;row-gap:6px}
 .sechead h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:700}
-.sechead .tot{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-left:auto;flex-shrink:0}
+.sechead .tot{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-left:auto;flex-shrink:1;min-width:0;text-align:right}
 .sechd-actions{flex-basis:100%;display:flex;align-items:center;justify-content:center;gap:8px}
 
 /* ---------- section cards (demarcation) ---------- */
@@ -382,7 +382,7 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 .sortBtn:active{filter:brightness(.96)}
 .sortBtn.on{border-color:var(--accent);color:var(--accent);background:var(--soft)}
 .sortDrop{position:absolute;top:100%;right:0;margin-top:6px;background:var(--card);border:1px solid var(--line);
-  border-radius:14px;box-shadow:0 12px 30px -12px rgba(0,0,0,.4);padding:6px;min-width:200px;z-index:70}
+  border-radius:14px;box-shadow:0 12px 30px -12px rgba(0,0,0,.4);padding:6px;min-width:200px;max-width:calc(100vw - 16px);z-index:70}
 .sortDrop.hidden{display:none}
 .sortDrop button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;
   border:none;background:none;color:var(--ink);font:inherit;font-weight:600;font-size:13px;padding:9px 10px;
@@ -434,7 +434,8 @@ button.rowCatIcon:active{transform:scale(.92)}
   padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .recToggle.on{background:var(--accent-2);border-color:var(--accent-2);color:#fff}
 .recToggle:active{transform:scale(.96)}
-.nameIn{flex:1;min-width:0;border:none;background:transparent;font-size:15.5px;font-weight:600;color:var(--ink);outline:none;padding:2px 0}
+.nameIn{flex:1;min-width:0;border:none;background:transparent;font-size:15.5px;font-weight:600;color:var(--ink);outline:none;padding:2px 0;
+  font-family:inherit;line-height:1.28;resize:none;overflow:hidden;white-space:pre-wrap;word-break:break-word;display:block}
 .nameIn::placeholder{color:var(--faint);font-weight:500}
 .planWrap{display:flex;align-items:center;gap:1px;flex-shrink:0}
 .planIn{width:66px;text-align:right;border:none;background:transparent;font-family:var(--mono);font-size:15px;font-weight:600;color:var(--ink);outline:none}
@@ -537,7 +538,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .cmp{display:flex;flex-direction:column;gap:12px}
 .cmpItem .cmptop{display:flex;flex-wrap:wrap;justify-content:space-between;font-size:13px;margin-bottom:5px;row-gap:2px;column-gap:8px}
 .cmpItem .cn{font-weight:600;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
-.cmpItem .cv{font-family:var(--mono);color:var(--muted);white-space:nowrap}
+.cmpItem .cv{font-family:var(--mono);color:var(--muted);text-align:right;min-width:0;white-space:normal;overflow-wrap:normal;word-break:normal}
 .cmpItem .cv b{color:var(--ink)}
 .cmpItem .cv .ov{color:var(--red);font-weight:700}
 .blistRow{position:relative}
@@ -658,7 +659,7 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
 .rowList .rowCatIcon{width:28px;height:28px;font-size:15px}
 .rlNameWrap{flex:1;min-width:0;display:flex}
 .rowList .nameIn{font-size:15px;font-weight:600;padding:0}
-.rlAmt{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.rlAmt{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);text-align:right;flex-shrink:0;white-space:nowrap}
 .rlAmt.done{color:var(--ink)}
 .rlAmt.over{color:var(--red)}
 .rowList .quickBtn.rlQuick{width:26px;height:26px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:16px;line-height:1;flex-shrink:0}
@@ -890,7 +891,7 @@ html{scroll-behavior:smooth}
     <div class="section sec-fixed" id="sectionFixed">
       <div class="sechead">
         <div class="sechd-l"><h2>Budget fixe</h2><span class="cnt" id="fixedCount"></span></div>
-        <span class="tot" id="fixedTot">0 €</span>
+        <span class="tot" id="fixedTot">0 / 0</span>
         <div class="sechd-actions">
           <div class="sortWrap">
             <button type="button" class="sortBtn" id="sortBtnFixed" aria-label="Trier">⇅</button>
@@ -907,8 +908,8 @@ html{scroll-behavior:smooth}
 
     <div class="section sec-variable" id="sectionVar">
       <div class="sechead">
-        <div class="sechd-l"><h2>Budget variable</h2><span class="cnt" id="varCount"></span></div>
-        <span class="tot" id="varTot">0 €</span>
+        <div class="sechd-l"><h2>Budget var</h2><span class="cnt" id="varCount"></span></div>
+        <span class="tot" id="varTot">0 / 0</span>
         <div class="sechd-actions">
           <div class="sortWrap">
             <button type="button" class="sortBtn" id="sortBtnVar" aria-label="Trier">⇅</button>
@@ -1066,6 +1067,7 @@ const ICON_GROUPS=[
 const ICONS=ICON_GROUPS.flatMap(g=>g.items.map(it=>it.e));
 const eur=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:2}).format(Number.isFinite(n)?n:0);
 const eur0=eur; // ne plus arrondir à l'euro près : mêmes décimales que eur() partout
+const num2=n=>new Intl.NumberFormat("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number.isFinite(n)?n:0); // comme eur(), sans le symbole € — pour gagner de la place
 const mKey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 function mLabel(k){const[y,m]=k.split("-").map(Number);const d=new Date(y,m-1,1);
   const s=new Intl.DateTimeFormat("fr-FR",{month:"long",year:"numeric"}).format(d);return s[0].toUpperCase()+s.slice(1);}
@@ -1480,9 +1482,13 @@ function buildRow(line,mode){
   catIcon.textContent=catById(line.category||"").icon;
   catIcon.title="Changer la catégorie";catIcon.setAttribute("aria-label","Changer la catégorie");
   catIcon.addEventListener("click",ev=>{ev.stopPropagation();openCatPicker(line,catIcon);});
-  // Nom
-  const name=document.createElement("input");name.className="nameIn";name.value=line.name;name.placeholder="Nom du poste";
-  name.addEventListener("input",()=>{line.name=name.value;updateComputed();touch();});
+  // Nom — textarea auto-extensible : les noms longs restent entièrement visibles (repli propre sur 2 lignes)
+  // plutôt que d'être coupés comme dans un champ texte classique sur une seule ligne.
+  const name=document.createElement("textarea");name.className="nameIn";name.rows=1;name.value=line.name;name.placeholder="Nom du poste";
+  const autoSizeName=()=>{name.style.height="auto";name.style.height=name.scrollHeight+"px";};
+  name.addEventListener("input",()=>{line.name=name.value;autoSizeName();updateComputed();touch();});
+  name.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();name.blur();}});
+  requestAnimationFrame(autoSizeName);
   // Budget prévu
   const pw=document.createElement("div");pw.className="planWrap";
   const plan=document.createElement("input");plan.className="planIn";plan.type="text";plan.inputMode="decimal";plan.autocomplete="off";
@@ -1879,8 +1885,8 @@ function updateComputed(){
     const fixedLines=m.lines.filter(l=>l.type==="fixed"),varLines=m.lines.filter(l=>l.type==="variable");
     const fixedPlanned=fixedLines.reduce((s,l)=>s+(+l.planned||0),0),fixedSpent=fixedLines.reduce((s,l)=>s+spent(l),0);
     const varPlanned=varLines.reduce((s,l)=>s+(+l.planned||0),0),varSpent=varLines.reduce((s,l)=>s+spent(l),0);
-    document.getElementById("fixedTot").textContent=eur(fixedSpent)+" / "+eur(fixedPlanned);
-    document.getElementById("varTot").textContent=eur(varSpent)+" / "+eur(varPlanned);
+    document.getElementById("fixedTot").textContent=num2(fixedSpent)+"/"+num2(fixedPlanned);
+    document.getElementById("varTot").textContent=num2(varSpent)+"/"+num2(varPlanned);
   }
   const stEl=document.getElementById("savingsTot");if(stEl)stEl.textContent=eur(t.savings);
   const incIn=document.getElementById("incomeIn");
@@ -2045,8 +2051,8 @@ function renderTopExpenses(){
     const pct=max>0?x.amt/max*100:0;
     html+='<div style="margin-bottom:10px">'
       +'<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:4px">'
-      +'<span style="color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(i+1)+'. '+x.cat.icon+' '+esc(x.poste)+(x.note?' — '+esc(x.note):'')+'</span>'
-      +'<span style="font-family:var(--mono);font-weight:700;color:var(--ink);flex-shrink:0">'+eur0(x.amt)+'</span></div>'
+      +'<span style="color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto;min-width:0">'+(i+1)+'. '+x.cat.icon+' '+esc(x.poste)+(x.note?' — '+esc(x.note):'')+'</span>'
+      +'<span style="font-family:var(--mono);font-weight:700;color:var(--ink);flex-shrink:1;min-width:0">'+eur0(x.amt)+'</span></div>'
       +'<div class="track"><i style="width:'+Math.max(0,Math.min(100,pct))+'%"></i></div></div>';
   });
   html+='</div>';
@@ -2498,6 +2504,16 @@ function closeSortDrops(except){
     const d=document.getElementById("sortDrop"+sortIdSuffix[t]);if(d)d.classList.add("hidden");
   });
 }
+// Repositionne le menu déroulant pour qu'il reste toujours entièrement visible à l'écran
+// (sur petit téléphone, "right:0" seul peut le faire déborder à gauche de l'écran).
+function clampDropdownToViewport(drop){
+  drop.style.transform="";
+  const margin=8,rect=drop.getBoundingClientRect();
+  let dx=0;
+  if(rect.left<margin)dx=margin-rect.left;
+  else if(rect.right>window.innerWidth-margin)dx=(window.innerWidth-margin)-rect.right;
+  if(dx)drop.style.transform="translateX("+dx+"px)";
+}
 ["fixed","variable"].forEach(type=>{
   const btn=document.getElementById("sortBtn"+sortIdSuffix[type]);
   btn.onclick=ev=>{
@@ -2505,7 +2521,7 @@ function closeSortDrops(except){
     const d=document.getElementById("sortDrop"+sortIdSuffix[type]);
     const willOpen=d.classList.contains("hidden");
     closeSortDrops();
-    if(willOpen){renderSortDrop(type);d.classList.remove("hidden");}else d.classList.add("hidden");
+    if(willOpen){renderSortDrop(type);d.classList.remove("hidden");clampDropdownToViewport(d);}else d.classList.add("hidden");
   };
 });
 document.addEventListener("click",e=>{if(!e.target.closest(".sortWrap"))closeSortDrops();});
