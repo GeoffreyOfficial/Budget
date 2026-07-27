@@ -542,6 +542,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .prog{height:7px;border-radius:99px;background:var(--soft);margin:10px 0 8px;overflow:hidden}
 .prog>i{display:block;height:100%;border-radius:99px;background:var(--accent-2);transition:width .4s ease}
 .prog>i.over{background:var(--red)}
+.prog>i.full{background:var(--green)}
 .rmeta{display:flex;align-items:center;gap:8px}
 .mtxt{flex:1;min-width:0;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mtxt b{font-family:var(--mono);color:var(--ink);font-weight:700}
@@ -590,6 +591,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .app[data-view="flow"] .prog{order:5;flex:1 1 100%;height:9px;border-radius:6px;margin:0 0 8px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
 .app[data-view="flow"] .prog>i{border-radius:6px;background:linear-gradient(90deg,var(--accent-2),var(--accent));box-shadow:0 0 10px -2px var(--accent-2)}
 .app[data-view="flow"] .prog>i.over{background:linear-gradient(90deg,var(--red),#ff8a7a);box-shadow:0 0 10px -1px var(--red)}
+.app[data-view="flow"] .prog>i.full{background:linear-gradient(90deg,var(--green),var(--green));box-shadow:0 0 10px -2px var(--green)}
 .app[data-view="flow"] .rmeta{order:6;flex:1 1 100%;flex-wrap:wrap;gap:6px}
 /* Le texte de statut ("12,50 € / 50,00 €") prend sa propre ligne pour laisser toute la largeur
    aux boutons d'action juste en dessous, plutôt que de les pousser à la ligne ou de déborder. */
@@ -652,13 +654,13 @@ button.rowCatIcon:active{transform:scale(.92)}
 /* ---------- AFFICHAGE COMPACT (réglage) ---------- */
 .app.compact{padding:0 10px 80px}
 .app.compact .topbar{padding-top:calc(8px + env(safe-area-inset-top))}
-.app.compact .hero{padding:10px;border-radius:16px}
-.app.compact .big{font-size:23px}
-.app.compact .bar{margin:6px 0 5px;height:5px}
-.app.compact .stats{gap:5px}
-.app.compact .stat{padding:5px 7px;border-radius:9px}
-.app.compact .stat .k{font-size:9px}
-.app.compact .stat .v{font-size:12.5px;margin-top:1px}
+.app.compact .hero{padding:14px;border-radius:16px}
+.app.compact .big{font-size:27px}
+.app.compact .bar{margin:8px 0 7px;height:6px}
+.app.compact .stats{gap:6px}
+.app.compact .stat{padding:7px 9px;border-radius:10px}
+.app.compact .stat .k{font-size:9.5px}
+.app.compact .stat .v{font-size:13.5px;margin-top:2px}
 .app.compact .tabs{margin:8px 0 3px;padding:2px;border-radius:10px}
 .app.compact .tab{padding:6px 4px;font-size:11px;border-radius:7px}
 .app.compact .section{padding:7px 6px 7px;margin:10px 2px 3px;border-radius:12px}
@@ -2288,7 +2290,8 @@ function applyRowState(el,line){
   el.classList.remove("over","done");
   if(any)el.classList.add(over?"over":"done");
   const pct=p>0?s/p*100:(s>0?100:0);
-  const fill=el.querySelector(".prog>i");fill.style.width=Math.max(0,Math.min(100,pct))+"%";fill.className=over?"over":"";
+  const fill=el.querySelector(".prog>i");fill.style.width=Math.max(0,Math.min(100,pct))+"%";
+  fill.className=over?"over":(p>0&&Math.round(pct)>=100?"full":"");
   const mt=el.querySelector(".mtxt");
   if(mt){
     if(over){mt.className="mtxt over";mt.innerHTML="<b>+"+eur(s-p)+"</b>";}
