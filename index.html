@@ -750,16 +750,19 @@ button.rowCatIcon:active{transform:scale(.92)}
 .flame{display:inline-block;animation:flameWiggle 1.5s ease-in-out infinite}
 .panel h3{margin:0 0 4px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .panel .psub{font-size:12px;color:var(--faint);margin:0 0 12px}
-.donutwrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.donutwrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center}
 .donut{width:130px;height:130px;flex-shrink:0;animation:donutPop .5s cubic-bezier(.34,1.56,.64,1) both}
 .dc-big{font-family:var(--mono);font-size:15px;font-weight:700;fill:var(--ink)}
 .dc-lbl{font-size:8px;fill:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.legend{flex:1;min-width:150px;display:flex;flex-direction:column;gap:8px}
+/* min-width élevé : sur téléphone la légende passe sous le donut et prend toute la largeur,
+   au lieu de rester coincée dans une colonne étroite qui tronquait les noms à 2-3 lettres. */
+.legend{flex:1 1 220px;min-width:200px;display:flex;flex-direction:column;gap:8px}
 .leg{display:flex;align-items:center;gap:8px;font-size:13px}
 .leg .ld{width:11px;height:11px;border-radius:3px;flex-shrink:0}
-.leg .ln{flex:1;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.leg .lv{font-family:var(--mono);font-weight:700;color:var(--ink)}
-.leg .lp{font-family:var(--mono);color:var(--muted);font-size:11.5px;width:38px;text-align:right}
+/* Le nom peut revenir à la ligne au lieu d'être coupé : toujours lisible en entier. */
+.leg .ln{flex:1 1 auto;min-width:0;color:var(--ink);white-space:normal;word-break:break-word;line-height:1.3}
+.leg .lv{font-family:var(--mono);font-weight:700;color:var(--ink);flex-shrink:0}
+.leg .lp{font-family:var(--mono);color:var(--muted);font-size:11.5px;width:38px;text-align:right;flex-shrink:0}
 .cmp{display:flex;flex-direction:column;gap:12px}
 .cmpItem .cmptop{display:flex;flex-wrap:wrap;justify-content:space-between;font-size:13px;margin-bottom:5px;row-gap:2px;column-gap:8px}
 .cmpItem .cn{font-weight:600;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
@@ -964,45 +967,78 @@ html{scroll-behavior:smooth}
 .calcFabTop{flex-shrink:0}
 
 .calcPopup{position:fixed;width:264px;background:var(--card);border:1px solid var(--line);border-radius:18px;
-  padding:12px;box-shadow:0 18px 42px -12px rgba(0,0,0,.45);z-index:255;
+  padding:10px;box-shadow:0 18px 42px -12px rgba(0,0,0,.45);z-index:255;
   opacity:0;transform:scale(.92) translateY(6px);transform-origin:bottom right;
-  pointer-events:none;transition:opacity .15s,transform .15s}
+  pointer-events:none;transition:opacity .15s,transform .15s;
+  /* Cas extrême (écran partagé en hauteur, ex. S25 divisé en 2) : si la calculette entière
+     ne tient plus, elle devient scrollable en interne plutôt que d'être coupée. */
+  max-height:min(560px,calc(100dvh - 16px));overflow-y:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.calcPopup::-webkit-scrollbar{width:5px}
+.calcPopup::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+/* Sous ~460px de hauteur de viewport (écran partagé), on resserre encore la mise en page
+   quelle que soit la taille choisie (sm/md/lg) pour maximiser les chances que tout tienne
+   sans avoir à scroller. */
+@media (max-height:460px){
+  .calcPopup{padding:6px}
+  .calcHead{margin-bottom:3px}
+  .calcDisplay{padding:3px 8px;margin-bottom:4px}
+  .calcDisplay .val{font-size:18px;line-height:1.05}
+  .calcDisplay .expr{font-size:10px;min-height:10px}
+  .calcGrid{gap:4px}
+  .calcGrid button{padding:5px 0;font-size:13px}
+  .calcInsert{padding:6px;margin-top:4px;font-size:11.5px}
+}
 .calcPopup.open{opacity:1;transform:scale(1) translateY(0);pointer-events:auto}
 /* Pendant le défilement de la page, la calculette s'efface pour ne pas gêner la lecture,
    puis réapparaît une fois le scroll terminé (elle reste ouverte, seule la croix la ferme). */
 .calcPopup.scrollHidden{opacity:0;pointer-events:none;transition:opacity .18s}
 .calcPopup.dragging{transition:none;opacity:.35}
-.calcHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:grab;touch-action:none;user-select:none}
+.calcHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;cursor:grab;touch-action:none;user-select:none;
+  position:sticky;top:0;background:var(--card);z-index:2}
 .calcHead.dragging{cursor:grabbing}
 .calcHead .t{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .calcClose{border:none;background:var(--soft);color:var(--muted);width:24px;height:24px;border-radius:99px;font-size:13px;cursor:pointer;line-height:1}
-.calcDisplay{background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:10px;text-align:right}
-.calcDisplay .expr{font-size:12px;color:var(--faint);min-height:15px;font-family:var(--mono);word-break:break-all}
-.calcDisplay .val{font-size:24px;font-weight:700;font-family:var(--mono);color:var(--ink);word-break:break-all;line-height:1.2}
-.calcGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+/* Champ d'affichage volontairement compact (hauteur réduite) pour que toute la calculette,
+   y compris la touche 0 et le bouton Insérer, reste visible même en écran partagé. */
+.calcDisplay{background:var(--soft);border-radius:11px;padding:6px 11px;margin-bottom:8px;text-align:right}
+.calcDisplay .expr{font-size:11.5px;color:var(--faint);min-height:13px;font-family:var(--mono);word-break:break-all;line-height:1.1}
+.calcDisplay .val{font-size:22px;font-weight:700;font-family:var(--mono);color:var(--ink);word-break:break-all;line-height:1.12}
+.calcGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .calcGrid button{border:none;background:var(--soft);color:var(--ink);border-radius:10px;font-size:16px;font-weight:600;
-  padding:13px 0;cursor:pointer;font-family:var(--mono);touch-action:manipulation}
+  padding:10px 0;cursor:pointer;font-family:var(--mono);touch-action:manipulation}
+/* Mode 5 colonnes : mêmes 20 touches (0 = span 2) réparties sur 4 rangées au lieu de 5,
+   ce qui réduit la hauteur totale de la calculette — pratique en écran partagé. */
+.calcPopup.cols-5 .calcGrid{grid-template-columns:repeat(5,1fr)}
+.calcPopup.cols-5 .calcGrid button{font-size:14px;padding:9px 0}
+.calcPopup.cols-5.sz-sm .calcGrid button{font-size:12.5px;padding:6px 0}
+.calcPopup.cols-5.sz-lg .calcGrid button{font-size:17px;padding:12px 0}
 .calcGrid button:active{filter:brightness(.94)}
 .calcGrid button.op{background:var(--accent);color:#fff}
 .calcGrid button.eq{background:var(--accent-2);color:#fff}
 .calcGrid button.fn{color:var(--red);font-weight:700}
-.calcInsert{width:100%;margin-top:9px;border:none;background:var(--ink);color:var(--paper);border-radius:11px;
-  padding:11px;font-weight:700;font-size:13px;cursor:pointer}
+.calcInsert{width:100%;margin-top:7px;border:none;background:var(--ink);color:var(--paper);border-radius:11px;
+  padding:9px;font-weight:700;font-size:13px;cursor:pointer}
 .calcInsert:disabled{opacity:.35}
 .copyable-active{background:color-mix(in srgb,var(--accent-2) 22%,var(--soft))!important;transform:scale(1.04);transition:background .15s,transform .1s}
 
 /* ----- Tailles de la calculette (réglable dans Réglages) ----- */
-.calcPopup.sz-sm{width:222px}
-.calcPopup.sz-sm .calcDisplay .val{font-size:20px}
-.calcPopup.sz-sm .calcDisplay .expr{font-size:11px}
-.calcPopup.sz-sm .calcGrid button{font-size:14px;padding:11px 0}
-.calcPopup.sz-sm .calcInsert{font-size:12px;padding:9px}
+/* Taille « petite » : optimisée en hauteur avant tout (écran partagé) — marges, padding des
+   touches et champ d'affichage encore plus resserrés, tout en gardant des touches cliquables. */
+.calcPopup.sz-sm{width:222px;padding:8px}
+.calcPopup.sz-sm .calcHead{margin-bottom:4px}
+.calcPopup.sz-sm .calcDisplay{padding:4px 9px;margin-bottom:6px}
+.calcPopup.sz-sm .calcDisplay .val{font-size:19px;line-height:1.08}
+.calcPopup.sz-sm .calcDisplay .expr{font-size:10.5px;min-height:11px}
+.calcPopup.sz-sm .calcGrid{gap:5px}
+.calcPopup.sz-sm .calcGrid button{font-size:14px;padding:7px 0}
+.calcPopup.sz-sm .calcInsert{font-size:12px;padding:7px;margin-top:6px}
 .calcPopup.sz-lg{width:322px}
 .calcPopup.sz-lg .calcDisplay .val{font-size:30px}
 .calcPopup.sz-lg .calcDisplay .expr{font-size:13px}
-.calcPopup.sz-lg .calcGrid{gap:9px}
-.calcPopup.sz-lg .calcGrid button{font-size:19px;padding:16px 0}
-.calcPopup.sz-lg .calcInsert{font-size:14px;padding:13px}
+.calcPopup.sz-lg .calcGrid{gap:8px}
+.calcPopup.sz-lg .calcGrid button{font-size:19px;padding:13px 0}
+.calcPopup.sz-lg .calcInsert{font-size:14px;padding:12px}
 .szSeg{display:flex;gap:6px}
 .szSeg button{flex:1;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:10px;
   padding:9px 0;font-size:12.5px;font-weight:700;cursor:pointer}
@@ -1079,6 +1115,11 @@ html{scroll-behavior:smooth}
       <button type="button" data-sz="sm">Petite</button>
       <button type="button" data-sz="md">Moyenne</button>
       <button type="button" data-sz="lg">Grande</button>
+    </div>
+    <p class="bkhint" style="margin-top:8px">Colonnes du pavé — 5 colonnes réduit la hauteur (utile en écran partagé).</p>
+    <div class="szSeg" id="calcColsSeg">
+      <button type="button" data-cols="4">4 colonnes</button>
+      <button type="button" data-cols="5">5 colonnes</button>
     </div>
     <div class="hr"></div>
     <div class="slabel">Indicateurs d'en-tête</div>
@@ -1598,6 +1639,27 @@ function migrate(){
   state.confirmDelete=sanitizeConfirmDelete(state.confirmDelete);
   state.compact=!!state.compact;
   state.moveMode=!!state.moveMode;
+  // Budgets personnalisés : même remise en forme défensive que les mois (postes, revenus, épargne),
+  // pour rester cohérent si un budget vient d'un JSON importé ou d'une ancienne version.
+  if(!state.customBudgets||typeof state.customBudgets!=="object")state.customBudgets={};
+  for(const k in state.customBudgets){
+    const b=state.customBudgets[k];
+    if(!b||typeof b!=="object"){delete state.customBudgets[k];continue;}
+    if(typeof b.name!=="string"||!b.name.trim())b.name="Budget personnalisé";
+    if(!Array.isArray(b.lines))b.lines=[];
+    for(const l of b.lines){
+      if(!Array.isArray(l.entries))l.entries=[];
+      for(const e of l.entries)if(e.note==null)e.note="";
+      if(typeof l.category!=="string")l.category="";
+      if(typeof l.recurring!=="boolean")l.recurring=false;
+      if(l.type!=="fixed"&&l.type!=="variable")l.type="variable";
+    }
+    if(typeof b.incomeDetailed!=="boolean")b.incomeDetailed=false;
+    if(!Array.isArray(b.incomeLines))b.incomeLines=[];
+    for(const il of b.incomeLines){if(typeof il.id!=="string")il.id=uid();if(typeof il.name!=="string")il.name="";il.amount=Number.isFinite(+il.amount)?(+il.amount):0;}
+    if(!b.savings||typeof b.savings!=="object")b.savings=emptySavings();
+    if(!Array.isArray(b.savings.lines))b.savings.lines=[];
+  }
 }
 function sanitizeConfirmDelete(o){
   const def={budget:true,expense:false,income:false,savings:false};
@@ -2760,7 +2822,10 @@ function donutSVG(items){
   const segs=items.map(i=>{const len=i.value/total*C;
     const c='<circle cx="60" cy="60" r="'+r+'" fill="none" stroke="'+i.color+'" stroke-width="16" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 60 60)"/>';
     off+=len;return c;}).join("");
-  return '<svg viewBox="0 0 120 120" class="donut">'+segs+'<text x="60" y="57" text-anchor="middle" class="dc-big">'+eur0(total)+'</text><text x="60" y="71" text-anchor="middle" class="dc-lbl">dépensé</text></svg>';
+  // Le montant central est contraint en largeur pour ne jamais déborder de l'anneau (gros montants).
+  const c0=eur0(total);
+  const fit=c0.length>8?' textLength="70" lengthAdjust="spacingAndGlyphs"':'';
+  return '<svg viewBox="0 0 120 120" class="donut">'+segs+'<text x="60" y="57" text-anchor="middle" class="dc-big"'+fit+'>'+c0+'</text><text x="60" y="71" text-anchor="middle" class="dc-lbl">dépensé</text></svg>';
 }
 function barsSVG(vals,labels,todayIdx){
   const N=vals.length,W=Math.max(320,N*11),H=140,padB=16,padT=10,padX=6;
@@ -3754,9 +3819,9 @@ function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.custom
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
   expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));}
 function undo(){if(hIndex<=0)return;clearTimeout(recTimer);hIndex--;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();save();render();updateUndoUI();toast("Annulé");}
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Annulé");}
 function redo(){if(hIndex>=history.length-1)return;clearTimeout(recTimer);hIndex++;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();save();render();updateUndoUI();toast("Rétabli");}
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Rétabli");}
 document.getElementById("undoBtn").onclick=undo;
 document.getElementById("redoBtn").onclick=redo;
 
@@ -3778,7 +3843,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -3875,6 +3940,7 @@ function importData(file){
     state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
     state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
+    folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
     migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
@@ -4019,14 +4085,17 @@ document.getElementById("deleteMonthBtn").onclick=async()=>{
 };
 
 function hasInvalidFields(){
-  for(const k in state.months){
-    const m=state.months[k];if(!m)continue;
-    for(const l of m.lines){
+  const scan=(m,k)=>{
+    if(!m)return false;
+    for(const l of (m.lines||[])){
       if(!(l.name||"").trim())return true;
       if(!((+l.planned||0)>0))return true;
       if(entryIssues(l,k)>0)return true;
     }
-  }
+    return false;
+  };
+  for(const k in state.months)if(scan(state.months[k],k))return true;
+  for(const k in (state.customBudgets||{}))if(scan(state.customBudgets[k],k))return true;
   return false;
 }
 window.addEventListener("beforeunload",e=>{
@@ -4095,11 +4164,24 @@ function gdGetToken(interactive){
     catch(e){ gdResolve=gdReject=null; rej(e); }
   });
 }
-async function gdApi(url,opt){
+async function gdApi(url,opt,_retried){
   const t=await gdGetToken(false);
-  const o=opt||{};o.headers=Object.assign({Authorization:"Bearer "+t},o.headers||{});
+  const o=Object.assign({},opt||{});
+  o.headers=Object.assign({Authorization:"Bearer "+t},(opt&&opt.headers)||{});
   const r=await fetch(url,o);
-  if(!r.ok){ if(r.status===401){gdToken=null;gdTokenExp=0;gdSaveCachedToken();} throw new Error("Drive "+r.status); }
+  if(!r.ok){
+    if(r.status===401){
+      gdToken=null;gdTokenExp=0;gdSaveCachedToken();
+      // Jeton expiré en cours de session : on tente une seule fois d'en obtenir un nouveau
+      // (silencieusement) puis on rejoue la requête, au lieu de faire échouer toute la synchro.
+      if(!_retried){
+        try{ await gdGetToken(false); }
+        catch(e){ throw new Error("Drive 401"); }
+        return gdApi(url,opt,true);
+      }
+    }
+    throw new Error("Drive "+r.status);
+  }
   return r;
 }
 
@@ -4107,7 +4189,7 @@ async function gdApi(url,opt){
 function gdSerialize(){
   dataUpdatedAt = Date.now();
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,customBudgets:state.customBudgets,current:state.current,
-    theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,
+    theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
     confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode});
 }
@@ -4125,6 +4207,7 @@ function gdApply(d){
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
+  folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
   migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();commit();render();
 }
 
@@ -4241,11 +4324,15 @@ function gdSnapshotOf(d){
   return{months:d.months||{},customBudgets:d.customBudgets||{},current:d.current||null,theme:d.theme||null,categories:d.categories||[],
     budgetView:d.budgetView||null,savings:d.savings||null,savingsMigrated:!!d.savingsMigrated,
     statsOrder:sanitizeStatsOrder(d.statsOrder),heroMetric:sanitizeHeroMetric(d.heroMetric),labels:sanitizeLabels(d.labels),
-    expanded:Array.isArray(d.expanded)?[...d.expanded].sort():[]};
+    expanded:Array.isArray(d.expanded)?[...d.expanded].sort():[],
+    folded:Array.isArray(d.folded)?[...d.folded].sort():[]};
 }
 function gdContentEquals(remote){
-  const local={months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,
-    budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,expanded:[...expanded]};
+  // IMPORTANT : ce local doit contenir exactement les mêmes champs que ceux lus par gdSnapshotOf
+  // (dont categories) — sinon la comparaison est toujours « différente » et le raccourci
+  // « déjà à jour » ne se déclenche jamais (fausses invites de restauration).
+  const local={months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,
+    budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,expanded:[...expanded],folded:[...folded]};
   return gdStableStringify(gdSnapshotOf(local))===gdStableStringify(gdSnapshotOf(remote));
 }
 
@@ -4285,7 +4372,10 @@ async function gdPull(force){
     if(!id){gdBusy=false;gdUpdateUI();if(force)toast("Aucune sauvegarde dans Drive");return false;}
     const d=await gdReadFile(id);
     const remoteAt=+d.updatedAt||0;
-    const localEmpty=Object.keys(state.months||{}).length===0;
+    // « Local vide » = ni mois ni budget personnalisé. Sans le second test, un utilisateur qui
+    // n'a QUE des budgets personnalisés serait considéré « vide » et Drive écraserait ses données
+    // sans confirmation.
+    const localEmpty=Object.keys(state.months||{}).length===0 && Object.keys(state.customBudgets||{}).length===0;
     // Les données distantes sont en réalité les mêmes que les données locales (seul un horodatage
     // diffère, par ex. après un rechargement pendant une synchro) : on resynchronise silencieusement
     // les métadonnées sans rien demander.
@@ -4571,8 +4661,12 @@ function positionPopup(){
   const margin=8;
   let right=window.innerWidth-r.right;
   let top=r.bottom+margin;
-  const w=calcPopup.getBoundingClientRect().width||264;
+  const rect=calcPopup.getBoundingClientRect();
+  const w=rect.width||264, h=rect.height||420;
   right=Math.max(8,Math.min(window.innerWidth-w-8,right));
+  // Si la placer sous le bouton la ferait déborder en bas (ex. écran partagé), on la remonte
+  // pour garder toute la calculette visible — y compris la touche 0 et le bouton Insérer.
+  top=Math.max(8,Math.min(top,window.innerHeight-h-8));
   calcPopup.style.left="auto";calcPopup.style.bottom="auto";
   calcPopup.style.right=right+"px";
   calcPopup.style.top=top+"px";
@@ -4684,6 +4778,30 @@ document.querySelectorAll("#calcSizeSeg button").forEach(b=>{
     calcSize=b.dataset.sz;
     applyCalcSize(calcSize);
     try{localStorage.setItem(CALC_SIZE_KEY,calcSize);}catch(_){}
+  });
+});
+
+/* ----- Nombre de colonnes du pavé (4 ou 5) — 5 colonnes tient sur 4 rangées au lieu de 5,
+   donc gagne de la hauteur, utile en écran partagé ----- */
+const CALC_COLS_KEY="budget-calc-cols";
+function applyCalcCols(cols){
+  calcPopup.classList.toggle("cols-5",cols===5);
+  document.querySelectorAll("#calcColsSeg button").forEach(b=>{
+    b.classList.toggle("active",Number(b.dataset.cols)===cols);
+  });
+  if(!popupMovedManually) positionPopup();
+}
+let calcCols=4;
+try{
+  const savedCols=Number(localStorage.getItem(CALC_COLS_KEY));
+  if(savedCols===4||savedCols===5) calcCols=savedCols;
+}catch(_){}
+applyCalcCols(calcCols);
+document.querySelectorAll("#calcColsSeg button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    calcCols=Number(b.dataset.cols);
+    applyCalcCols(calcCols);
+    try{localStorage.setItem(CALC_COLS_KEY,calcCols);}catch(_){}
   });
 });
 
