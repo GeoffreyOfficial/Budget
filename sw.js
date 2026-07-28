@@ -3,7 +3,7 @@
    Il ne touche JAMAIS à tes données : celles-ci vivent dans localStorage,
    pas dans ce cache. Vider ce cache ne supprime pas ton budget. */
 
-const CACHE = "budget-v2";
+const CACHE = "budget-v4";
 const ASSETS = [
   "./",
   "./index.html",
