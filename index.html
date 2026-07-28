@@ -1008,11 +1008,33 @@ html{scroll-behavior:smooth}
 .calcGrid button{border:none;background:var(--soft);color:var(--ink);border-radius:10px;font-size:16px;font-weight:600;
   padding:10px 0;cursor:pointer;font-family:var(--mono);touch-action:manipulation}
 /* Mode 5 colonnes : mêmes 20 touches (0 = span 2) réparties sur 4 rangées au lieu de 5,
-   ce qui réduit la hauteur totale de la calculette — pratique en écran partagé. */
+   ce qui réduit la hauteur totale de la calculette — pratique en écran partagé.
+   Placement explicite (par data-k) plutôt que le flux automatique, pour garder les chiffres
+   alignés en colonnes (7/4/1, 8/5/2, 9/6/3), les opérateurs alignés en colonne 4,
+   et les fonctions (C, ⌫, %) + le "=" alignés en colonne 5. */
 .calcPopup.cols-5 .calcGrid{grid-template-columns:repeat(5,1fr)}
 .calcPopup.cols-5 .calcGrid button{font-size:14px;padding:9px 0}
 .calcPopup.cols-5.sz-sm .calcGrid button{font-size:12.5px;padding:6px 0}
 .calcPopup.cols-5.sz-lg .calcGrid button{font-size:17px;padding:12px 0}
+.calcPopup.cols-5 .calcGrid button[data-k="7"]{grid-column:1;grid-row:1}
+.calcPopup.cols-5 .calcGrid button[data-k="8"]{grid-column:2;grid-row:1}
+.calcPopup.cols-5 .calcGrid button[data-k="9"]{grid-column:3;grid-row:1}
+.calcPopup.cols-5 .calcGrid button[data-k="/"]{grid-column:4;grid-row:1}
+.calcPopup.cols-5 .calcGrid button[data-k="C"]{grid-column:5;grid-row:1}
+.calcPopup.cols-5 .calcGrid button[data-k="4"]{grid-column:1;grid-row:2}
+.calcPopup.cols-5 .calcGrid button[data-k="5"]{grid-column:2;grid-row:2}
+.calcPopup.cols-5 .calcGrid button[data-k="6"]{grid-column:3;grid-row:2}
+.calcPopup.cols-5 .calcGrid button[data-k="*"]{grid-column:4;grid-row:2}
+.calcPopup.cols-5 .calcGrid button[data-k="back"]{grid-column:5;grid-row:2}
+.calcPopup.cols-5 .calcGrid button[data-k="1"]{grid-column:1;grid-row:3}
+.calcPopup.cols-5 .calcGrid button[data-k="2"]{grid-column:2;grid-row:3}
+.calcPopup.cols-5 .calcGrid button[data-k="3"]{grid-column:3;grid-row:3}
+.calcPopup.cols-5 .calcGrid button[data-k="-"]{grid-column:4;grid-row:3}
+.calcPopup.cols-5 .calcGrid button[data-k="%"]{grid-column:5;grid-row:3}
+.calcPopup.cols-5 .calcGrid button[data-k="0"]{grid-column:1/3;grid-row:4}
+.calcPopup.cols-5 .calcGrid button[data-k="."]{grid-column:3;grid-row:4}
+.calcPopup.cols-5 .calcGrid button[data-k="+"]{grid-column:4;grid-row:4}
+.calcPopup.cols-5 .calcGrid button[data-k="="]{grid-column:5;grid-row:4}
 .calcGrid button:active{filter:brightness(.94)}
 .calcGrid button.op{background:var(--accent);color:#fff}
 .calcGrid button.eq{background:var(--accent-2);color:#fff}
@@ -4683,9 +4705,12 @@ function closeCalc(){calcPopup.classList.remove("open");calcPopup.classList.remo
 // Défilement de l'appli : on efface la calculette le temps du scroll, puis on la ramène ~450 ms
 // après le dernier événement de scroll. Écoute en phase de capture pour attraper aussi les zones
 // à défilement interne (listes de dépenses, menus…). La calculette reste ouverte.
+// Important : si le scroll vient de la calculette elle-même (son propre overflow-y interne,
+// cas extrême écran partagé), on ne la cache PAS — sinon impossible de la faire défiler.
 let calcScrollT=null;
-function calcOnScroll(){
+function calcOnScroll(e){
   if(!calcPopup.classList.contains("open"))return;
+  if(e && e.target && (e.target===calcPopup || calcPopup.contains(e.target)))return;
   if(!calcPopup.classList.contains("scrollHidden"))calcPopup.classList.add("scrollHidden");
   clearTimeout(calcScrollT);
   calcScrollT=setTimeout(()=>calcPopup.classList.remove("scrollHidden"),450);
