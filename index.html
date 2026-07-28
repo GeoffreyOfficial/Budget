@@ -2944,19 +2944,6 @@ function renderSavingsRate(){
   html+='</div>';
   return html;
 }
-function renderFixedVsVar(){
-  const m=ensure(state.current);
-  const fixedSpent=round2(m.lines.filter(l=>l.type==="fixed").reduce((s,l)=>s+spent(l),0));
-  const varSpent=round2(m.lines.filter(l=>l.type==="variable").reduce((s,l)=>s+spent(l),0));
-  const total=round2(fixedSpent+varSpent);
-  if(total<=0)return "";
-  const pal=palette();
-  const items=[{label:"Fixes",value:fixedSpent,color:pal[0]},{label:"Variables",value:varSpent,color:pal[2]}].filter(i=>i.value>0);
-  let leg='<div class="legend">';
-  items.forEach(i=>{leg+='<div class="leg"><span class="ld" style="background:'+i.color+'"></span><span class="ln">'+i.label+'</span><span class="lv">'+eur0(i.value)+'</span><span class="lp">'+Math.round(i.value/total*100)+'%</span></div>';});
-  leg+='</div>';
-  return '<div class="panel"><h3>Fixes vs variables</h3><p class="psub">Répartition du dépensé — utile pour voir ta marge de manœuvre</p><div class="donutwrap">'+donutSVG(items)+leg+'</div></div>';
-}
 function renderTopExpenses(){
   const m=ensure(state.current);
   const flat=[];
@@ -2987,7 +2974,6 @@ function renderAnalyse(){
 
   c.insertAdjacentHTML("beforeend",renderMonthSummary());
   c.insertAdjacentHTML("beforeend",renderSavingsRate());
-  c.insertAdjacentHTML("beforeend",renderFixedVsVar());
 
   // donut répartition
   let p1='<div class="panel"><h3>Répartition du dépensé</h3>';
