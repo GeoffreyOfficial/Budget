@@ -748,6 +748,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer}
 .empty{text-align:center;color:var(--faint);font-size:13.5px;padding:14px 8px 18px;line-height:1.5}
 .searchWrap{position:relative;margin:14px 2px 2px}
+.searchWrap.hiddenPref{display:none}
 .searchIn{width:100%;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;
   padding:10px 34px 10px 12px;font-size:13.5px;font-family:inherit;outline:none}
 .searchIn::placeholder{color:var(--faint)}
@@ -1126,6 +1127,10 @@ html{scroll-behavior:smooth}
     <label class="settingSwitchRow" id="compactRow">
       <span class="ssTxt"><span class="ssTitle">Affichage compact</span><span class="ssSub">Réduit les espacements et les tailles pour voir plus d'éléments à l'écran.</span></span>
       <button type="button" class="switch" id="compactSwitch" role="switch" aria-checked="false" aria-label="Activer l'affichage compact"></button>
+    </label>
+    <label class="settingSwitchRow" id="showSearchRow">
+      <span class="ssTxt"><span class="ssTitle">Barre de recherche</span><span class="ssSub">Affiche le champ de recherche des dépenses en haut de l'onglet Budgets.</span></span>
+      <button type="button" class="switch" id="showSearchSwitch" role="switch" aria-checked="false" aria-label="Afficher la barre de recherche des dépenses"></button>
     </label>
     <div class="hr"></div>
     <div class="slabel">Tri</div>
@@ -1571,7 +1576,7 @@ function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id o
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0};
+let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false};
 // Tris (configurables dans les Réglages). Deux tris indépendants : les budgets (postes) et les
 // dépenses. Par défaut « plus récent d'abord » (ordre décroissant d'ajout). « Manuel » = ordre
 // choisi au glisser-déposer (postes uniquement). Un « seq » d'ordre d'ajout est attribué à chaque
@@ -1584,7 +1589,7 @@ let tab="budgets";
 const expanded=new Set();
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -1610,6 +1615,17 @@ function applyCompact(){
 }
 document.getElementById("compactSwitch").onclick=()=>{
   state.compact=!state.compact;applyCompact();save();
+};
+// Barre de recherche des dépenses : masquée par défaut, affichable dans les Réglages.
+function applyShowSearch(){
+  const sw=document.getElementById("searchWrap");if(sw)sw.classList.toggle("hiddenPref",!state.showSearch);
+  const btn=document.getElementById("showSearchSwitch");
+  if(btn){btn.classList.toggle("on",!!state.showSearch);btn.setAttribute("aria-checked",state.showSearch?"true":"false");}
+}
+document.getElementById("showSearchSwitch").onclick=()=>{
+  state.showSearch=!state.showSearch;
+  if(!state.showSearch){budgetSearch="";const inp=document.getElementById("budgetSearch");if(inp)inp.value="";}
+  applyShowSearch();save();render();
 };
 
 /* ---------- MODE DÉPLACEMENT DES BUDGETS ---------- */
@@ -1704,6 +1720,7 @@ function migrate(){
   state.confirmDelete=sanitizeConfirmDelete(state.confirmDelete);
   state.compact=!!state.compact;
   state.moveMode=!!state.moveMode;
+  state.showSearch=!!state.showSearch;
   // Budgets personnalisés : même remise en forme défensive que les mois (postes, revenus, épargne),
   // pour rester cohérent si un budget vient d'un JSON importé ou d'une ancienne version.
   if(!state.customBudgets||typeof state.customBudgets!=="object")state.customBudgets={};
@@ -1745,7 +1762,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,lines:[]};}
@@ -3484,7 +3501,7 @@ function renderBudgets(){
   renderIncomeBox();renderSavingsBox();
   // L'épargne est un plan global mensuel : on masque sa section dans un budget personnalisé.
   const secSav=document.getElementById("sectionSavings");if(secSav)secSav.classList.toggle("hidden",cust);
-  const q=budgetSearch.trim().toLowerCase();
+  const q=(state.showSearch?budgetSearch:"").trim().toLowerCase();
   const matches=l=>!q||(l.name||"").toLowerCase().includes(q);
   const fixedList=document.getElementById("fixedList");fixedList.innerHTML="";
   const fixedAll=m.lines.filter(l=>l.type==="fixed");
@@ -3808,7 +3825,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;re
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq});
+const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -3830,12 +3847,12 @@ function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.custom
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);
   state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
-  state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;
+  state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;
   expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));}
 function undo(){if(hIndex<=0)return;clearTimeout(recTimer);hIndex--;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Annulé");}
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Annulé");}
 function redo(){if(hIndex>=history.length-1)return;clearTimeout(recTimer);hIndex++;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Rétabli");}
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Rétabli");}
 document.getElementById("undoBtn").onclick=undo;
 document.getElementById("redoBtn").onclick=redo;
 
@@ -3857,7 +3874,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -3953,10 +3970,10 @@ function importData(file){
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
     state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
     state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
-    state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;
+    state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -4116,7 +4133,7 @@ window.addEventListener("beforeunload",e=>{
   if(hasInvalidFields()){e.preventDefault();e.returnValue="";return e.returnValue;}
 });
 
-applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ================= SAUVEGARDE AUTOMATIQUE — GOOGLE DRIVE =================
@@ -4205,7 +4222,7 @@ function gdSerialize(){
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,customBudgets:state.customBudgets,current:state.current,
     theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
-    confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq});
+    confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch});
 }
 function gdApply(d){
   const cleanMonths=sanitizeMonths(d.months);
@@ -4220,10 +4237,10 @@ function gdApply(d){
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
-  state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;
+  state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
   folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
