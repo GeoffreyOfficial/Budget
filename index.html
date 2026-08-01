@@ -406,6 +406,12 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 .settingSwitchRow .ssTxt{display:flex;flex-direction:column;gap:2px;min-width:0}
 .settingSwitchRow .ssTitle{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
 .settingSwitchRow .ssSub{display:block;font-size:11.5px;color:var(--faint);line-height:1.35}
+.settingSelRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 2px}
+.settingSelRow+.settingSelRow{border-top:1px dashed var(--line)}
+.settingSelRow .ssTxt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.settingSelRow .ssTitle{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.settingSelRow .ssSub{display:block;font-size:11.5px;color:var(--faint);line-height:1.35}
+.setSel{flex:0 0 auto;max-width:46%;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 9px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer}
 .svDeduct{display:inline-flex;align-items:center;gap:7px;margin:1px 0 3px;border:none;background:none;color:var(--muted);font-size:11.5px;font-weight:600;cursor:pointer;padding:2px 0}
 .svDeduct .svDot{width:26px;height:16px;border-radius:99px;background:var(--soft);border:1px solid var(--line);position:relative;transition:background .2s,border-color .2s;flex-shrink:0}
 .svDeduct .svDot::after{content:"";position:absolute;top:1px;left:1px;width:12px;height:12px;border-radius:50%;background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
@@ -1115,6 +1121,16 @@ html{scroll-behavior:smooth}
       <button type="button" class="switch" id="compactSwitch" role="switch" aria-checked="false" aria-label="Activer l'affichage compact"></button>
     </label>
     <div class="hr"></div>
+    <div class="slabel">Tri</div>
+    <div class="settingSelRow">
+      <span class="ssTxt"><span class="ssTitle">Ordre des budgets</span><span class="ssSub">Classement des postes fixes et variables. « Manuel » = ordre réglé au glisser-déposer (Mode déplacement).</span></span>
+      <select class="setSel" id="sortBudgetsSel" aria-label="Ordre des budgets"></select>
+    </div>
+    <div class="settingSelRow">
+      <span class="ssTxt"><span class="ssTitle">Ordre des dépenses</span><span class="ssSub">Classement des dépenses à l'intérieur de chaque poste.</span></span>
+      <select class="setSel" id="sortExpensesSel" aria-label="Ordre des dépenses"></select>
+    </div>
+    <div class="hr"></div>
     <div class="slabel">Confirmation avant suppression</div>
     <label class="settingSwitchRow" id="confirmDelBudgetRow">
       <span class="ssTxt"><span class="ssTitle">Budget (poste)</span><span class="ssSub">Demander une confirmation pour supprimer un poste fixe ou variable.</span></span>
@@ -1270,10 +1286,6 @@ html{scroll-behavior:smooth}
         <div class="sechd-l"><h2>Budget fixe</h2><span class="cnt" id="fixedCount"></span></div>
         <span class="tot" id="fixedTot"><span class="totVal" id="fixedTotVal">0 / 0</span><span class="pctRing hidden" id="fixedPctRing"></span><span class="pctBadge" id="fixedPctBadge"></span></span>
         <div class="sechd-actions">
-          <div class="sortWrap">
-            <button type="button" class="sortBtn" id="sortBtnFixed" aria-label="Trier">⇅</button>
-            <div class="sortDrop hidden" id="sortDropFixed"></div>
-          </div>
           <button type="button" class="secToggle" id="foldFixedBtn" aria-label="Replier les dépenses fixes" aria-expanded="true"><span class="chev">⌄</span></button>
         </div>
       </div>
@@ -1288,10 +1300,6 @@ html{scroll-behavior:smooth}
         <div class="sechd-l"><h2>Budget var</h2><span class="cnt" id="varCount"></span></div>
         <span class="tot" id="varTot"><span class="totVal" id="varTotVal">0 / 0</span><span class="pctRing hidden" id="varPctRing"></span><span class="pctBadge" id="varPctBadge"></span></span>
         <div class="sechd-actions">
-          <div class="sortWrap">
-            <button type="button" class="sortBtn" id="sortBtnVar" aria-label="Trier">⇅</button>
-            <div class="sortDrop hidden" id="sortDropVar"></div>
-          </div>
           <button type="button" class="expandAllBtn" id="expandAllVarBtn"><span class="eaIcon">⤢</span><span class="eaTxt">Tout déplier</span></button>
           <button type="button" class="secToggle" id="foldVarBtn" aria-label="Replier les dépenses variables" aria-expanded="true"><span class="chev">⌄</span></button>
         </div>
@@ -1556,12 +1564,20 @@ function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id o
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false};
+let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0};
+// Tris (configurables dans les Réglages). Deux tris indépendants : les budgets (postes) et les
+// dépenses. Par défaut « plus récent d'abord » (ordre décroissant d'ajout). « Manuel » = ordre
+// choisi au glisser-déposer (postes uniquement). Un « seq » d'ordre d'ajout est attribué à chaque
+// poste pour que « récent/ancien » reste stable même après un réarrangement manuel.
+const BUDGET_SORTS=[["recent","Plus récent d'abord"],["oldest","Plus ancien d'abord"],["manual","Manuel (glisser-déposer)"],["name","Nom (A → Z)"],["budget_desc","Budget (gros → petit)"],["spent_desc","Dépensé (gros → petit)"],["over_desc","Dépassement d'abord"],["category","Catégorie (A → Z)"]];
+const EXPENSE_SORTS=[["recent","Plus récent d'abord"],["oldest","Plus ancien d'abord"],["date_desc","Date (récente → ancienne)"],["date_asc","Date (ancienne → récente)"],["amount_desc","Montant (gros → petit)"]];
+const BUDGET_SORT_KEYS=BUDGET_SORTS.map(x=>x[0]), EXPENSE_SORT_KEYS=EXPENSE_SORTS.map(x=>x[0]);
+const nextSeq=()=>(state.seq=(Number(state.seq)||0)+1);
 let tab="budgets";
 const expanded=new Set();
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -1599,6 +1615,22 @@ document.getElementById("moveModeSwitch").onclick=()=>{
   state.moveMode=!state.moveMode;applyMoveMode();save();
 };
 
+/* ---------- TRIS (réglages) ---------- */
+function fillSortSelect(id,options,current){
+  const sel=document.getElementById(id);if(!sel)return;
+  sel.innerHTML=options.map(o=>'<option value="'+o[0]+'"'+(o[0]===current?" selected":"")+'>'+o[1]+'</option>').join("");
+}
+function renderSortSettings(){
+  fillSortSelect("sortBudgetsSel",BUDGET_SORTS,state.sortBudgets||"recent");
+  fillSortSelect("sortExpensesSel",EXPENSE_SORTS,state.sortExpenses||"recent");
+}
+(function wireSortSelects(){
+  const bs=document.getElementById("sortBudgetsSel");
+  if(bs)bs.onchange=()=>{if(BUDGET_SORT_KEYS.includes(bs.value)){state.sortBudgets=bs.value;save();render();}};
+  const es=document.getElementById("sortExpensesSel");
+  if(es)es.onchange=()=>{if(EXPENSE_SORT_KEYS.includes(es.value)){state.sortExpenses=es.value;save();render();}};
+})();
+
 /* ---------- CONFIRMATION AVANT SUPPRESSION (réglages) ---------- */
 const DELETE_CONFIRM_SWITCHES={budget:"confirmDelBudgetSwitch",expense:"confirmDelExpenseSwitch",income:"confirmDelIncomeSwitch",savings:"confirmDelSavingsSwitch"};
 function renderDeleteConfirmSettings(){
@@ -1613,7 +1645,7 @@ for(const kind in DELETE_CONFIRM_SWITCHES){
   if(sw)sw.onclick=()=>{
     if(!state.confirmDelete)state.confirmDelete=sanitizeConfirmDelete(null);
     state.confirmDelete[kind]=!state.confirmDelete[kind];
-    renderDeleteConfirmSettings();save();
+    renderDeleteConfirmSettings();renderSortSettings();save();
   };
 }
 // Suppression conditionnée au réglage correspondant : si le réglage est désactivé, on supprime directement
@@ -1706,7 +1738,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,lines:[]};}
@@ -1729,7 +1761,7 @@ function ensure(k){
     if(!state.customBudgets[k])state.customBudgets[k]=emptyCustomBudget();
     const b=state.customBudgets[k];
     if(typeof b.name!=="string")b.name="Budget personnalisé";
-    for(const l of (b.lines||(b.lines=[])))if(!Array.isArray(l.entries))l.entries=[];
+    for(const l of (b.lines||(b.lines=[]))){if(!Array.isArray(l.entries))l.entries=[];if(typeof l.seq!=="number")l.seq=nextSeq();}
     if(typeof b.incomeDetailed!=="boolean")b.incomeDetailed=false;
     if(!Array.isArray(b.incomeLines))b.incomeLines=[];
     if(!b.savings||typeof b.savings!=="object")b.savings=emptySavings();
@@ -1738,7 +1770,7 @@ function ensure(k){
   }
   if(!state.months[k])state.months[k]=buildMonth(k);
   const m=state.months[k];
-  for(const l of m.lines)if(!Array.isArray(l.entries))l.entries=[];
+  for(const l of m.lines){if(!Array.isArray(l.entries))l.entries=[];if(typeof l.seq!=="number")l.seq=nextSeq();}
   if(typeof m.incomeDetailed!=="boolean")m.incomeDetailed=false;
   if(!Array.isArray(m.incomeLines))m.incomeLines=[];
   if(!m.savings||typeof m.savings!=="object")m.savings=emptySavings();
@@ -2166,7 +2198,7 @@ function monthBounds(k){k=k||state.current;
   return [k+"-01", k+"-"+String(daysIn(k)).padStart(2,"0")];}
 function entryEl(line,e){
   const [minD,maxD]=monthBounds();
-  const box=document.createElement("div");box.className="entry";
+  const box=document.createElement("div");box.className="entry";box.dataset.eid=e.id||"";
   const top=document.createElement("div");top.className="entryTop";
   const date=document.createElement("input");date.className="dateIn";date.type="date";date.value=e.date||"";
   date.min=minD;date.max=maxD;
@@ -2338,7 +2370,8 @@ function persistManualOrder(type){
   if(reordered.length!==linesOfType.length)return; // rendu incohérent (recherche active, etc.) : on ne touche à rien
   let idx=0;
   m.lines=m.lines.map(l=>l.type===type?reordered[idx++]:l);
-  if(sectionSort[type].key!=="default")sectionSort[type]={key:"default",dir:1};
+  // Un glisser-déposer choisit le tri « manuel » : on conserve l'arrangement fait à la main.
+  if(state.sortBudgets!=="manual"){state.sortBudgets="manual";renderSortSettings();}
   commit();render();
 }
 function buildRow(line){
@@ -2419,10 +2452,10 @@ function buildRow(line){
     toggleF.title="Détail des dépenses";toggleF.setAttribute("aria-label","Détail des dépenses ("+nf+")");
     const detailsF=document.createElement("div");detailsF.className="details";
     const entriesF=document.createElement("div");entriesF.className="entries";
-    line.entries.forEach(e=>entriesF.append(entryEl(line,e)));
+    sortEntries(line.entries).forEach(e=>entriesF.append(entryEl(line,e)));
     const footF=document.createElement("div");footF.className="detailFoot";
     const addF=document.createElement("button");addF.className="addentry";addF.innerHTML='<span class="btnIcon">+</span><span class="btnLabel">Ajouter une dépense</span>';
-    addF.onclick=()=>{line.entries.push({id:uid(),date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id);};
+    addF.onclick=()=>{const nid=uid();line.entries.push({id:nid,date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id,nid);};
     footF.append(addF);
     detailsF.append(entriesF,footF);
     if(expanded.has(line.id)){toggleF.classList.add("open");}else{detailsF.classList.add("hidden");}
@@ -2440,7 +2473,7 @@ function buildRow(line){
   // Ajout rapide (postes variables uniquement)
   const quick=document.createElement("button");quick.className="quickBtn";quick.type="button";
   quick.innerHTML='<span class="btnIcon">+</span><span class="btnLabel">Dépense</span>';quick.title="Ajouter une dépense";
-  quick.addEventListener("click",ev=>{ev.stopPropagation();line.entries.push({id:uid(),date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id);});
+  quick.addEventListener("click",ev=>{ev.stopPropagation();const nid=uid();line.entries.push({id:nid,date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id,nid);});
   // Bouton détail
   const n=line.entries.length;
   const toggle=document.createElement("button");toggle.className="toggle";
@@ -2464,10 +2497,10 @@ function buildRow(line){
   dup.onclick=()=>{duplicateLine(line);};
   actions.append(dup);
   const entries=document.createElement("div");entries.className="entries";
-  line.entries.forEach(e=>entries.append(entryEl(line,e)));
+  sortEntries(line.entries).forEach(e=>entries.append(entryEl(line,e)));
   const foot=document.createElement("div");foot.className="detailFoot";
   const add=document.createElement("button");add.className="addentry";add.innerHTML='<span class="btnIcon">+</span><span class="btnLabel">Ajouter une dépense</span>';
-  add.onclick=()=>{line.entries.push({id:uid(),date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id);};
+  add.onclick=()=>{const nid=uid();line.entries.push({id:nid,date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id,nid);};
   foot.append(add,payBtn);
   details.append(actions,entries,foot);
   if(expanded.has(line.id)){toggle.classList.add("open");quick.classList.add("hidden");}else{details.classList.add("hidden");}
@@ -2824,13 +2857,14 @@ function addLine(type,name){
   const row=list&&list.querySelector('.row[data-id="'+line.id+'"]');
   if(row){const target=row.querySelector(line.name?".planIn":".nameIn");if(target){target.focus();target.select();}}
 }
-function focusNewEntry(lineId){
+function focusNewEntry(lineId,entryId){
   const row=document.querySelector('.row[data-id="'+lineId+'"]');
   if(!row)return;
-  const entries=row.querySelectorAll(".entry");
-  const last=entries[entries.length-1];
-  const inp=last&&last.querySelector(".amtIn");
-  if(inp)inp.focus();
+  // Avec le tri « récent », la nouvelle dépense n'est plus forcément en bas : on la cible par son id.
+  let target=entryId?row.querySelector('.entry[data-eid="'+entryId+'"]'):null;
+  if(!target){const entries=row.querySelectorAll(".entry");target=entries[entries.length-1];}
+  const inp=target&&target.querySelector(".amtIn");
+  if(inp){inp.focus();inp.scrollIntoView({block:"nearest"});}
 }
 function deleteLine(line){const m=ensure(state.current);m.lines=m.lines.filter(l=>l.id!==line.id);commit();render();}
 function duplicateLine(line){
@@ -3467,80 +3501,41 @@ function renderBudgets(){
   const vc=document.getElementById("varCount");if(vc)vc.textContent=variAll.length?String(variAll.length):"";
   const sw=document.getElementById("searchWrap");if(sw)sw.classList.toggle("has",!!budgetSearch);
   updateExpandAllBtn("variable","expandAllVarBtn");
-  updateSortBtn("fixed");updateSortBtn("variable");
   applySectionFolds();
 }
-/* ---------- Tri des budgets (catégorie, dépassement, taille du budget) ---------- */
-const sectionSort={fixed:{key:"default",dir:1},variable:{key:"default",dir:1}};
-const SORT_LABELS={default:"Ordre par défaut",category:"Catégorie",over:"Dépassement",budget:"Taille du budget"};
-const sortIdSuffix={fixed:"Fixed",variable:"Var"};
+/* ---------- Tris ---------- */
 function sortLines(lines,type){
-  const cfg=sectionSort[type];
-  if(!cfg||cfg.key==="default")return lines;
+  const key=state.sortBudgets||"recent";
+  if(key==="manual")return lines; // ordre du tableau (glisser-déposer)
   const arr=[...lines];
+  const seqOf=l=>typeof l.seq==="number"?l.seq:0;
   const catName=l=>catById(l.category||"").name.toLowerCase();
-  const overAmt=l=>round2(spent(l)-(+l.planned||0));
-  const plannedAmt=l=>+l.planned||0;
-  let cmp;
-  if(cfg.key==="category")cmp=(a,b)=>catName(a).localeCompare(catName(b),"fr");
-  else if(cfg.key==="over")cmp=(a,b)=>overAmt(a)-overAmt(b);
-  else if(cfg.key==="budget")cmp=(a,b)=>plannedAmt(a)-plannedAmt(b);
-  else return lines;
-  arr.sort((a,b)=>cfg.dir*cmp(a,b));
+  switch(key){
+    case "oldest": arr.sort((a,b)=>seqOf(a)-seqOf(b)); break;
+    case "name": arr.sort((a,b)=>(a.name||"").localeCompare(b.name||"","fr",{sensitivity:"base"})); break;
+    case "budget_desc": arr.sort((a,b)=>(+b.planned||0)-(+a.planned||0)); break;
+    case "spent_desc": arr.sort((a,b)=>spent(b)-spent(a)); break;
+    case "over_desc": arr.sort((a,b)=>(spent(b)-(+b.planned||0))-(spent(a)-(+a.planned||0))); break;
+    case "category": arr.sort((a,b)=>catName(a).localeCompare(catName(b),"fr")); break;
+    case "recent": default: arr.sort((a,b)=>seqOf(b)-seqOf(a)); break;
+  }
   return arr;
 }
-function updateSortBtn(type){
-  const btn=document.getElementById("sortBtn"+sortIdSuffix[type]);if(!btn)return;
-  const cfg=sectionSort[type];const active=cfg.key!=="default";
-  btn.classList.toggle("on",active);
-  btn.title=active?("Trié par "+SORT_LABELS[cfg.key].toLowerCase()+(cfg.dir===1?" (croissant)":" (décroissant)")):"Trier";
-  btn.setAttribute("aria-label",btn.title);
+// Tri des dépenses (entrées) d'un poste. L'ordre du tableau = ordre d'ajout ; « récent » l'inverse.
+function sortEntries(entries){
+  const key=state.sortExpenses||"recent";
+  if(key==="oldest")return entries; // ordre d'ajout
+  const arr=[...entries];
+  const dOf=e=>e.date||"";
+  const aOf=e=>Math.abs(+e.amount||0);
+  switch(key){
+    case "date_desc": arr.sort((a,b)=>dOf(b).localeCompare(dOf(a))); break;
+    case "date_asc": arr.sort((a,b)=>dOf(a).localeCompare(dOf(b))); break;
+    case "amount_desc": arr.sort((a,b)=>aOf(b)-aOf(a)); break;
+    case "recent": default: return arr.reverse(); // ordre d'ajout inversé (plus récent d'abord)
+  }
+  return arr;
 }
-function renderSortDrop(type){
-  const drop=document.getElementById("sortDrop"+sortIdSuffix[type]);if(!drop)return;
-  drop.innerHTML="";
-  Object.keys(SORT_LABELS).forEach(key=>{
-    const cfg=sectionSort[type];const isCur=cfg.key===key;
-    const b=document.createElement("button");b.type="button";b.className=isCur?"cur":"";
-    const arrow=key==="default"?"":(isCur?(cfg.dir===1?"↑":"↓"):"↕");
-    b.innerHTML="<span>"+SORT_LABELS[key]+"</span>"+(arrow?"<span class=\"sdArrow\">"+arrow+"</span>":"");
-    b.onclick=()=>{
-      if(key==="default"){sectionSort[type]={key:"default",dir:1};}
-      else if(isCur){sectionSort[type]={key,dir:cfg.dir*-1};}
-      else{sectionSort[type]={key,dir:1};}
-      drop.classList.add("hidden");
-      renderBudgets();
-    };
-    drop.append(b);
-  });
-}
-function closeSortDrops(except){
-  ["fixed","variable"].forEach(t=>{
-    if(t===except)return;
-    const d=document.getElementById("sortDrop"+sortIdSuffix[t]);if(d)d.classList.add("hidden");
-  });
-}
-// Repositionne le menu déroulant pour qu'il reste toujours entièrement visible à l'écran
-// (sur petit téléphone, "right:0" seul peut le faire déborder à gauche de l'écran).
-function clampDropdownToViewport(drop){
-  drop.style.transform="";
-  const margin=8,rect=drop.getBoundingClientRect();
-  let dx=0;
-  if(rect.left<margin)dx=margin-rect.left;
-  else if(rect.right>window.innerWidth-margin)dx=(window.innerWidth-margin)-rect.right;
-  if(dx)drop.style.transform="translateX("+dx+"px)";
-}
-["fixed","variable"].forEach(type=>{
-  const btn=document.getElementById("sortBtn"+sortIdSuffix[type]);
-  btn.onclick=ev=>{
-    ev.stopPropagation();
-    const d=document.getElementById("sortDrop"+sortIdSuffix[type]);
-    const willOpen=d.classList.contains("hidden");
-    closeSortDrops();
-    if(willOpen){renderSortDrop(type);d.classList.remove("hidden");clampDropdownToViewport(d);}else d.classList.add("hidden");
-  };
-});
-document.addEventListener("click",e=>{if(!e.target.closest(".sortWrap"))closeSortDrops();});
 /* ---------- Tout déplier / tout replier (détail de toutes les cartes d'une section) ---------- */
 function sectionLineIds(type){return ensure(state.current).lines.filter(l=>l.type===type).map(l=>l.id);}
 function updateExpandAllBtn(type,btnId){
@@ -3796,14 +3791,14 @@ document.getElementById("incomeIn").addEventListener("input",e=>{const m=ensure(
   const v=parseAmt(e.target.value);m.income=v!=null?(v):0;
   updateComputed();touch();});
 document.getElementById("paletteBtn").onclick=()=>{document.getElementById("settings").classList.remove("hidden");
-  renderResetSection();
+  renderResetSection();renderSortSettings();
   const cur=document.querySelector("#themebar .sw.on");if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});};
 document.getElementById("settingsCloseBtn").onclick=()=>document.getElementById("settings").classList.add("hidden");
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode});
+const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -3825,11 +3820,12 @@ function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.custom
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);
   state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
+  state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;
   expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));}
 function undo(){if(hIndex<=0)return;clearTimeout(recTimer);hIndex--;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Annulé");}
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Annulé");}
 function redo(){if(hIndex>=history.length-1)return;clearTimeout(recTimer);hIndex++;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Rétabli");}
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Rétabli");}
 document.getElementById("undoBtn").onclick=undo;
 document.getElementById("redoBtn").onclick=redo;
 
@@ -3851,7 +3847,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -3947,9 +3943,10 @@ function importData(file){
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
     state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
     state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
+    state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -4110,7 +4107,7 @@ window.addEventListener("beforeunload",e=>{
   if(hasInvalidFields()){e.preventDefault();e.returnValue="";return e.returnValue;}
 });
 
-applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ================= SAUVEGARDE AUTOMATIQUE — GOOGLE DRIVE =================
@@ -4199,7 +4196,7 @@ function gdSerialize(){
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,customBudgets:state.customBudgets,current:state.current,
     theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
-    confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode});
+    confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq});
 }
 function gdApply(d){
   const cleanMonths=sanitizeMonths(d.months);
@@ -4214,9 +4211,10 @@ function gdApply(d){
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
+  state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
   folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
