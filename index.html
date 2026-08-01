@@ -560,6 +560,13 @@ button.rowCatIcon:active{transform:scale(.92)}
 .mtxt b{font-family:var(--mono);color:var(--ink);font-weight:700}
 .mtxt.over{color:var(--red)}
 .mtxt.over b{color:var(--red)}
+/* Budget « sans montant » (0 €) : distinction discrète, jamais rouge. Barre en pointillés (pas
+   de cible), statut grisé, et le champ de montant en italique atténué au lieu du rouge d'erreur. */
+.row.noBudget .prog{background:repeating-linear-gradient(90deg,var(--line) 0 5px,transparent 5px 10px);opacity:.55}
+.row.noBudget .prog>i{display:none}
+.mtxt.noBudget{color:var(--faint);font-style:italic}
+.planIn.noBudget{color:var(--faint)}
+.planIn.noBudget::placeholder{color:var(--faint);font-style:italic}
 .quickBtn{flex-shrink:0;border:1px solid var(--line);background:var(--soft);color:var(--accent-2);border-radius:99px;padding:5px 11px;font-size:11.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 .quickBtn:active{transform:scale(.97);filter:brightness(.97)}
 .rowActions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -2244,9 +2251,9 @@ function entryEl(line,e){
     return false;
   }
   function validate(){const msgs=[];
-    const badAmt=e.amount==null||!Number.isFinite(+e.amount);const badDate=!e.date||e.date<minD||e.date>maxD;
+    const badAmt=e.amount==null||!Number.isFinite(+e.amount)||(+e.amount)===0;const badDate=!e.date||e.date<minD||e.date>maxD;
     amt.classList.toggle("inv",badAmt);date.classList.toggle("inv",badDate);
-    if(badAmt)msgs.push("Montant requis");
+    if(badAmt)msgs.push((e.amount!=null&&(+e.amount)===0)?"Montant à 0":"Montant requis");
     if(badDate)msgs.push(!e.date?"Date requise":"Date hors du mois");
     warn.textContent=msgs.length?"⚠ "+msgs.join(" · "):"";warn.classList.toggle("show",msgs.length>0);
     const isDup=!badAmt&&!badDate&&isDuplicate();
@@ -2256,7 +2263,7 @@ function entryEl(line,e){
   return box;
 }
 function entryIssues(line,k){const [minD,maxD]=monthBounds(k);
-  return line.entries.filter(e=>e.amount==null||!Number.isFinite(+e.amount)||!e.date||e.date<minD||e.date>maxD).length;}
+  return line.entries.filter(e=>e.amount==null||!Number.isFinite(+e.amount)||(+e.amount)===0||!e.date||e.date<minD||e.date>maxD).length;}
 function rowEl(line){return buildRow(line);}
 /* ---------- Sélecteur rapide de catégorie (tap sur l'icône d'un poste) ---------- */
 function openCatPicker(line){
@@ -2397,7 +2404,7 @@ function buildRow(line){
   // Budget prévu
   const pw=document.createElement("div");pw.className="planWrap";
   const plan=document.createElement("input");plan.className="planIn";plan.type="text";plan.inputMode="decimal";plan.autocomplete="off";
-  plan.value=(+line.planned||0)===0?"":line.planned;plan.placeholder="0";
+  plan.value=(+line.planned||0)===0?"":line.planned;plan.placeholder="—";
   plan.addEventListener("input",()=>{const v=parseAmt(plan.value);line.planned=v!=null?(v):0;updateComputed();touch();});
   const pc=document.createElement("span");pc.className="planCur";pc.textContent="€";pw.append(plan,pc);
   // Suppression (logique commune, présentée différemment selon le mode)
@@ -2516,15 +2523,19 @@ function buildRow(line){
   applyRowState(wrap,line);return wrap;
 }
 function applyRowState(el,line){
-  const p=+line.planned||0,s=spent(line),over=s>p&&s>0,any=s>0;
-  el.classList.remove("over","done");
-  if(any)el.classList.add(over?"over":"done");
-  const pct=p>0?s/p*100:(s>0?100:0);
-  const fill=el.querySelector(".prog>i");fill.style.width=Math.max(0,Math.min(100,pct))+"%";
+  const p=+line.planned||0,s=spent(line);
+  const noBudget=!(p>0); // budget à 0 = « sans montant » : suivi libre, PAS une erreur
+  const over=!noBudget&&s>p&&s>0,any=s>0;
+  el.classList.remove("over","done","noBudget");
+  if(noBudget)el.classList.add("noBudget");
+  else if(any)el.classList.add(over?"over":"done");
+  const pct=p>0?s/p*100:0;
+  const fill=el.querySelector(".prog>i");fill.style.width=(noBudget?0:Math.max(0,Math.min(100,pct)))+"%";
   fill.className=over?"over":(p>0&&Math.round(pct)>=100?"full":"");
   const mt=el.querySelector(".mtxt");
   if(mt){
-    if(over){mt.className="mtxt over";mt.innerHTML="<b>+"+eur(s-p)+"</b>";}
+    if(noBudget){mt.className="mtxt noBudget";mt.innerHTML=s>0?("dépensé <b>"+eur(s)+"</b>"):"sans montant";}
+    else if(over){mt.className="mtxt over";mt.innerHTML="<b>+"+eur(s-p)+"</b>";}
     else{mt.className="mtxt";mt.innerHTML="reste <b>"+eur(p-s)+"</b>";}
   }
   const payBtn=el.querySelector(".payBtn");
@@ -2538,15 +2549,14 @@ function applyRowState(el,line){
     payBtn.title=covered?(autoPaid?"Payé — retaper pour annuler":(isFixed?"Entièrement payé":"Dépense entièrement payée"))
       :(isFixed?"Marquer ce poste comme payé":"Marquer ce poste comme payé (ajoute le montant restant)");
   }
-  // validations dépense
-  const badName=!(line.name||"").trim(),badBudget=!(p>0);
+  // validations : le nom reste requis ; un budget à 0 n'est PAS une erreur (juste « sans montant »).
+  const badName=!(line.name||"").trim();
   const nameIn=el.querySelector(".nameIn"),planIn=el.querySelector(".planIn");
   if(nameIn)nameIn.classList.toggle("inv",badName);
-  if(planIn)planIn.classList.toggle("inv",badBudget);
+  if(planIn){planIn.classList.remove("inv");planIn.classList.toggle("noBudget",noBudget);}
   const ei=entryIssues(line);
   const msgs=[];
   if(badName)msgs.push("Nom requis");
-  if(badBudget)msgs.push("Budget requis");
   if(ei>0)msgs.push(ei+" dépense"+(ei>1?"s":"")+" à compléter");
   const rwarn=el.querySelector(".rwarn");
   if(rwarn){rwarn.textContent=msgs.length?"⚠ "+msgs.join(" · "):"";rwarn.classList.toggle("show",msgs.length>0);}
@@ -2844,7 +2854,7 @@ function updateComputed(){
   document.getElementById("foot").innerHTML="Données enregistrées sur cet appareil.";
   document.querySelectorAll("#tab-budgets .row").forEach(el=>{const line=m.lines.find(l=>l.id===el.dataset.id);if(line)applyRowState(el,line);});
   renderRecap();
-  let issues=0;m.lines.forEach(l=>{if(!(l.name||"").trim())issues++;if(!((+l.planned||0)>0))issues++;issues+=entryIssues(l);});
+  let issues=0;m.lines.forEach(l=>{if(!(l.name||"").trim())issues++;issues+=entryIssues(l);});
   const ib=document.getElementById("issues");
   if(ib){ib.textContent=issues>0?("⚠ "+issues+" élément"+(issues>1?"s":"")+" à compléter "+(cust?"dans ce budget":"ce mois")+" — voir les champs en rouge"):"";
     ib.classList.toggle("show",issues>0);}
@@ -4094,7 +4104,6 @@ function hasInvalidFields(){
     if(!m)return false;
     for(const l of (m.lines||[])){
       if(!(l.name||"").trim())return true;
-      if(!((+l.planned||0)>0))return true;
       if(entryIssues(l,k)>0)return true;
     }
     return false;
