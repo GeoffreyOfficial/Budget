@@ -292,14 +292,12 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .entries>.entry .noteIn::placeholder{color:var(--faint);font-weight:400;opacity:.5}
 .entries>.entry .entryTop{
   border-top:1px dashed var(--line);padding-top:7px}
-.entries>.entry .dateIn{font-size:11px;color:var(--faint);display:none}
-.entries>.entry.showDate .dateIn{display:inline-block}
-.entries>.entry .dateWrap{display:flex;align-items:center;gap:4px;min-width:0}
+.entries>.entry .dateIn{position:absolute;inset:0;opacity:0;pointer-events:none;border:0;padding:0;margin:0}
+.entries>.entry .dateWrap{display:flex;align-items:center;gap:4px;min-width:0;position:relative}
 .entries>.entry .dateToggle{flex-shrink:0;border:1px solid var(--line);background:var(--card);opacity:.9;
   cursor:pointer;padding:0;line-height:1;border-radius:6px;display:flex;flex-direction:column;
   width:22px;height:22px;overflow:hidden}
 .entries>.entry .dateToggle:active{opacity:1;transform:scale(.92)}
-.entries>.entry.showDate .dateToggle{opacity:1;border-color:var(--accent)}
 .entries>.entry .dtBar{display:block;height:5px;width:100%;background:var(--red);flex-shrink:0}
 .entries>.entry .dtNum{display:flex;flex:1;align-items:center;justify-content:center;
   font-size:10px;font-weight:800;font-family:var(--mono);color:var(--ink);line-height:1}
@@ -724,15 +722,16 @@ button.rowCatIcon:active{transform:scale(.92)}
 .app[data-view="flow"] .recToggle .btnIcon,.app[data-view="flow"] .actBtn .btnIcon{font-size:13px}
 .app[data-view="flow"] .toggle{padding:5px 8px}
 .app[data-view="flow"] .addentry{width:auto;padding:7px 12px}
-/* Lignes de dépense (date + montant + signe + suppression) : sur une carte étroite, ces éléments mis bout
-   à bout dépassent largement la largeur disponible et se retrouvent tronqués par l'overflow:hidden de la
-   carte. On les empile plutôt sur deux lignes : la date seule en haut, puis le montant (aligné à droite) en
-   dessous, ce qui garantit que rien ne déborde quelle que soit la largeur de la tuile. */
+/* Lignes de dépense (date + badge % + montant + signe + suppression) : sur une carte étroite, ces
+   éléments mis bout à bout dépassent largement la largeur disponible. On les empile plutôt sur deux
+   lignes : l'icône de date seule en haut, puis badge/signe/montant/suppression groupés et alignés à
+   droite en dessous — jamais la croix isolée toute seule sur sa propre ligne. */
 .app[data-view="flow"] .entryTop{flex-wrap:wrap;row-gap:6px}
-.app[data-view="flow"] .dateIn{flex:1 1 100%;width:100%;min-width:0;font-size:12px}
-.app[data-view="flow"] .amtWrap{margin-left:0;flex:1 1 auto;min-width:0}
-.app[data-view="flow"] .amtIn{width:100%;min-width:0;flex:1 1 auto}
-.app[data-view="flow"] .delE{margin-left:auto;flex-shrink:0}
+.app[data-view="flow"] .dateWrap{flex:1 1 100%}
+.app[data-view="flow"] .pctBadge{font-size:9.5px;padding:2px 5px}
+.app[data-view="flow"] .amtWrap{margin-left:auto;flex:0 1 auto;min-width:0}
+.app[data-view="flow"] .amtIn{width:56px;min-width:0;flex:0 0 auto}
+.app[data-view="flow"] .delE{flex-shrink:0;margin-left:0}
 /* Habillage assorti des sections Revenus / Épargne, même agencement, coins et bordures un peu plus doux */
 .app[data-view="flow"] .income{border-radius:16px}
 .app[data-view="flow"] .miniRow{background:var(--soft);border-radius:10px;padding:6px 10px;margin-bottom:6px}
@@ -818,9 +817,6 @@ button.rowCatIcon:active{transform:scale(.92)}
 .dateIn::-webkit-datetime-edit-year-field{display:none}
 .dateIn::-webkit-datetime-edit-text:last-of-type{display:none}
 .dateWrap{display:flex;align-items:center;gap:4px;min-width:0}
-.dateToggle{display:none}
-.dtBar{display:none}
-.dtNum{display:none}
 .amtWrap{margin-left:auto;display:flex;align-items:center;gap:1px}
 .amtWrap .pctBadge{margin-right:6px}
 .amtIn{width:76px;text-align:right;border:none;background:transparent;font-family:var(--mono);font-size:14.5px;font-weight:600;color:var(--ink);outline:none}
@@ -2372,18 +2368,19 @@ function entryEl(line,e){
   const box=document.createElement("div");box.className="entry";box.dataset.eid=e.id||"";
   const top=document.createElement("div");top.className="entryTop";
   const dateWrap=document.createElement("div");dateWrap.className="dateWrap";
-  const dateToggle=document.createElement("button");dateToggle.type="button";dateToggle.className="dateToggle";
+  const dateId="dateFor_"+(e.id||uid());
+  const dateToggle=document.createElement("label");dateToggle.htmlFor=dateId;dateToggle.className="dateToggle";
   dateToggle.innerHTML='<span class="dtBar"></span><span class="dtNum"></span>';
   const dtNum=dateToggle.querySelector(".dtNum");
   const updateDateIcon=()=>{
     const d=e.date&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)?+e.date.slice(8,10):null;
     dtNum.textContent=d?String(d):"–";
     const lbl=e.date?"Date : "+e.date.split("-").reverse().join("/"):"Aucune date";
-    dateToggle.title=lbl+" — afficher/masquer";dateToggle.setAttribute("aria-label",lbl);
+    dateToggle.title=lbl+" — modifier la date";dateToggle.setAttribute("aria-label",lbl);
   };
-  dateToggle.onclick=()=>{box.classList.toggle("showDate");if(box.classList.contains("showDate")){date.focus();try{date.showPicker&&date.showPicker();}catch(err){}}};
-  const date=document.createElement("input");date.className="dateIn";date.type="date";date.value=e.date||"";
-  date.min=minD;date.max=maxD;
+  const date=document.createElement("input");date.className="dateIn";date.type="date";date.id=dateId;date.value=e.date||"";
+  date.min=minD;date.max=maxD;date.tabIndex=-1;
+  date.addEventListener("click",()=>{try{date.showPicker&&date.showPicker();}catch(err){}});
   date.addEventListener("change",()=>{let v=date.value;if(v){if(v<minD)v=minD;if(v>maxD)v=maxD;}date.value=v;e.date=v;validate();touch();updateDateIcon();});
   updateDateIcon();
   dateWrap.append(dateToggle,date);
