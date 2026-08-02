@@ -272,7 +272,9 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .bdProg{margin:0 2px 8px}
 .bdProg.noBudget{background:repeating-linear-gradient(90deg,var(--line) 0 5px,transparent 5px 10px);opacity:.55}
 .bdProg.noBudget>i{display:none}
-.bdMtxt{font-size:13.5px;margin:0 2px 12px;white-space:normal}
+#bdBody .bdMtxt{font-size:19px;margin:0 2px 14px;white-space:normal}
+#bdBody .bdMtxt b{font-size:1.05em}
+#bdBody .bdMtxt .mspent{font-size:.72em}
 .bdRwarn{margin:0 2px 10px}
 .bdActions{margin:2px 2px 4px}
 .bdEntriesHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 2px 10px}
@@ -288,20 +290,23 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .entries>.entry:last-child{margin-bottom:0}
 .entries>.entry .noteIn{
   order:-1;background:transparent;border-radius:0;padding:0 0 5px;
-  font-size:14.5px;font-weight:700;color:var(--ink)}
+  font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.1px}
 .entries>.entry .noteIn::placeholder{color:var(--faint);font-weight:400;opacity:.5}
 .entries>.entry .entryTop{
   border-top:1px dashed var(--line);padding-top:7px}
 .entries>.entry .dateIn{position:absolute;inset:0;opacity:0;pointer-events:none;border:0;padding:0;margin:0}
 .entries>.entry .dateWrap{display:flex;align-items:center;gap:4px;min-width:0;position:relative}
 .entries>.entry .dateToggle{flex-shrink:0;border:1px solid var(--line);background:var(--card);opacity:.9;
-  cursor:pointer;padding:0;line-height:1;border-radius:6px;display:flex;flex-direction:column;
-  width:22px;height:22px;overflow:hidden}
+  cursor:pointer;padding:0;line-height:1;border-radius:5px;display:flex;flex-direction:column;
+  width:17px;height:17px;overflow:hidden}
 .entries>.entry .dateToggle:active{opacity:1;transform:scale(.92)}
-.entries>.entry .dtBar{display:block;height:5px;width:100%;background:var(--red);flex-shrink:0}
-.entries>.entry .dateToggle.over .dtBar{background:var(--money-out)}
+.entries>.entry .dtBar{display:block;height:4px;width:100%;background:var(--faint);flex-shrink:0}
+.entries>.entry .dateToggle.pct-ok .dtBar{background:var(--green)}
+.entries>.entry .dateToggle.pct-warn .dtBar{background:var(--money-out)}
+.entries>.entry .dateToggle.pct-over .dtBar{background:var(--red)}
 .entries>.entry .dtNum{display:flex;flex:1;align-items:center;justify-content:center;
-  font-size:10px;font-weight:800;font-family:var(--mono);color:var(--ink);line-height:1}
+  font-size:8.5px;font-weight:800;font-family:var(--mono);color:var(--ink);line-height:1}
+.entries>.entrySplit{border-top:1px dashed var(--red);margin:3px 6px 7px;opacity:.5}
 .entries>.entry .amtIn{font-size:15.5px}
 /* Entrée en cascade des sections du panneau détail, pour un effet plus vivant à l'ouverture */
 #bdBody>*{animation:panelIn .5s cubic-bezier(.16,1,.3,1) both}
@@ -531,6 +536,17 @@ svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
 .pctBadge.pct-ok{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
 .pctBadge.pct-warn{background:color-mix(in srgb,var(--money-out) 20%,transparent);color:var(--money-out)}
 .pctBadge.pct-over{background:var(--red-soft);color:var(--red)}
+/* Variante "cumul" (dépenses individuelles) : fond qui se remplit selon le %, pour la distinguer
+   d'un coup d'œil de la pastille plate utilisée pour le total du poste. */
+.pctBadge.cum{position:relative;overflow:hidden;isolation:isolate}
+.pctBadge.cum::before{content:"";position:absolute;inset:0;left:0;width:var(--fill,0%);z-index:-1;
+  border-radius:99px 0 0 99px;opacity:.4;transition:width .25s ease}
+.pctBadge.cum.pct-ok{background:color-mix(in srgb,var(--green) 8%,transparent)}
+.pctBadge.cum.pct-ok::before{background:var(--green)}
+.pctBadge.cum.pct-warn{background:color-mix(in srgb,var(--money-out) 10%,transparent)}
+.pctBadge.cum.pct-warn::before{background:var(--money-out)}
+.pctBadge.cum.pct-over{background:var(--red-soft)}
+.pctBadge.cum.pct-over::before{width:100%;opacity:.55;background:var(--red)}
 .pctRing{--pct:0;--ringc:var(--muted);flex-shrink:0;width:15px;height:15px;border-radius:50%;position:relative;
   background:conic-gradient(var(--ringc) calc(var(--pct)*1%),var(--line) 0)}
 .pctRing::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--card)}
@@ -795,7 +811,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .app.compact .recap .rline{padding:2px 0;font-size:12px}
 .app.compact .entries{max-height:180px;margin-top:5px}
 .app.compact .entry{padding:4px 9px;gap:3px}
-.app.compact .noteIn{padding:5px 8px;font-size:12px}
+.app.compact .noteIn{padding:5px 8px;font-size:13.5px}
 .app.compact .detailToggleRow{margin-top:3px}
 .entries{margin-top:8px;max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin}
 /* En vue Jauges, les cartes sont plus petites : on réduit la hauteur de scroll du détail pour rester compact */
@@ -1236,7 +1252,7 @@ html{scroll-behavior:smooth}
       <button type="button" class="switch" id="compactSwitch" role="switch" aria-checked="false" aria-label="Activer l'affichage compact"></button>
     </label>
     <label class="settingSwitchRow" id="showSearchRow">
-      <span class="ssTxt"><span class="ssTitle">Barre de recherche</span><span class="ssSub">Affiche le champ de recherche des dépenses en haut de l'onglet Budgets.</span></span>
+      <span class="ssTxt"><span class="ssTitle">Barre de recherche</span><span class="ssSub">Affiche le champ de recherche des dépenses en haut de l'onglet Budgets, ainsi que dans le détail d'un poste.</span></span>
       <button type="button" class="switch" id="showSearchSwitch" role="switch" aria-checked="false" aria-label="Afficher la barre de recherche des dépenses"></button>
     </label>
     <div class="hr"></div>
@@ -2342,14 +2358,21 @@ function attachRowGestures(wrap,line,onDelete){
 function monthBounds(k){k=k||state.current;
   if(isCustom(k))return ["0001-01-01","9999-12-31"]; // budget personnalisé : n'importe quelle date
   return [k+"-01", k+"-"+String(daysIn(k)).padStart(2,"0")];}
-/* Badge « % du budget » (option D) : montre directement, sans jauge à interpréter, la part du
-   budget du poste que représente CETTE dépense à elle seule. Masqué proprement si le poste n'a
-   pas de budget défini (0 €), pour ne jamais afficher un pourcentage basé sur une division par zéro. */
+/* Badge « % cumulé » : montre la part du budget du poste déjà atteinte une fois cette dépense
+   incluse dans le cumul, en repartant de la 1ère dépense créée. N'a de sens que si les dépenses
+   sont affichées dans l'ordre de création ("oldest"/"recent" — même ordre, juste inversé) ;
+   masqué pour les autres tris, ainsi que si le poste n'a pas de budget défini. */
 function entryPctInfo(line,e){
+  const key=state.sortExpenses||"recent";
+  if(key!=="oldest"&&key!=="recent")return null;
   const p=+line.planned||0;
-  const a=Math.abs(+e.amount||0);
-  if(!(p>0)||!Number.isFinite(a)||a<=0)return null;
-  const pct=Math.round(a/p*100);
+  if(!(p>0))return null;
+  let cum=0;
+  for(const en of line.entries){
+    cum+=+en.amount||0; // signé, comme spent() : une dépense négative réduit le cumul au lieu de l'augmenter
+    if(en.id===e.id)break;
+  }
+  const pct=cum>0?Math.round(cum/p*100):0;
   const cls=pct>100?"pct-over":pct>=90?"pct-warn":"pct-ok";
   return{pct,cls};
 }
@@ -2360,40 +2383,68 @@ function refreshEntryFills(root,line){
     const badge=box.querySelector(".pctBadge");
     if(!en||!badge)return;
     const info=entryPctInfo(line,en);
-    if(info){badge.textContent=info.pct+"%";badge.className="pctBadge "+info.cls;}
+    if(info){badge.textContent=info.pct+"%";badge.className="pctBadge cum "+info.cls;badge.style.setProperty("--fill",Math.min(100,info.pct)+"%");}
     else{badge.textContent="";badge.className="pctBadge hidden";}
+    const dt=box.querySelector(".dateToggle");
+    if(dt){
+      dt.classList.remove("pct-ok","pct-warn","pct-over");
+      if(info)dt.classList.add(info.cls);
+    }
+  });
+  // Recalcule aussi la ligne pointillée de dépassement (.entrySplit) : elle n'est posée qu'au
+  // rendu complet (appendEntriesWithSplit) et sinon reste figée à sa position d'origine quand
+  // le montant d'une dépense change et fait basculer le cumul. On repositionne ici sans
+  // reconstruire les lignes (.entry), pour ne pas perdre le focus/la saisie en cours.
+  root.querySelectorAll(":scope .entries").forEach(container=>{
+    container.querySelectorAll(":scope .entrySplit").forEach(s=>s.remove());
+    let prevOver=null;
+    sortEntries(line.entries).forEach(e=>{
+      const info=entryPctInfo(line,e);
+      const isOver=info?info.cls==="pct-over":null;
+      const box=container.querySelector(':scope > .entry[data-eid="'+(e.id||"")+'"]');
+      if(box&&info&&prevOver!==null&&prevOver!==isOver){
+        container.insertBefore(document.createElement("div"),box).className="entrySplit";
+      }
+      if(box)prevOver=info?isOver:null;
+    });
   });
 }
 // "oldest" et "recent" sont le même ordre (ordre d'ajout), juste affiché à l'envers : le cumul
 // progressif garde donc un sens dans les deux cas. Les autres tris (date, montant) mélangent
 // l'ordre d'ajout, donc le repère de dépassement n'y aurait plus de sens.
-function overBudgetIds(line){
-  const key=state.sortExpenses||"recent";
-  if(key!=="oldest"&&key!=="recent")return null;
-  const planned=+line.planned||0;
-  if(!(planned>0))return null;
-  let cum=0,crossed=false;const ids=new Set();
-  for(const e of line.entries){
-    const a=Math.abs(+e.amount||0);
-    if(Number.isFinite(a))cum+=a;
-    if(!crossed&&cum>planned)crossed=true;
-    if(crossed&&e.id)ids.add(e.id);
-  }
-  return ids;
+// Insère une ligne pointillée discrète au point où le cumul bascule en dépassement (jamais si
+// le poste est "sans montant", ou si le tri n'est pas l'ordre de création — entryPctInfo renvoie
+// alors null pour toutes les dépenses et aucune ligne n'est ajoutée).
+function appendEntriesWithSplit(container,line){
+  let prevOver=null;
+  sortEntries(line.entries).forEach(e=>{
+    const info=entryPctInfo(line,e);
+    const isOver=info?info.cls==="pct-over":null;
+    if(info&&prevOver!==null&&prevOver!==isOver){
+      const sep=document.createElement("div");sep.className="entrySplit";
+      container.append(sep);
+    }
+    container.append(entryEl(line,e));
+    prevOver=info?isOver:null;
+  });
 }
-function entryEl(line,e,over){
+function entryEl(line,e){
   const [minD,maxD]=monthBounds();
   const box=document.createElement("div");box.className="entry";box.dataset.eid=e.id||"";
   const top=document.createElement("div");top.className="entryTop";
   const dateWrap=document.createElement("div");dateWrap.className="dateWrap";
   const dateId="dateFor_"+(e.id||uid());
-  const dateToggle=document.createElement("label");dateToggle.htmlFor=dateId;dateToggle.className="dateToggle"+(over?" over":"");
+  const dateToggle=document.createElement("label");dateToggle.htmlFor=dateId;dateToggle.className="dateToggle";
   dateToggle.innerHTML='<span class="dtBar"></span><span class="dtNum"></span>';
   const dtNum=dateToggle.querySelector(".dtNum");
   const updateDateIcon=()=>{
     const d=e.date&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)?+e.date.slice(8,10):null;
     dtNum.textContent=d?String(d):"–";
-    const lbl=(e.date?"Date : "+e.date.split("-").reverse().join("/"):"Aucune date")+(over?" · budget dépassé à partir d'ici":"");
+    const info=entryPctInfo(line,e);
+    dateToggle.classList.remove("pct-ok","pct-warn","pct-over");
+    if(info)dateToggle.classList.add(info.cls);
+    const overNote=info&&info.cls==="pct-over"?" · budget dépassé à partir d'ici":"";
+    const lbl=(e.date?"Date : "+e.date.split("-").reverse().join("/"):"Aucune date")+overNote;
     dateToggle.title=lbl+" — modifier la date";dateToggle.setAttribute("aria-label",lbl);
   };
   const date=document.createElement("input");date.className="dateIn";date.type="date";date.id=dateId;date.value=e.date||"";
@@ -2411,8 +2462,9 @@ function entryEl(line,e,over){
   const syncSign=()=>{const neg=(+e.amount||0)<0;amt.classList.toggle("neg",neg);sign.classList.toggle("neg",neg);};
   const syncPct=()=>{
     const info=entryPctInfo(line,e);
-    if(info){pctBadge.textContent=info.pct+"%";pctBadge.className="pctBadge "+info.cls;}
+    if(info){pctBadge.textContent=info.pct+"%";pctBadge.className="pctBadge cum "+info.cls;pctBadge.style.setProperty("--fill",Math.min(100,info.pct)+"%");}
     else{pctBadge.textContent="";pctBadge.className="pctBadge hidden";}
+    updateDateIcon();
   };
   amt.addEventListener("input",()=>{const v=parseAmt(amt.value);e.amount=v!=null?(v):null;syncSign();syncPct();validate();updateComputed();touch();});
   sign.onclick=()=>{if(e.amount==null)return;e.amount=round2(-e.amount);amt.value=e.amount;syncSign();syncPct();validate();updateComputed();touch();};
@@ -2651,8 +2703,7 @@ function buildRow(line){
     toggleF.title="Détail des dépenses";toggleF.setAttribute("aria-label","Détail des dépenses ("+nf+")");
     const detailsF=document.createElement("div");detailsF.className="details";
     const entriesF=document.createElement("div");entriesF.className="entries";
-    const overF=overBudgetIds(line);
-    sortEntries(line.entries).forEach(e=>entriesF.append(entryEl(line,e,!!(overF&&overF.has(e.id)))));
+    appendEntriesWithSplit(entriesF,line);
     const footF=document.createElement("div");footF.className="detailFoot";
     const addF=document.createElement("button");addF.className="addentry";addF.innerHTML='<span class="btnIcon">+</span><span class="btnLabel">Ajouter une dépense</span>';
     addF.onclick=()=>{const nid=uid();line.entries.push({id:nid,date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id,nid);};
@@ -2700,8 +2751,7 @@ function buildRow(line){
   dup.onclick=()=>{duplicateLine(line);};
   actions.append(dup);
   const entries=document.createElement("div");entries.className="entries";
-  const over=overBudgetIds(line);
-  sortEntries(line.entries).forEach(e=>entries.append(entryEl(line,e,!!(over&&over.has(e.id)))));
+  appendEntriesWithSplit(entries,line);
   const foot=document.createElement("div");foot.className="detailFoot";
   const add=document.createElement("button");add.className="addentry";add.innerHTML='<span class="btnIcon">+</span><span class="btnLabel">Ajouter une dépense</span>';
   add.onclick=()=>{const nid=uid();line.entries.push({id:nid,date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id,nid);};
@@ -2879,7 +2929,7 @@ function renderDetailBody(line){
   };
   head.append(label,addBtn);
   body.append(head);
-  if(line.entries.length>4){
+  if(state.showSearch&&line.entries.length>4){
     const search=document.createElement("input");search.className="searchIn bdEntrySearch";search.id="bdEntrySearch";
     search.type="text";search.placeholder="🔍 Filtrer par étiquette, montant, date…";search.autocomplete="off";
     search.value=detailEntrySearch;
@@ -2887,8 +2937,7 @@ function renderDetailBody(line){
     body.append(search);
   }
   const entriesBox=document.createElement("div");entriesBox.className="entries bdEntries";entriesBox.id="bdEntries";
-  const overBd=overBudgetIds(line);
-  sortEntries(line.entries).forEach(e=>entriesBox.append(entryEl(line,e,!!(overBd&&overBd.has(e.id)))));
+  appendEntriesWithSplit(entriesBox,line);
   body.append(entriesBox);
   if(line.entries.length===0){
     const empty=document.createElement("p");empty.className="empty bdEmpty";
