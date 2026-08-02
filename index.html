@@ -4373,8 +4373,16 @@ const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.custo
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
-function touch(){save();clearTimeout(recTimer);recTimer=setTimeout(record,500);gdMarkDataChanged();}
-function commit(){clearTimeout(recTimer);save();record();gdMarkDataChanged();}
+// L'écriture localStorage (save()) sérialise tout l'historique (tous les mois) : la faire à
+// chaque frappe clavier peut saccader la saisie sur un budget ancien avec beaucoup de mois.
+// On la débounce donc légèrement (300ms d'inactivité), avec un filet de sécurité : flushSave()
+// force l'écriture immédiate dès qu'on quitte l'app, change d'onglet, ou perd le focus — jamais
+// plus de 300ms de saisie non sauvegardée en cas de fermeture brutale.
+let saveTimer=null,savePending=false;
+function scheduleSave(){savePending=true;clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,300);}
+function flushSave(){clearTimeout(saveTimer);if(!savePending)return;savePending=false;save();}
+function touch(){scheduleSave();clearTimeout(recTimer);recTimer=setTimeout(record,500);gdMarkDataChanged();}
+function commit(){clearTimeout(recTimer);clearTimeout(saveTimer);savePending=false;save();record();gdMarkDataChanged();}
 // Appelée par touch()/commit() uniquement (vraies modifications de données) : marque les données comme
 // modifiées et programme un envoi vers Drive. Ne fait rien tant que le bloc Drive plus bas n'est pas chargé,
 // et ne fait rien si Drive n'est pas connecté (gdSchedulePush() vérifie déjà gdMeta.enabled).
@@ -4702,35 +4710,51 @@ function hasInvalidFields(){
   return false;
 }
 window.addEventListener("beforeunload",e=>{
+  flushSave();
   if(hasInvalidFields()){e.preventDefault();e.returnValue="";return e.returnValue;}
 });
+// Filet de sécurité supplémentaire pour la sauvegarde différée (scheduleSave/flushSave, voir plus
+// haut) : sur mobile, "beforeunload" ne se déclenche pas toujours (l'app est juste mise en arrière-
+// plan). "pagehide" et "visibilitychange" (onglet caché) sont plus fiables pour ce cas.
+window.addEventListener("pagehide",flushSave);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushSave();});
+window.addEventListener("blur",flushSave);
 
 applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ---------- Raccourcis d'icône (manifest shortcuts, appui long sur l'icône Android) ----------
-   L'icône installée propose des raccourcis vers index.html?action=XXX. On lit ce paramètre
-   une seule fois au démarrage, on nettoie l'URL (pour ne pas re-déclencher au refresh), puis
-   on exécute l'action correspondante une fois le premier rendu terminé. */
-(function handleShortcutAction(){
+   L'icône installée propose des raccourcis vers index.html?action=XXX. Android relance parfois
+   l'instance déjà ouverte de l'app au lieu d'un chargement complet de page : on ne peut donc pas
+   se fier uniquement à l'exécution du script au démarrage. On revérifie l'URL à chaque reprise
+   au premier plan (pageshow / visibilitychange / focus), en plus du démarrage initial. */
+function handleShortcutAction(){
   const params=new URLSearchParams(location.search);
   const action=params.get("action");
   if(!action)return;
-  history.replaceState(null,"",location.pathname+location.hash);
+  window.history.replaceState(null,"",location.pathname+location.hash);
   requestAnimationFrame(()=>{
     if(action==="addVar"){
       tab="budgets";state.current=mKey(new Date());render();
       const btn=document.getElementById("addVar");if(btn)btn.click();
+      toast("Raccourci : + dépense variable");
     }else if(action==="addFixed"){
       tab="budgets";state.current=mKey(new Date());render();
       const btn=document.getElementById("addFixed");if(btn)btn.click();
+      toast("Raccourci : + poste fixe");
     }else if(action==="analyse"){
       tab="analyse";state.current=mKey(new Date());render();
+      toast("Raccourci : analyse du mois");
     }else if(action==="settings"){
       const btn=document.getElementById("paletteBtn");if(btn)btn.click();
+      toast("Raccourci : réglages");
     }
   });
-})();
+}
+handleShortcutAction();
+window.addEventListener("pageshow",handleShortcutAction);
+window.addEventListener("focus",handleShortcutAction);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")handleShortcutAction();});
 
 /* ================= SAUVEGARDE AUTOMATIQUE — GOOGLE DRIVE =================
    Colle ci-dessous l'identifiant client OAuth obtenu dans Google Cloud
