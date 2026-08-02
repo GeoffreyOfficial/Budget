@@ -92,7 +92,33 @@
   --money-in:#63A4FF;--money-out:#FFCB6B;
   --c1:#4FD1C5;--c2:#63A4FF;--c3:#C08BFF;--c4:#FFCB6B;--c5:#FF8A6B;--c6:#7BE0A0;
 }
-:root{color-scheme:light}
+/* Transition en fondu au changement de thème : on enregistre les variables de couleur pour
+   que le navigateur puisse interpoler leur valeur (color-mix, sinon un changement de custom
+   property est toujours instantané), puis on transitionne ces variables sur <html> — comme
+   elles sont héritées, chaque élément qui utilise var(--xxx) suit le fondu automatiquement,
+   sans avoir besoin d'ajouter une transition à chaque composant. Désactivé pour la vue
+   réduite du mouvement via la règle globale plus bas (transition:none!important). */
+@property --paper{syntax:'<color>';inherits:true;initial-value:#EEF0EA}
+@property --card{syntax:'<color>';inherits:true;initial-value:#FFFFFF}
+@property --line{syntax:'<color>';inherits:true;initial-value:#E0E3DA}
+@property --ink{syntax:'<color>';inherits:true;initial-value:#20261E}
+@property --muted{syntax:'<color>';inherits:true;initial-value:#5C6355}
+@property --faint{syntax:'<color>';inherits:true;initial-value:#696F5F}
+@property --accent{syntax:'<color>';inherits:true;initial-value:#1E4D3B}
+@property --accent-2{syntax:'<color>';inherits:true;initial-value:#2E7D5B}
+@property --soft{syntax:'<color>';inherits:true;initial-value:#F6F7F3}
+@property --hero-a{syntax:'<color>';inherits:true;initial-value:#1E4D3B}
+@property --hero-b{syntax:'<color>';inherits:true;initial-value:#2E7D5B}
+@property --hero-ink{syntax:'<color>';inherits:true;initial-value:#EDF3EA}
+@property --red{syntax:'<color>';inherits:true;initial-value:#B23A2E}
+@property --red-soft{syntax:'<color>';inherits:true;initial-value:#FBEDEB}
+@property --green{syntax:'<color>';inherits:true;initial-value:#2E7D5B}
+@property --money-in{syntax:'<color>';inherits:true;initial-value:#1F6FB2}
+@property --money-out{syntax:'<color>';inherits:true;initial-value:#C08525}
+html{transition:--paper .45s ease,--card .45s ease,--line .45s ease,--ink .45s ease,--muted .45s ease,
+  --faint .45s ease,--accent .45s ease,--accent-2 .45s ease,--soft .45s ease,--hero-a .45s ease,
+  --hero-b .45s ease,--hero-ink .45s ease,--red .45s ease,--red-soft .45s ease,--green .45s ease,
+  --money-in .45s ease,--money-out .45s ease}
 [data-theme="midnight"],[data-theme="carbon"],[data-theme="nocturne"],[data-theme="ember"],[data-theme="slate"]{color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -373,6 +399,11 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .syncbadge.cta{color:#fff;background:var(--red);border-color:var(--red);cursor:pointer;font-weight:800;animation:badgePulse 2s ease-in-out infinite}
 .syncbadge.cta::before{background:#fff}
 .syncbadge.cta:active{filter:brightness(.92)}
+.syncbadge .sbIcon{display:inline-block}
+.syncbadge.busy .sbIcon{animation:sbSpin 1s linear infinite}
+@keyframes sbSpin{to{transform:rotate(360deg)}}
+.syncbadge .sbIcon.syncPop{animation:sbPop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes sbPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
 @media (max-width:380px){.syncbadge{font-size:10px;padding:4px 7px}}
 .catrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .caticon{flex-shrink:0;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--soft);font-size:16px;cursor:pointer;display:grid;place-items:center}
@@ -392,7 +423,7 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   max-width:min(86vw,420px);text-align:center;line-height:1.45}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--hero-a),var(--hero-b));
+.hero{position:relative;z-index:0;overflow:hidden;background:linear-gradient(135deg,var(--hero-a),var(--hero-b));
   background-size:200% 200%;animation:heroDrift 12s ease-in-out infinite;
   border-radius:20px;padding:20px;color:var(--hero-ink);box-shadow:0 12px 26px -16px rgba(0,0,0,.55);transition:background-color .35s}
 .hero.over{background:linear-gradient(135deg,color-mix(in srgb,var(--red) 55%,black),color-mix(in srgb,var(--red) 25%,black));background-size:200% 200%;animation:glow 2.2s ease-in-out infinite}
@@ -402,6 +433,15 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 @keyframes donutPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 @keyframes auroraSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+.big.shakeNeg{animation:heroShakeNeg .45s ease}
+@keyframes heroShakeNeg{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.row.overPulse{animation:rowOverPulse .7s ease}
+@keyframes rowOverPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--red) 55%,transparent)}70%{box-shadow:0 0 0 11px color-mix(in srgb,var(--red) 0%,transparent)}100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--red) 0%,transparent)}}
+.prog>i.near{background:var(--money-out);position:relative;overflow:hidden}
+.prog>i.near::after{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.4) 10%,transparent 20%,transparent 55%,rgba(255,255,255,.28) 65%,transparent 75%,transparent 100%);
+  background-size:220% 100%;animation:progWave 2.6s linear infinite}
+@keyframes progWave{from{background-position:0% 0}to{background-position:-220% 0}}
 #monthView{animation:none}
 #monthView.mvNext{animation:mvSlideNext .32s cubic-bezier(.16,1,.3,1) both}
 #monthView.mvPrev{animation:mvSlidePrev .32s cubic-bezier(.16,1,.3,1) both}
@@ -2778,13 +2818,17 @@ function applyRowState(el,line){
   // « Sans montant » ne reste qu'un état visuel discret quand rien n'est dépensé — jamais une erreur.
   const over=s>p&&s>0,any=s>0;
   const noBudget=!(p>0);
+  const wasOver=el.classList.contains("over");
   el.classList.remove("over","done","noBudget");
   if(over)el.classList.add("over");
   else if(any)el.classList.add("done");
   else if(noBudget)el.classList.add("noBudget"); // 0 € et aucune dépense
+  if(over&&!wasOver&&!prefersReducedMotion){
+    el.classList.remove("overPulse");void el.offsetWidth;el.classList.add("overPulse");
+  }
   const pct=p>0?s/p*100:(s>0?100:0);
   const fill=el.querySelector(".prog>i");fill.style.width=Math.max(0,Math.min(100,pct))+"%";
-  fill.className=over?"over":(p>0&&Math.round(pct)>=100?"full":"");
+  fill.className=over?"over":(p>0&&Math.round(pct)>=100?"full":(p>0&&pct>=90?"near":""));
   refreshEntryFills(el,line);
   const mt=el.querySelector(".mtxt");
   if(mt){
@@ -2957,7 +3001,7 @@ function applyDetailState(line){
   if(prog){
     const fill=prog.querySelector("i");
     fill.style.width=Math.max(0,Math.min(100,pct))+"%";
-    fill.className=over?"over":(p>0&&Math.round(pct)>=100?"full":"");
+    fill.className=over?"over":(p>0&&Math.round(pct)>=100?"full":(p>0&&pct>=90?"near":""));
     prog.classList.toggle("noBudget",noBudget);
   }
   const mt=document.querySelector("#bdBody .bdMtxt");
@@ -3221,12 +3265,17 @@ function miniSparkline(vals){
   const lastX=xf(N-1).toFixed(1),lastY=yf(vals[N-1]).toFixed(1);
   return '<polyline points="'+pts+'" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><circle cx="'+lastX+'" cy="'+lastY+'" r="2.6" fill="currentColor"/>';
 }
-let heroCurrentValue=null,heroRAF=null;
+let heroCurrentValue=null,heroRAF=null,heroSparkDrawnFor=null;
 const prefersReducedMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 function animateHeroValue(to){
   const el=document.getElementById("heroBig");
-  const from=heroCurrentValue==null?to:heroCurrentValue;
+  const wasSet=heroCurrentValue!=null;
+  const from=wasSet?heroCurrentValue:to;
+  const crossedNegative=wasSet&&from>=0&&to<0;
   heroCurrentValue=to;
+  if(crossedNegative&&!prefersReducedMotion){
+    el.classList.remove("shakeNeg");void el.offsetWidth;el.classList.add("shakeNeg");
+  }
   if(prefersReducedMotion||Math.abs(to-from)<0.005){el.textContent=eur(to);return;}
   cancelAnimationFrame(heroRAF);
   const dur=550,start=performance.now();
@@ -3272,6 +3321,20 @@ function updateComputed(){
       spark.setAttribute("viewBox","0 0 76 26");
       spark.innerHTML=miniSparkline(sparkKeys.map(k=>hm.get(totals(state.months[k]))));
       spark.classList.remove("hidden");
+      if(heroSparkDrawnFor!==state.current&&!prefersReducedMotion){
+        const poly=spark.querySelector("polyline"),dot=spark.querySelector("circle");
+        if(poly){
+          const len=poly.getTotalLength?poly.getTotalLength():140;
+          poly.style.strokeDasharray=len;poly.style.strokeDashoffset=len;
+          if(dot)dot.style.opacity="0";
+          requestAnimationFrame(()=>{
+            poly.style.transition="stroke-dashoffset .9s ease";
+            poly.style.strokeDashoffset="0";
+            if(dot){dot.style.transition="opacity .3s ease .75s";dot.style.opacity="1";}
+          });
+        }
+      }
+      heroSparkDrawnFor=state.current;
     }else{spark.innerHTML="";spark.classList.add("hidden");}
   }
   {
@@ -4026,6 +4089,31 @@ function render(){
     if(dline)renderDetailBody(dline);
     else{detailLineId=null;document.getElementById("budgetDetailPanel").classList.add("hidden");}
   }
+  updateAppBadge();
+}
+
+/* ---------- Badge d'icone (PWA installee) ----------
+   Affiche sur l'icone Carnet le nombre de postes fixes du mois reel (aujourd'hui,
+   pas forcement le mois affiche) qui ne sont pas encore payes. Purement informatif,
+   se met a jour a chaque render(). Sans effet si le navigateur ne supporte pas la
+   Badging API (elle est surtout dispo sur Chrome/Edge desktop + Android en PWA installee). */
+function updateAppBadge(){
+  if(!("setAppBadge" in navigator))return;
+  try{
+    const key=mKey(new Date());
+    const m=state.months[key];
+    let n=0;
+    if(m){
+      for(const l of m.lines){
+        if(l.type!=="fixed")continue;
+        const p=+l.planned||0;if(!(p>0))continue;
+        const s=spent(l);
+        if(round2(p-s)>0)n++; // pas encore entierement paye
+      }
+    }
+    if(n>0)navigator.setAppBadge(n).catch(()=>{});
+    else navigator.clearAppBadge().catch(()=>{});
+  }catch(e){/* pas bloquant */}
 }
 
 /* ---------- NAVIGATION MOIS (avec prompt de création) ---------- */
@@ -4595,6 +4683,30 @@ window.addEventListener("beforeunload",e=>{
 applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
+/* ---------- Raccourcis d'icône (manifest shortcuts, appui long sur l'icône Android) ----------
+   L'icône installée propose des raccourcis vers index.html?action=XXX. On lit ce paramètre
+   une seule fois au démarrage, on nettoie l'URL (pour ne pas re-déclencher au refresh), puis
+   on exécute l'action correspondante une fois le premier rendu terminé. */
+(function handleShortcutAction(){
+  const params=new URLSearchParams(location.search);
+  const action=params.get("action");
+  if(!action)return;
+  history.replaceState(null,"",location.pathname+location.hash);
+  requestAnimationFrame(()=>{
+    if(action==="addVar"){
+      tab="budgets";state.current=mKey(new Date());render();
+      const btn=document.getElementById("addVar");if(btn)btn.click();
+    }else if(action==="addFixed"){
+      tab="budgets";state.current=mKey(new Date());render();
+      const btn=document.getElementById("addFixed");if(btn)btn.click();
+    }else if(action==="analyse"){
+      tab="analyse";state.current=mKey(new Date());render();
+    }else if(action==="settings"){
+      const btn=document.getElementById("paletteBtn");if(btn)btn.click();
+    }
+  });
+})();
+
 /* ================= SAUVEGARDE AUTOMATIQUE — GOOGLE DRIVE =================
    Colle ci-dessous l'identifiant client OAuth obtenu dans Google Cloud
    (voir la notice). Tant qu'il est vide, la synchro reste désactivée. */
@@ -4753,7 +4865,20 @@ function gdBadgeUpdate(){
   const el=document.getElementById("syncBadge");if(!el)return;
   const bar=document.getElementById("syncBar");
   el.onclick=null;
-  const set=(cls,text,title)=>{el.className="syncbadge show "+cls;el.textContent=text;el.title=title;if(bar)bar.classList.add("has");};
+  const set=(cls,text,title)=>{
+    const prevCls=el.dataset.kind||"";
+    el.dataset.kind=cls;
+    el.className="syncbadge show "+cls;
+    const m=text.match(/^(\S+)\s*(.*)$/);
+    const icon=m?m[1]:"☁",rest=m?m[2]:"";
+    const justSynced=cls==="ok"&&(prevCls==="busy"||prevCls==="pending");
+    el.innerHTML='<span class="sbIcon'+(justSynced?" syncPop":"")+'">'+(justSynced?"✓":icon)+'</span>'+(rest?" "+esc(rest):"");
+    el.title=title;
+    if(bar)bar.classList.add("has");
+    if(justSynced){
+      setTimeout(()=>{if(el.dataset.kind==="ok"){const ic=el.querySelector(".sbIcon");if(ic){ic.textContent=icon;ic.classList.remove("syncPop");}}},900);
+    }
+  };
   if(!netOnline){
     set("off","📴 Hors ligne","Pas de connexion — tu vois la version locale. Les modifications seront envoyées vers Drive au retour du réseau.");
     return;
