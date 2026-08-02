@@ -32,5 +32,34 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ajouter une dépense variable",
+      "short_name": "+ Dépense",
+      "url": "./index.html?action=addVar",
+      "description": "Ajouter rapidement une dépense variable",
+      "icons": [
+        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Ajouter un poste fixe",
+      "short_name": "+ Fixe",
+      "url": "./index.html?action=addFixed",
+      "description": "Ajouter rapidement une charge fixe",
+      "icons": [
+        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Résumé du mois",
+      "short_name": "Analyse",
+      "url": "./index.html?action=analyse",
+      "description": "Voir l'analyse du mois en cours",
+      "icons": [
+        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
   ]
 }
