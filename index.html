@@ -246,6 +246,98 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 @media (min-width:1500px){.settingsBody{max-width:1060px}}
 .settings .slabel{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 2px 10px}
 .settings .hr{height:1px;background:var(--line);margin:14px 0}
+/* ---------- Panneau détail d'un budget (plein écran) ---------- */
+.expandBtn{flex-shrink:0;border:none;background:var(--soft);color:var(--muted);border-radius:50%;width:30px;height:30px;
+  font-size:13px;cursor:pointer;display:grid;place-items:center}
+.expandBtn:active{transform:scale(.92);filter:brightness(.97)}
+.bdHeadDelBtn{color:var(--red);border-color:var(--red)}
+.bdTop{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.bdCatIcon{flex-shrink:0;width:46px;height:46px;border-radius:14px;background:var(--soft);border:1px solid var(--line);
+  font-size:22px;display:grid;place-items:center;cursor:pointer;padding:0}
+.bdCatIcon:active{transform:scale(.94)}
+.bdNameWrap{flex:1;min-width:0;padding-top:2px}
+.bdNameIn{width:100%;border:none;background:transparent;font-size:19px;font-weight:800;color:var(--ink);outline:none;
+  resize:none;padding:2px 0;font-family:inherit;display:block}
+.bdNameIn::placeholder{color:var(--faint);font-weight:600}
+.bdNameIn.inv{color:var(--red)}
+.bdTypeBadge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);background:var(--soft);border-radius:99px;padding:4px 10px;margin:2px 0 14px}
+.bdPlanRow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--soft);
+  border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.bdPlanRow .planWrap{gap:2px}
+.bdPlanIn{width:130px;text-align:right;border:none;background:transparent;font-family:var(--mono);font-size:20px;
+  font-weight:800;color:var(--ink);outline:none}
+.bdPlanIn.noBudget{color:var(--faint)}
+.bdPlanLbl{font-size:12.5px;font-weight:700;color:var(--muted)}
+.bdProg{margin:0 2px 8px}
+.bdProg.noBudget{background:repeating-linear-gradient(90deg,var(--line) 0 5px,transparent 5px 10px);opacity:.55}
+.bdProg.noBudget>i{display:none}
+.bdMtxt{font-size:13.5px;margin:0 2px 12px;white-space:normal}
+.bdRwarn{margin:0 2px 10px}
+.bdActions{margin:2px 2px 4px}
+.bdEntriesHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 2px 10px}
+.bdCount{color:var(--faint);font-weight:600;text-transform:none;letter-spacing:normal}
+.bdEntrySearch{margin:0 2px 12px}
+#bdEntries.entries{max-height:none;margin-top:0;overflow:visible;-webkit-overflow-scrolling:auto;overscroll-behavior:auto}
+.bdEmpty{padding:16px 2px 0}
+/* Lisibilité des dépenses dans le panneau détail : chaque dépense devient une carte à part,
+   avec l'étiquette affichée en premier visuellement (titre), et le montant/la date en dessous. */
+.entries>.entry{
+  border-top:none;background:var(--soft);border:1px solid var(--line);border-radius:12px;
+  padding:11px 12px;margin-bottom:8px;gap:3px}
+.entries>.entry:last-child{margin-bottom:0}
+.entries>.entry .noteIn{
+  order:-1;background:transparent;border-radius:0;padding:0 0 5px;
+  font-size:14.5px;font-weight:700;color:var(--ink)}
+.entries>.entry .noteIn::placeholder{color:var(--faint);font-weight:400;opacity:.5}
+.entries>.entry .entryTop{
+  border-top:1px dashed var(--line);padding-top:7px}
+.entries>.entry .dateIn{font-size:11px;color:var(--faint);display:none}
+.entries>.entry.showDate .dateIn{display:inline-block}
+.entries>.entry .dateWrap{display:flex;align-items:center;gap:4px;min-width:0}
+.entries>.entry .dateToggle{flex-shrink:0;border:1px solid var(--line);background:var(--card);opacity:.9;
+  cursor:pointer;padding:0;line-height:1;border-radius:6px;display:flex;flex-direction:column;
+  width:22px;height:22px;overflow:hidden}
+.entries>.entry .dateToggle:active{opacity:1;transform:scale(.92)}
+.entries>.entry.showDate .dateToggle{opacity:1;border-color:var(--accent)}
+.entries>.entry .dtBar{display:block;height:5px;width:100%;background:var(--red);flex-shrink:0}
+.entries>.entry .dtNum{display:flex;flex:1;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;font-family:var(--mono);color:var(--ink);line-height:1}
+.entries>.entry .amtIn{font-size:15.5px}
+/* Entrée en cascade des sections du panneau détail, pour un effet plus vivant à l'ouverture */
+#bdBody>*{animation:panelIn .5s cubic-bezier(.16,1,.3,1) both}
+#bdBody>*:nth-child(1){animation-delay:.02s}
+#bdBody>*:nth-child(2){animation-delay:.06s}
+#bdBody>*:nth-child(3){animation-delay:.1s}
+#bdBody>*:nth-child(4){animation-delay:.14s}
+#bdBody>*:nth-child(5){animation-delay:.17s}
+#bdBody>*:nth-child(6){animation-delay:.2s}
+#bdBody>*:nth-child(7){animation-delay:.23s}
+#bdBody>*:nth-child(n+8){animation-delay:.26s}
+.bdCatIcon{animation:catIconPop .55s cubic-bezier(.34,1.56,.64,1) both .12s}
+@keyframes catIconPop{from{opacity:0;transform:scale(.5) rotate(-14deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+#bdEntries.entries>.entry{animation:panelIn .38s cubic-bezier(.16,1,.3,1) both}
+#bdEntries.entries>.entry:nth-child(1){animation-delay:.02s}
+#bdEntries.entries>.entry:nth-child(2){animation-delay:.05s}
+#bdEntries.entries>.entry:nth-child(3){animation-delay:.08s}
+#bdEntries.entries>.entry:nth-child(4){animation-delay:.11s}
+#bdEntries.entries>.entry:nth-child(5){animation-delay:.14s}
+#bdEntries.entries>.entry:nth-child(n+6){animation-delay:.17s}
+/* Barre de progression : brillance qui balaie une fois le poste entièrement payé */
+.bdProg>i.full{position:relative;overflow:hidden}
+.bdProg>i.full::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.65),transparent);
+  animation:barShine 1.8s ease-in-out infinite}
+/* Petit rebond du bouton Payer au moment où le poste devient payé */
+.payBtn.justPaid{animation:payBounce .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes payBounce{0%{transform:scale(1)}35%{transform:scale(1.22)}60%{transform:scale(.92)}100%{transform:scale(1)}}
+/* Confettis lancés depuis le bouton Payer */
+.confetti{position:fixed;top:0;left:0;width:7px;height:7px;border-radius:2px;pointer-events:none;z-index:9999;
+  animation:confettiBurst .7s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes confettiBurst{
+  0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
+  100%{transform:translate(var(--cx),var(--cy)) rotate(var(--cr)) scale(.4);opacity:0}
+}
 .backup{display:flex;gap:8px}
 .bkbtn{flex:1;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:11px;padding:11px;font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .15s,filter .15s}
 .bkbtn:active{filter:brightness(.96);transform:scale(.98)}
@@ -556,10 +648,13 @@ button.rowCatIcon:active{transform:scale(.92)}
 .prog>i.over{background:var(--red)}
 .prog>i.full{background:var(--green)}
 .rmeta{display:flex;align-items:center;gap:8px}
-.mtxt{flex:1;min-width:0;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtxt{flex:1;min-width:0;font-size:12.5px;color:var(--muted);white-space:normal;overflow:visible}
 .mtxt b{font-family:var(--mono);color:var(--ink);font-weight:700}
 .mtxt.over{color:var(--red)}
 .mtxt.over b{color:var(--red)}
+/* Détail « (dépensé …) » : secondaire et atténué, même en cas de dépassement (reste discret). */
+.mtxt .mspent{color:var(--faint);font-weight:600;font-size:.88em}
+.mtxt.over .mspent{color:var(--muted)}
 /* Budget « sans montant » (0 €) : distinction discrète, jamais rouge. Barre en pointillés (pas
    de cible), statut grisé, et le champ de montant en italique atténué au lieu du rouge d'erreur. */
 .row.noBudget .prog{background:repeating-linear-gradient(90deg,var(--line) 0 5px,transparent 5px 10px);opacity:.55}
@@ -716,8 +811,21 @@ button.rowCatIcon:active{transform:scale(.92)}
 .quickAdd .qaCancel{background:var(--card);color:var(--faint);border:1px solid var(--line)}
 .entryTop{display:flex;align-items:center;gap:8px}
 .dateIn{border:none;background:transparent;font-size:13px;color:var(--muted);font-family:var(--mono);outline:none;padding:2px 0;min-width:0;color-scheme:light dark}
+/* Le bouton dateToggle sert déjà d'affordance calendrier : l'icône native est redondante et
+   ne prend de la place pour rien. L'année n'apporte rien non plus dans ce contexte (on sait
+   déjà en quelle année on est) : on ne garde que jour/mois. */
+.dateIn::-webkit-calendar-picker-indicator{display:none}
+.dateIn::-webkit-datetime-edit-year-field{display:none}
+.dateIn::-webkit-datetime-edit-text:last-of-type{display:none}
+.dateWrap{display:flex;align-items:center;gap:4px;min-width:0}
+.dateToggle{display:none}
+.dtBar{display:none}
+.dtNum{display:none}
 .amtWrap{margin-left:auto;display:flex;align-items:center;gap:1px}
+.amtWrap .pctBadge{margin-right:6px}
 .amtIn{width:76px;text-align:right;border:none;background:transparent;font-family:var(--mono);font-size:14.5px;font-weight:600;color:var(--ink);outline:none}
+.amtWrap .pctBadge{white-space:nowrap}
+.amtWrap .pctBadge.hidden{display:none}
 .amtCur{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .delE{width:22px;height:22px;border:none;background:transparent;color:var(--faint);font-size:15px;cursor:pointer;border-radius:6px}
 .delE:active{color:var(--red)}
@@ -735,7 +843,9 @@ button.rowCatIcon:active{transform:scale(.92)}
 .addentry:active{filter:brightness(.97)}
 .payBtn{display:flex;align-items:center;gap:4px;flex-shrink:0;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:99px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer}
 .payBtn:active{filter:brightness(.94);transform:scale(.97)}
-.payBtn.done{border-color:transparent;background:var(--soft);color:var(--green);cursor:pointer;font-weight:600}
+.payBtn.done{border-color:transparent;background:var(--soft);color:var(--green);cursor:pointer;font-weight:600;
+  padding:6px 9px}
+.payBtn.done .btnLabel{display:none}
 .payBtn.done:active{transform:scale(.97);filter:brightness(.97)}
 .toggle{display:flex;align-items:center;gap:4px;margin-left:8px;flex-shrink:0;border:none;background:var(--soft);color:var(--muted);border-radius:99px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer}
 .toggle .chev{display:inline-block;transition:transform .2s;font-size:12px;line-height:1}
@@ -1217,6 +1327,14 @@ html{scroll-behavior:smooth}
     </div>
   </div>
 
+  <div class="settings hidden" id="budgetDetailPanel">
+    <div class="settingsHead">
+      <button type="button" class="settingsCloseBtn" id="bdCloseBtn" aria-label="Fermer le détail du budget">✕ Fermer</button>
+      <button type="button" class="settingsCloseBtn bdHeadDelBtn" id="bdDeleteBtn" aria-label="Supprimer ce poste">🗑 Supprimer</button>
+    </div>
+    <div class="settingsBody" id="bdBody"></div>
+  </div>
+
   <div class="driveAlert hidden" id="driveAlert" role="alert" aria-live="polite">
     <button type="button" class="daClose" id="driveAlertClose" aria-label="Masquer l'alerte">×</button>
     <div class="daMain">
@@ -1587,6 +1705,7 @@ const BUDGET_SORT_KEYS=BUDGET_SORTS.map(x=>x[0]), EXPENSE_SORT_KEYS=EXPENSE_SORT
 const nextSeq=()=>(state.seq=(Number(state.seq)||0)+1);
 let tab="budgets";
 const expanded=new Set();
+let detailLineId=null,detailEntrySearch="";
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
 try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;}}
@@ -2118,8 +2237,14 @@ function attachSwipeDelete(el,onDelete,kind){
   });
   el.addEventListener("pointermove",ev=>{
     if(!dragging||ev.pointerId!==pid)return;
-    const ddx=ev.clientX-startX,ddy=ev.clientY-startY;
-    if(decided===null&&(Math.abs(ddx)>8||Math.abs(ddy)>8))decided=Math.abs(ddx)>Math.abs(ddy)?"h":"v";
+    const ddx=ev.clientX-startX,ddy=ev.clientY-startY,adx=Math.abs(ddx),ady=Math.abs(ddy);
+    // Le scroll vertical est le geste par défaut le plus fréquent : on ne bascule en mode
+    // "swipe horizontal" que si le mouvement est nettement plus horizontal que vertical,
+    // pour éviter qu'une légère dérive latérale pendant un scroll ne bloque celui-ci.
+    if(decided===null){
+      if(adx>10&&adx>ady*1.8)decided="h";
+      else if(ady>10)decided="v";
+    }
     if(decided==="h"){ev.preventDefault();dx=Math.min(0,ddx);el.style.transform="translateX("+dx+"px)";el.classList.toggle("swipeReady",dx<-70);}
   },{passive:false});
   function snapBack(){
@@ -2220,41 +2345,76 @@ function attachRowGestures(wrap,line,onDelete){
 function monthBounds(k){k=k||state.current;
   if(isCustom(k))return ["0001-01-01","9999-12-31"]; // budget personnalisé : n'importe quelle date
   return [k+"-01", k+"-"+String(daysIn(k)).padStart(2,"0")];}
+/* Badge « % du budget » (option D) : montre directement, sans jauge à interpréter, la part du
+   budget du poste que représente CETTE dépense à elle seule. Masqué proprement si le poste n'a
+   pas de budget défini (0 €), pour ne jamais afficher un pourcentage basé sur une division par zéro. */
+function entryPctInfo(line,e){
+  const p=+line.planned||0;
+  const a=Math.abs(+e.amount||0);
+  if(!(p>0)||!Number.isFinite(a)||a<=0)return null;
+  const pct=Math.round(a/p*100);
+  const cls=pct>100?"pct-over":pct>=90?"pct-warn":"pct-ok";
+  return{pct,cls};
+}
+function refreshEntryFills(root,line){
+  if(!root)return;
+  root.querySelectorAll(":scope .entry[data-eid]").forEach(box=>{
+    const en=line.entries.find(x=>x.id===box.dataset.eid);
+    const badge=box.querySelector(".pctBadge");
+    if(!en||!badge)return;
+    const info=entryPctInfo(line,en);
+    if(info){badge.textContent=info.pct+"%";badge.className="pctBadge "+info.cls;}
+    else{badge.textContent="";badge.className="pctBadge hidden";}
+  });
+}
 function entryEl(line,e){
   const [minD,maxD]=monthBounds();
   const box=document.createElement("div");box.className="entry";box.dataset.eid=e.id||"";
   const top=document.createElement("div");top.className="entryTop";
+  const dateWrap=document.createElement("div");dateWrap.className="dateWrap";
+  const dateToggle=document.createElement("button");dateToggle.type="button";dateToggle.className="dateToggle";
+  dateToggle.innerHTML='<span class="dtBar"></span><span class="dtNum"></span>';
+  const dtNum=dateToggle.querySelector(".dtNum");
+  const updateDateIcon=()=>{
+    const d=e.date&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)?+e.date.slice(8,10):null;
+    dtNum.textContent=d?String(d):"–";
+    const lbl=e.date?"Date : "+e.date.split("-").reverse().join("/"):"Aucune date";
+    dateToggle.title=lbl+" — afficher/masquer";dateToggle.setAttribute("aria-label",lbl);
+  };
+  dateToggle.onclick=()=>{box.classList.toggle("showDate");if(box.classList.contains("showDate")){date.focus();try{date.showPicker&&date.showPicker();}catch(err){}}};
   const date=document.createElement("input");date.className="dateIn";date.type="date";date.value=e.date||"";
   date.min=minD;date.max=maxD;
-  date.addEventListener("change",()=>{let v=date.value;if(v){if(v<minD)v=minD;if(v>maxD)v=maxD;}date.value=v;e.date=v;validate();touch();});
+  date.addEventListener("change",()=>{let v=date.value;if(v){if(v<minD)v=minD;if(v>maxD)v=maxD;}date.value=v;e.date=v;validate();touch();updateDateIcon();});
+  updateDateIcon();
+  dateWrap.append(dateToggle,date);
   const aw=document.createElement("div");aw.className="amtWrap";
+  const pctBadge=document.createElement("span");pctBadge.className="pctBadge hidden";
   const sign=document.createElement("button");sign.type="button";sign.className="signBtn";sign.title="Inverser le signe (remboursement, régularisation…)";
   sign.textContent="±";
   const amt=document.createElement("input");amt.className="amtIn";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=e.amount==null?"":e.amount;amt.placeholder="0";
   const syncSign=()=>{const neg=(+e.amount||0)<0;amt.classList.toggle("neg",neg);sign.classList.toggle("neg",neg);};
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);e.amount=v!=null?(v):null;syncSign();validate();updateComputed();touch();});
-  sign.onclick=()=>{if(e.amount==null)return;e.amount=round2(-e.amount);amt.value=e.amount;syncSign();validate();updateComputed();touch();};
-  syncSign();
-  const cur=document.createElement("span");cur.className="amtCur";cur.textContent="€";aw.append(sign,amt,cur);
+  const syncPct=()=>{
+    const info=entryPctInfo(line,e);
+    if(info){pctBadge.textContent=info.pct+"%";pctBadge.className="pctBadge "+info.cls;}
+    else{pctBadge.textContent="";pctBadge.className="pctBadge hidden";}
+  };
+  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);e.amount=v!=null?(v):null;syncSign();syncPct();validate();updateComputed();touch();});
+  sign.onclick=()=>{if(e.amount==null)return;e.amount=round2(-e.amount);amt.value=e.amount;syncSign();syncPct();validate();updateComputed();touch();};
+  syncSign();syncPct();
+  const cur=document.createElement("span");cur.className="amtCur";cur.textContent="€";aw.append(pctBadge,sign,amt,cur);
   const del=document.createElement("button");del.className="delE";del.textContent="×";
   del.onclick=()=>{confirmThenDelete("expense",{
     title:"Supprimer cette dépense ?",
     message:"Cette ligne de dépense sera supprimée. Rattrapable avec ↶ juste après."
   },()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();});};
-  top.append(date,aw,del);
-  const note=document.createElement("input");note.className="noteIn";note.value=e.note||"";note.placeholder="Étiquette (ex. Carrefour, Marché…)";
+  top.append(dateWrap,aw,del);
+  const note=document.createElement("input");note.className="noteIn";note.value=e.note||"";note.placeholder="✎";
   note.addEventListener("input",()=>{e.note=note.value;touch();});
   attachSuggest(note,"note");
   const warn=document.createElement("div");warn.className="ewarn";
   const dup=document.createElement("div");dup.className="dupwarn";
   box.append(top,note,warn,dup);
-  attachSwipeDelete(box,()=>{
-    confirmThenDelete("expense",{
-      title:"Supprimer cette dépense ?",
-      message:"Cette ligne de dépense sera supprimée. Rattrapable avec ↶ juste après."
-    },()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();});
-  },"expense");
   function isDuplicate(){
     if(e.amount==null||!Number.isFinite(+e.amount)||!e.date)return false;
     const m=ensure(state.current),nm=(line.name||"").trim();
@@ -2486,10 +2646,13 @@ function buildRow(line){
     toggleF.onclick=()=>{const hidden=detailsF.classList.toggle("hidden");
       if(hidden){expanded.delete(line.id);toggleF.classList.remove("open");}
       else{expanded.add(line.id);toggleF.classList.add("open");}save();};
+    const expandF=document.createElement("button");expandF.type="button";expandF.className="expandBtn";
+    expandF.innerHTML="⛶";expandF.title="Ouvrir en plein écran";expandF.setAttribute("aria-label","Ouvrir le détail de ce poste en plein écran");
+    expandF.addEventListener("click",ev=>{ev.stopPropagation();openBudgetDetail(line);});
     const top=document.createElement("div");top.className="rtop";
     top.append(dragHandle,catIcon,name,pw,del);
     const meta=document.createElement("div");meta.className="rmeta";
-    meta.append(mtxt,payBtn,toggleF);
+    meta.append(mtxt,payBtn,expandF,toggleF);
     wrap.append(top,prog,meta,rwarn,detailsF);
     attachRowGestures(wrap,line,askDelete);
     applyRowState(wrap,line);return wrap;
@@ -2531,29 +2694,39 @@ function buildRow(line){
   toggle.onclick=()=>{const hidden=details.classList.toggle("hidden");
     if(hidden){expanded.delete(line.id);toggle.classList.remove("open");quick.classList.remove("hidden");}
     else{expanded.add(line.id);toggle.classList.add("open");quick.classList.add("hidden");}save();};
+  const expand=document.createElement("button");expand.type="button";expand.className="expandBtn";
+  expand.innerHTML="⛶";expand.title="Ouvrir en plein écran";expand.setAttribute("aria-label","Ouvrir le détail de ce poste en plein écran");
+  expand.addEventListener("click",ev=>{ev.stopPropagation();openBudgetDetail(line);});
   const top=document.createElement("div");top.className="rtop";
   top.append(dragHandle,catIcon,name,pw,del);
   const meta=document.createElement("div");meta.className="rmeta";
-  meta.append(mtxt,quick,toggle);
+  meta.append(mtxt,quick,expand,toggle);
   wrap.append(top,prog,meta,rwarn,details);
   attachRowGestures(wrap,line,askDelete);
   applyRowState(wrap,line);return wrap;
 }
 function applyRowState(el,line){
   const p=+line.planned||0,s=spent(line);
-  const noBudget=!(p>0); // budget à 0 = « sans montant » : suivi libre, PAS une erreur
-  const over=!noBudget&&s>p&&s>0,any=s>0;
+  // Un budget à 0 est un vrai budget de 0 : toute dépense le dépasse (même calcul que les autres).
+  // « Sans montant » ne reste qu'un état visuel discret quand rien n'est dépensé — jamais une erreur.
+  const over=s>p&&s>0,any=s>0;
+  const noBudget=!(p>0);
   el.classList.remove("over","done","noBudget");
-  if(noBudget)el.classList.add("noBudget");
-  else if(any)el.classList.add(over?"over":"done");
-  const pct=p>0?s/p*100:0;
-  const fill=el.querySelector(".prog>i");fill.style.width=(noBudget?0:Math.max(0,Math.min(100,pct)))+"%";
+  if(over)el.classList.add("over");
+  else if(any)el.classList.add("done");
+  else if(noBudget)el.classList.add("noBudget"); // 0 € et aucune dépense
+  const pct=p>0?s/p*100:(s>0?100:0);
+  const fill=el.querySelector(".prog>i");fill.style.width=Math.max(0,Math.min(100,pct))+"%";
   fill.className=over?"over":(p>0&&Math.round(pct)>=100?"full":"");
+  refreshEntryFills(el,line);
   const mt=el.querySelector(".mtxt");
   if(mt){
-    if(noBudget){mt.className="mtxt noBudget";mt.innerHTML=s>0?("dépensé <b>"+eur(s)+"</b>"):"sans montant";}
-    else if(over){mt.className="mtxt over";mt.innerHTML="<b>+"+eur(s-p)+"</b>";}
-    else{mt.className="mtxt";mt.innerHTML="reste <b>"+eur(p-s)+"</b>";}
+    // Détail « dépensé » entre parenthèses : d'un coup d'œil on a le budget (champ), le reste ou
+    // le dépassement (en gras), et le total déjà dépensé.
+    const spentTxt=s>0?' <span class="mspent">(dépensé '+eur(s)+')</span>':'';
+    if(over){mt.className="mtxt over";mt.innerHTML="<b>+"+eur(s-p)+"</b>"+spentTxt;}
+    else if(noBudget){mt.className="mtxt noBudget";mt.innerHTML="sans montant";}
+    else{mt.className="mtxt";mt.innerHTML="reste <b>"+eur(p-s)+"</b>"+spentTxt;}
   }
   const payBtn=el.querySelector(".payBtn");
   if(payBtn){
@@ -2578,6 +2751,191 @@ function applyRowState(el,line){
   const rwarn=el.querySelector(".rwarn");
   if(rwarn){rwarn.textContent=msgs.length?"⚠ "+msgs.join(" · "):"";rwarn.classList.toggle("show",msgs.length>0);}
 }
+/* ---------- Panneau détail d'un budget (plein écran) : meilleure visibilité avec
+   beaucoup de dépenses (recherche interne, liste non plafonnée en hauteur). ---------- */
+function findLine(id){const m=ensure(state.current);return m.lines.find(l=>l.id===id)||null;}
+function openBudgetDetail(line){
+  detailLineId=line.id;detailEntrySearch="";
+  document.getElementById("budgetDetailPanel").classList.remove("hidden");
+  renderDetailBody(line);
+}
+function closeBudgetDetail(){
+  detailLineId=null;
+  document.getElementById("budgetDetailPanel").classList.add("hidden");
+  render();
+}
+function filterDetailEntries(){
+  const q=detailEntrySearch.trim().toLowerCase();
+  document.querySelectorAll("#bdEntries > .entry").forEach(box=>{
+    if(!q){box.classList.remove("hidden");return;}
+    const note=(box.querySelector(".noteIn")?.value||"").toLowerCase();
+    const amt=(box.querySelector(".amtIn")?.value||"").toLowerCase();
+    const date=(box.querySelector(".dateIn")?.value||"").toLowerCase();
+    box.classList.toggle("hidden",!(note.includes(q)||amt.includes(q)||date.includes(q)));
+  });
+}
+function focusDetailEntry(entryId){
+  const box=document.getElementById("bdEntries");if(!box)return;
+  let target=entryId?box.querySelector('.entry[data-eid="'+entryId+'"]'):null;
+  if(!target){const entries=box.querySelectorAll(".entry");target=entries[entries.length-1];}
+  const inp=target&&target.querySelector(".amtIn");
+  if(inp){inp.focus();inp.scrollIntoView({block:"nearest"});}
+}
+function renderDetailBody(line){
+  const body=document.getElementById("bdBody");if(!body)return;
+  body.innerHTML="";
+  const top=document.createElement("div");top.className="bdTop";
+  const catIcon=document.createElement("button");catIcon.type="button";catIcon.className="bdCatIcon";
+  catIcon.textContent=catById(line.category||"").icon;catIcon.title="Changer la catégorie";
+  catIcon.setAttribute("aria-label","Changer la catégorie");
+  catIcon.addEventListener("click",()=>openCatPicker(line,catIcon));
+  const nameWrap=document.createElement("div");nameWrap.className="bdNameWrap";
+  const name=document.createElement("textarea");name.className="bdNameIn";name.id="bdNameIn";name.rows=1;
+  name.value=line.name;name.placeholder="Nom du poste";
+  const autoSizeName=()=>{name.style.height="auto";name.style.height=name.scrollHeight+"px";};
+  name.addEventListener("input",()=>{line.name=name.value;autoSizeName();updateComputed();touch();});
+  name.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();name.blur();}});
+  requestAnimationFrame(autoSizeName);
+  attachSuggest(name,"expense");
+  nameWrap.append(name);
+  top.append(catIcon,nameWrap);
+  const badge=document.createElement("div");badge.className="bdTypeBadge";
+  badge.textContent=line.type==="fixed"?"Poste fixe":"Poste variable";
+  body.append(top,badge);
+  const planRow=document.createElement("div");planRow.className="bdPlanRow";
+  const planLbl=document.createElement("span");planLbl.className="bdPlanLbl";planLbl.textContent="Budget prévu";
+  const pw=document.createElement("div");pw.className="planWrap";
+  const plan=document.createElement("input");plan.className="bdPlanIn";plan.id="bdPlanIn";plan.type="text";
+  plan.inputMode="decimal";plan.autocomplete="off";
+  plan.value=(+line.planned||0)===0?"":line.planned;plan.placeholder="—";
+  plan.addEventListener("input",()=>{const v=parseAmt(plan.value);line.planned=v!=null?v:0;updateComputed();touch();});
+  const cur=document.createElement("span");cur.textContent="€";cur.style.cssText="font-weight:700;color:var(--muted)";
+  pw.append(plan,cur);
+  planRow.append(planLbl,pw);
+  body.append(planRow);
+  const prog=document.createElement("div");prog.className="prog bdProg";prog.innerHTML="<i></i>";
+  const mtxt=document.createElement("div");mtxt.className="mtxt bdMtxt";
+  const rwarn=document.createElement("div");rwarn.className="rwarn bdRwarn";
+  body.append(prog,mtxt,rwarn);
+  const actions=document.createElement("div");actions.className="rowActions bdActions";
+  const payBtn=document.createElement("button");payBtn.type="button";payBtn.className="payBtn";
+  payBtn.innerHTML='<span class="btnIcon">✓</span><span class="btnLabel">Payer</span>';
+  payBtn.onclick=()=>{
+    const p=+line.planned||0,s=spent(line),missing=round2(p-s);
+    const isFixed=line.type==="fixed";
+    const autoPaid=isFixed&&line.entries.length===1&&line.entries[0].note==="Payé";
+    if(missing>0){
+      if(isFixed&&line.entries.length===0){line.entries=[{id:uid(),date:defaultDate(state.current),amount:p,note:"Payé"}];}
+      else{line.entries.push({id:uid(),date:defaultDate(state.current),amount:missing,note:"Payé"});}
+      celebratePay(payBtn);
+      commit();render();
+      bouncePayBtn();
+    }else if(autoPaid){line.entries=[];commit();render();}
+    else if(isFixed){toast(s>p?"Déjà dépassé":"Déjà entièrement payé");}
+    else{toast(s>p?"Déjà dépassé — rien à ajouter automatiquement":"Budget déjà entièrement couvert");}
+  };
+  actions.append(payBtn);
+  if(line.type!=="fixed"){
+    const recToggle=document.createElement("button");recToggle.type="button";
+    recToggle.className="recToggle"+(line.recurring?" on":"");
+    recToggle.innerHTML='<span class="btnIcon">🔁</span><span class="btnLabel">Récurrente</span>';
+    recToggle.setAttribute("aria-pressed",line.recurring?"true":"false");
+    recToggle.title="Reprise automatiquement le mois prochain avec les charges fixes";
+    recToggle.onclick=()=>{line.recurring=!line.recurring;recToggle.classList.toggle("on",line.recurring);
+      recToggle.setAttribute("aria-pressed",line.recurring?"true":"false");commit();};
+    actions.append(recToggle);
+  }
+  const dup=document.createElement("button");dup.type="button";dup.className="actBtn";
+  dup.innerHTML='<span class="btnIcon">⧉</span><span class="btnLabel">Dupliquer</span>';
+  dup.onclick=()=>{duplicateLine(line);closeBudgetDetail();};
+  actions.append(dup);
+  body.append(actions);
+  const head=document.createElement("div");head.className="bdEntriesHead";
+  const label=document.createElement("div");label.className="slabel";label.style.margin="0";
+  label.innerHTML='Dépenses (<span class="bdCount">'+line.entries.length+'</span>)';
+  const addBtn=document.createElement("button");addBtn.type="button";addBtn.className="addentry";
+  addBtn.style.cssText="margin:0;width:auto;padding:8px 14px";
+  addBtn.innerHTML='<span class="btnIcon">+</span><span class="btnLabel">Ajouter</span>';
+  addBtn.onclick=()=>{
+    const nid=uid();line.entries.push({id:nid,date:defaultDate(state.current),amount:null,note:""});
+    commit();render();focusDetailEntry(nid);
+  };
+  head.append(label,addBtn);
+  body.append(head);
+  if(line.entries.length>4){
+    const search=document.createElement("input");search.className="searchIn bdEntrySearch";search.id="bdEntrySearch";
+    search.type="text";search.placeholder="🔍 Filtrer par étiquette, montant, date…";search.autocomplete="off";
+    search.value=detailEntrySearch;
+    search.addEventListener("input",()=>{detailEntrySearch=search.value;filterDetailEntries();});
+    body.append(search);
+  }
+  const entriesBox=document.createElement("div");entriesBox.className="entries bdEntries";entriesBox.id="bdEntries";
+  sortEntries(line.entries).forEach(e=>entriesBox.append(entryEl(line,e)));
+  body.append(entriesBox);
+  if(line.entries.length===0){
+    const empty=document.createElement("p");empty.className="empty bdEmpty";
+    empty.textContent="Aucune dépense enregistrée dans ce poste.";
+    body.append(empty);
+  }
+  filterDetailEntries();
+  applyDetailState(line);
+}
+function applyDetailState(line){
+  const panel=document.getElementById("budgetDetailPanel");
+  if(!panel||panel.classList.contains("hidden")||detailLineId!==line.id)return;
+  const p=+line.planned||0,s=spent(line);
+  const over=s>p&&s>0,any=s>0,noBudget=!(p>0);
+  const pct=p>0?s/p*100:(s>0?100:0);
+  const prog=document.querySelector("#bdBody .bdProg");
+  if(prog){
+    const fill=prog.querySelector("i");
+    fill.style.width=Math.max(0,Math.min(100,pct))+"%";
+    fill.className=over?"over":(p>0&&Math.round(pct)>=100?"full":"");
+    prog.classList.toggle("noBudget",noBudget);
+  }
+  const mt=document.querySelector("#bdBody .bdMtxt");
+  if(mt){
+    const spentTxt=s>0?' <span class="mspent">(dépensé '+eur(s)+')</span>':'';
+    if(over){mt.className="mtxt bdMtxt over";mt.innerHTML="<b>+"+eur(s-p)+"</b>"+spentTxt;}
+    else if(noBudget){mt.className="mtxt bdMtxt noBudget";mt.innerHTML="sans montant";}
+    else{mt.className="mtxt bdMtxt";mt.innerHTML="reste <b>"+eur(p-s)+"</b>"+spentTxt;}
+  }
+  refreshEntryFills(document.getElementById("bdBody"),line);
+  const payBtn=document.querySelector("#bdBody .payBtn");
+  if(payBtn){
+    const isFixed=line.type==="fixed";
+    const covered=p>0&&!(round2(p-s)>0);
+    payBtn.classList.toggle("hidden",!(p>0));
+    payBtn.classList.toggle("done",covered);
+    const autoPaid=isFixed&&line.entries.length===1&&line.entries[0].note==="Payé";
+    payBtn.innerHTML=covered?'<span class="btnIcon">✓</span><span class="btnLabel">Payé</span>':'<span class="btnIcon">✓</span><span class="btnLabel">Payer</span>';
+    payBtn.title=covered?(autoPaid?"Payé — retaper pour annuler":(isFixed?"Entièrement payé":"Dépense entièrement payée"))
+      :(isFixed?"Marquer ce poste comme payé":"Marquer ce poste comme payé (ajoute le montant restant)");
+  }
+  const badName=!(line.name||"").trim();
+  const nameIn=document.getElementById("bdNameIn"),planIn=document.getElementById("bdPlanIn");
+  if(nameIn)nameIn.classList.toggle("inv",badName);
+  if(planIn){planIn.classList.remove("inv");planIn.classList.toggle("noBudget",noBudget);}
+  const ei=entryIssues(line);
+  const msgs=[];
+  if(badName)msgs.push("Nom requis");
+  if(ei>0)msgs.push(ei+" dépense"+(ei>1?"s":"")+" à compléter");
+  const rwarnEl=document.querySelector("#bdBody .bdRwarn");
+  if(rwarnEl){rwarnEl.textContent=msgs.length?"⚠ "+msgs.join(" · "):"";rwarnEl.classList.toggle("show",msgs.length>0);}
+  const catIconEl=document.querySelector("#bdBody .bdCatIcon");
+  if(catIconEl)catIconEl.textContent=catById(line.category||"").icon;
+  const countEl=document.querySelector("#bdBody .bdCount");
+  if(countEl)countEl.textContent=String(line.entries.length);
+}
+document.getElementById("bdCloseBtn").onclick=closeBudgetDetail;
+document.getElementById("bdDeleteBtn").onclick=async()=>{
+  const line=findLine(detailLineId);if(!line)return;
+  const nm=(line.name||"").trim();
+  await confirmThenDelete("budget",{
+    title:"Supprimer "+(nm?'« '+nm+' »':"ce poste")+" ?",
+    message:"Ce poste et toutes ses dépenses enregistrées seront supprimés. Rattrapable avec ↶ juste après."
+  },()=>{deleteLine(line);closeBudgetDetail();});
+};
 function miniLineEl(item,onChange,onDelete){
   const row=document.createElement("div");row.className="miniRow";
   const name=document.createElement("input");name.className="miniName";name.value=item.name||"";name.placeholder="Ex. Salaire, Prime, Cadeau…";
@@ -2870,6 +3228,7 @@ function updateComputed(){
   if(savInp&&state.savings.detailed&&document.activeElement!==savInp){const v=t.savings;savInp.value=v===0?"":v;}
   document.getElementById("foot").innerHTML="Données enregistrées sur cet appareil.";
   document.querySelectorAll("#tab-budgets .row").forEach(el=>{const line=m.lines.find(l=>l.id===el.dataset.id);if(line)applyRowState(el,line);});
+  if(detailLineId){const dline=m.lines.find(l=>l.id===detailLineId);if(dline)applyDetailState(dline);}
   renderRecap();
   let issues=0;m.lines.forEach(l=>{if(!(l.name||"").trim())issues++;issues+=entryIssues(l);});
   const ib=document.getElementById("issues");
@@ -2950,7 +3309,7 @@ function renderMonthSummary(){
   else{
     html+='<div class="cmp">';
     cats.forEach(x=>{
-      const over=x.spent>x.planned&&x.planned>0;
+      const over=x.spent>x.planned&&x.spent>0;
       const pct=x.planned>0?x.spent/x.planned*100:(x.spent>0?100:0);
       const detail=x.lines.filter(l=>l.entries.length>0||(+l.planned||0)!==0)
         .sort((a,b)=>spent(b)-spent(a))
@@ -3595,6 +3954,11 @@ function render(){
   if(tab==="comparer")renderComparer();
   updateComputed();
   renderResetSection();
+  if(detailLineId){
+    const dline=ensure(state.current).lines.find(l=>l.id===detailLineId);
+    if(dline)renderDetailBody(dline);
+    else{detailLineId=null;document.getElementById("budgetDetailPanel").classList.add("hidden");}
+  }
 }
 
 /* ---------- NAVIGATION MOIS (avec prompt de création) ---------- */
@@ -3858,6 +4222,34 @@ document.getElementById("redoBtn").onclick=redo;
 
 let toastT;
 function toast(msg,ms){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),ms||2400);}
+// Petite explosion de confettis + rebond, déclenchée quand un poste passe à "payé".
+// Les particules sont ajoutées à document.body (indépendant du panneau) pour survivre au re-render.
+function celebratePay(btn){
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const rect=btn.getBoundingClientRect();
+  const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+  const colors=["#ffd166","#06d6a0","#118ab2","#ef476f","#ffb703"];
+  const n=14;
+  for(let i=0;i<n;i++){
+    const el=document.createElement("span");el.className="confetti";
+    const angle=(Math.PI*2*i)/n+Math.random()*.5;
+    const dist=46+Math.random()*46;
+    el.style.setProperty("--cx",(Math.cos(angle)*dist)+"px");
+    el.style.setProperty("--cy",(Math.sin(angle)*dist-20)+"px");
+    el.style.setProperty("--cr",(Math.random()*360-180)+"deg");
+    el.style.left=cx+"px";el.style.top=cy+"px";
+    el.style.background=colors[i%colors.length];
+    if(Math.random()>.5)el.style.borderRadius="50%";
+    document.body.appendChild(el);
+    el.addEventListener("animationend",()=>el.remove());
+  }
+}
+function bouncePayBtn(){
+  const btn=document.querySelector("#bdBody .payBtn.done");
+  if(!btn)return;
+  btn.classList.remove("justPaid");void btn.offsetWidth;btn.classList.add("justPaid");
+  setTimeout(()=>btn.classList.remove("justPaid"),550);
+}
 // Reste-appuyé : affiche une description dans le toast pour les boutons icône seule (tactile).
 // Retourne une fonction qu'on peut consulter dans le onclick pour ignorer le clic déclenché juste après l'appui long.
 function longPressInfo(el,msg,ms){
