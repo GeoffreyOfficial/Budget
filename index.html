@@ -299,6 +299,7 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   width:22px;height:22px;overflow:hidden}
 .entries>.entry .dateToggle:active{opacity:1;transform:scale(.92)}
 .entries>.entry .dtBar{display:block;height:5px;width:100%;background:var(--red);flex-shrink:0}
+.entries>.entry .dateToggle.over .dtBar{background:var(--money-out)}
 .entries>.entry .dtNum{display:flex;flex:1;align-items:center;justify-content:center;
   font-size:10px;font-weight:800;font-family:var(--mono);color:var(--ink);line-height:1}
 .entries>.entry .amtIn{font-size:15.5px}
@@ -793,7 +794,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .app.compact .recap{padding:7px 9px 6px 9px;margin:7px 2px 3px;border-radius:12px}
 .app.compact .recap .rline{padding:2px 0;font-size:12px}
 .app.compact .entries{max-height:180px;margin-top:5px}
-.app.compact .entry{padding:4px 0;gap:3px}
+.app.compact .entry{padding:4px 9px;gap:3px}
 .app.compact .noteIn{padding:5px 8px;font-size:12px}
 .app.compact .detailToggleRow{margin-top:3px}
 .entries{margin-top:8px;max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin}
@@ -2363,19 +2364,36 @@ function refreshEntryFills(root,line){
     else{badge.textContent="";badge.className="pctBadge hidden";}
   });
 }
-function entryEl(line,e){
+// "oldest" et "recent" sont le même ordre (ordre d'ajout), juste affiché à l'envers : le cumul
+// progressif garde donc un sens dans les deux cas. Les autres tris (date, montant) mélangent
+// l'ordre d'ajout, donc le repère de dépassement n'y aurait plus de sens.
+function overBudgetIds(line){
+  const key=state.sortExpenses||"recent";
+  if(key!=="oldest"&&key!=="recent")return null;
+  const planned=+line.planned||0;
+  if(!(planned>0))return null;
+  let cum=0,crossed=false;const ids=new Set();
+  for(const e of line.entries){
+    const a=Math.abs(+e.amount||0);
+    if(Number.isFinite(a))cum+=a;
+    if(!crossed&&cum>planned)crossed=true;
+    if(crossed&&e.id)ids.add(e.id);
+  }
+  return ids;
+}
+function entryEl(line,e,over){
   const [minD,maxD]=monthBounds();
   const box=document.createElement("div");box.className="entry";box.dataset.eid=e.id||"";
   const top=document.createElement("div");top.className="entryTop";
   const dateWrap=document.createElement("div");dateWrap.className="dateWrap";
   const dateId="dateFor_"+(e.id||uid());
-  const dateToggle=document.createElement("label");dateToggle.htmlFor=dateId;dateToggle.className="dateToggle";
+  const dateToggle=document.createElement("label");dateToggle.htmlFor=dateId;dateToggle.className="dateToggle"+(over?" over":"");
   dateToggle.innerHTML='<span class="dtBar"></span><span class="dtNum"></span>';
   const dtNum=dateToggle.querySelector(".dtNum");
   const updateDateIcon=()=>{
     const d=e.date&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)?+e.date.slice(8,10):null;
     dtNum.textContent=d?String(d):"–";
-    const lbl=e.date?"Date : "+e.date.split("-").reverse().join("/"):"Aucune date";
+    const lbl=(e.date?"Date : "+e.date.split("-").reverse().join("/"):"Aucune date")+(over?" · budget dépassé à partir d'ici":"");
     dateToggle.title=lbl+" — modifier la date";dateToggle.setAttribute("aria-label",lbl);
   };
   const date=document.createElement("input");date.className="dateIn";date.type="date";date.id=dateId;date.value=e.date||"";
@@ -2633,7 +2651,8 @@ function buildRow(line){
     toggleF.title="Détail des dépenses";toggleF.setAttribute("aria-label","Détail des dépenses ("+nf+")");
     const detailsF=document.createElement("div");detailsF.className="details";
     const entriesF=document.createElement("div");entriesF.className="entries";
-    sortEntries(line.entries).forEach(e=>entriesF.append(entryEl(line,e)));
+    const overF=overBudgetIds(line);
+    sortEntries(line.entries).forEach(e=>entriesF.append(entryEl(line,e,!!(overF&&overF.has(e.id)))));
     const footF=document.createElement("div");footF.className="detailFoot";
     const addF=document.createElement("button");addF.className="addentry";addF.innerHTML='<span class="btnIcon">+</span><span class="btnLabel">Ajouter une dépense</span>';
     addF.onclick=()=>{const nid=uid();line.entries.push({id:nid,date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id,nid);};
@@ -2681,7 +2700,8 @@ function buildRow(line){
   dup.onclick=()=>{duplicateLine(line);};
   actions.append(dup);
   const entries=document.createElement("div");entries.className="entries";
-  sortEntries(line.entries).forEach(e=>entries.append(entryEl(line,e)));
+  const over=overBudgetIds(line);
+  sortEntries(line.entries).forEach(e=>entries.append(entryEl(line,e,!!(over&&over.has(e.id)))));
   const foot=document.createElement("div");foot.className="detailFoot";
   const add=document.createElement("button");add.className="addentry";add.innerHTML='<span class="btnIcon">+</span><span class="btnLabel">Ajouter une dépense</span>';
   add.onclick=()=>{const nid=uid();line.entries.push({id:nid,date:defaultDate(state.current),amount:null,note:""});expanded.add(line.id);commit();render();focusNewEntry(line.id,nid);};
@@ -2867,7 +2887,8 @@ function renderDetailBody(line){
     body.append(search);
   }
   const entriesBox=document.createElement("div");entriesBox.className="entries bdEntries";entriesBox.id="bdEntries";
-  sortEntries(line.entries).forEach(e=>entriesBox.append(entryEl(line,e)));
+  const overBd=overBudgetIds(line);
+  sortEntries(line.entries).forEach(e=>entriesBox.append(entryEl(line,e,!!(overBd&&overBd.has(e.id)))));
   body.append(entriesBox);
   if(line.entries.length===0){
     const empty=document.createElement("p");empty.className="empty bdEmpty";
