@@ -12,81 +12,81 @@
 <style>
 /* ---------- THEMES (couleurs en variables) ---------- */
 :root{
-  --paper:#EEF0EA;--card:#FFFFFF;--line:#E0E3DA;--ink:#20261E;--muted:#5C6355;--faint:#696F5F;
-  --accent:#1E4D3B;--accent-2:#2E7D5B;--soft:#F6F7F3;
-  --hero-a:#1E4D3B;--hero-b:#2E7D5B;--hero-ink:#EDF3EA;
+  --paper:#EEF0EA;--card:#FFFFFF;--line:#828D6B;--ink:#20261E;--muted:#5C6355;--faint:#696F5F;
+  --accent:#1E4D3B;--accent-2:#2E7D5B;--soft:#EEF0E8;
+  --hero-a:#1E4D3B;--hero-b:#296E50;--hero-ink:#EDF3EA;
   --red:#B23A2E;--red-soft:#FBEDEB;--green:#2E7D5B;
-  --money-in:#1F6FB2;--money-out:#C08525;
+  --money-in:#1F6FB2;--money-out:#95671D;
   --c1:#1E4D3B;--c2:#2E7D5B;--c3:#8FB05B;--c4:#C9A227;--c5:#B2673A;--c6:#4F7C82;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
 }
 [data-theme="midnight"]{
-  --paper:#12151A;--card:#1B2027;--line:#2A313A;--ink:#E7ECEF;--muted:#95A0AC;--faint:#7D8895;
-  --accent:#3DD6A0;--accent-2:#2BB489;--soft:#232A33;
+  --paper:#12151A;--card:#1B2027;--line:#5C6C80;--ink:#E7ECEF;--muted:#95A0AC;--faint:#919BA6;
+  --accent:#3DD6A0;--accent-2:#2BB489;--soft:#29323C;
   --hero-a:#171D24;--hero-b:#0F332A;--hero-ink:#E7ECEF;
   --red:#FF6B5E;--red-soft:#3A211F;--green:#3DD6A0;
   --money-in:#4FA9FF;--money-out:#FFC24F;
   --c1:#3DD6A0;--c2:#4FA9FF;--c3:#B98BFF;--c4:#FFD166;--c5:#FF8A5B;--c6:#5AD1D6;
 }
 [data-theme="ocean"]{
-  --paper:#EAF0F3;--card:#FFFFFF;--line:#D6E1E7;--ink:#152430;--muted:#4C5F6D;--faint:#5D6F7A;
-  --accent:#0E4C6B;--accent-2:#1E88A8;--soft:#EFF4F6;
-  --hero-a:#0E4C6B;--hero-b:#1E88A8;--hero-ink:#E7F3F8;
+  --paper:#EAF0F3;--card:#FFFFFF;--line:#658EA5;--ink:#152430;--muted:#4C5F6D;--faint:#5D6F7A;
+  --accent:#0E4C6B;--accent-2:#1E88A8;--soft:#E9F0F3;
+  --hero-a:#0E4C6B;--hero-b:#186C85;--hero-ink:#E7F3F8;
   --red:#C0392B;--red-soft:#FBECEA;--green:#177C63;
-  --money-in:#1F6FB2;--money-out:#C08525;
+  --money-in:#1F6FB2;--money-out:#95671D;
   --c1:#0E4C6B;--c2:#1E88A8;--c3:#37B5B0;--c4:#79C7A6;--c5:#E0A458;--c6:#C0567B;
 }
 [data-theme="plum"]{
-  --paper:#F3EEF4;--card:#FFFFFF;--line:#E4D9E6;--ink:#2A1E2E;--muted:#675868;--faint:#77687C;
-  --accent:#5B2A6B;--accent-2:#8E44AD;--soft:#F5EEF6;
-  --hero-a:#5B2A6B;--hero-b:#8E44AD;--hero-ink:#F3E9F6;
+  --paper:#F3EEF4;--card:#FFFFFF;--line:#A27CA9;--ink:#2A1E2E;--muted:#675868;--faint:#77687C;
+  --accent:#5B2A6B;--accent-2:#8E44AD;--soft:#F5EDF6;
+  --hero-a:#5B2A6B;--hero-b:#8841A6;--hero-ink:#F3E9F6;
   --red:#C0392B;--red-soft:#FBECEA;--green:#2E7954;
-  --money-in:#1F6FB2;--money-out:#C08525;
+  --money-in:#1F6FB2;--money-out:#95671D;
   --c1:#5B2A6B;--c2:#8E44AD;--c3:#C065A0;--c4:#E08AB0;--c5:#E0A458;--c6:#4F86C6;
 }
 [data-theme="sand"]{
-  --paper:#F4EEE4;--card:#FFFBF4;--line:#E7DCC9;--ink:#2E2519;--muted:#695E48;--faint:#766B55;
-  --accent:#9A5B33;--accent-2:#C67B3E;--soft:#F6EFE4;
-  --hero-a:#9A5B33;--hero-b:#C67B3E;--hero-ink:#F7EEE2;
+  --paper:#F4EEE4;--card:#FFFBF4;--line:#A58349;--ink:#2E2519;--muted:#695E48;--faint:#766B55;
+  --accent:#9A5B33;--accent-2:#C67B3E;--soft:#F5EDE0;
+  --hero-a:#9A5B33;--hero-b:#8A5429;--hero-ink:#F7EEE2;
   --red:#B23A2E;--red-soft:#F8E9E4;--green:#517741;
   --money-in:#1F6FB2;--money-out:#9A5B33;
   --c1:#9A5B33;--c2:#C67B3E;--c3:#D9A85C;--c4:#7E8B4C;--c5:#4F86C6;--c6:#B0567B;
 }
 [data-theme="plage"]{
-  --paper:#FBF3E4;--card:#FFFEFB;--line:#EAD9BA;--ink:#1F3436;--muted:#5F726F;--faint:#70827E;
-  --accent:#0B6E77;--accent-2:#D9683A;--soft:#F6EEDB;
-  --hero-a:#0A5F68;--hero-b:#0E9E9C;--hero-ink:#F4FBFA;
-  --red:#D9483A;--red-soft:#FBEAE3;--green:#1F8F5F;
-  --money-in:#1E88C7;--money-out:#D98A2E;
+  --paper:#FBF3E4;--card:#FFFEFB;--line:#B08436;--ink:#1F3436;--muted:#556563;--faint:#596764;
+  --accent:#0B6E77;--accent-2:#D9683A;--soft:#EEE0BC;
+  --hero-a:#0A5F68;--hero-b:#0A6F6E;--hero-ink:#F4FBFA;
+  --red:#C43426;--red-soft:#FBEAE3;--green:#1F8F5F;
+  --money-in:#1A76AC;--money-out:#A2651D;
   --c1:#0B6E77;--c2:#0E9E9C;--c3:#F0B23D;--c4:#D9683A;--c5:#5FAE6E;--c6:#3D6E9E;
 }
 [data-theme="carbon"]{
-  --paper:#111214;--card:#1A1C1F;--line:#2B2E33;--ink:#E9EBEE;--muted:#9AA0A8;--faint:#7D848D;
-  --accent:#5AA9FF;--accent-2:#3E86E0;--soft:#22252A;
+  --paper:#111214;--card:#1A1C1F;--line:#626874;--ink:#E9EBEE;--muted:#9AA0A8;--faint:#90969D;
+  --accent:#5AA9FF;--accent-2:#3E86E0;--soft:#2A2E34;
   --hero-a:#191B1F;--hero-b:#0F1418;--hero-ink:#E9EBEE;
   --red:#FF6B5E;--red-soft:#3A211F;--green:#49C98A;
   --money-in:#4FA9FF;--money-out:#FFC24F;
   --c1:#5AA9FF;--c2:#49C98A;--c3:#B98BFF;--c4:#FFD166;--c5:#FF8A5B;--c6:#5AD1D6;
 }
 [data-theme="nocturne"]{
-  --paper:#14121F;--card:#1E1B2E;--line:#312C46;--ink:#EAE6F5;--muted:#9E97B8;--faint:#8780A2;
-  --accent:#B98BFF;--accent-2:#8E5CE0;--soft:#272338;
+  --paper:#14121F;--card:#1E1B2E;--line:#6C619B;--ink:#EAE6F5;--muted:#9E97B8;--faint:#9892AF;
+  --accent:#B98BFF;--accent-2:#8E5CE0;--soft:#302B46;
   --hero-a:#1F1A33;--hero-b:#2A1F4D;--hero-ink:#EAE6F5;
   --red:#FF6B84;--red-soft:#3A1F28;--green:#5AD6A8;
   --money-in:#4FA9FF;--money-out:#FFC24F;
   --c1:#B98BFF;--c2:#6E8BFF;--c3:#FF8BC5;--c4:#FFD166;--c5:#5AD6A8;--c6:#5AD1D6;
 }
 [data-theme="ember"]{
-  --paper:#161210;--card:#201A16;--line:#352C25;--ink:#F0E7DF;--muted:#AC9E92;--faint:#938170;
-  --accent:#F5A65B;--accent-2:#E0803E;--soft:#2A221C;
+  --paper:#161210;--card:#201A16;--line:#786454;--ink:#F0E7DF;--muted:#AC9E92;--faint:#A09182;
+  --accent:#F5A65B;--accent-2:#E0803E;--soft:#352B23;
   --hero-a:#241813;--hero-b:#3A241A;--hero-ink:#F0E7DF;
   --red:#FF6B5E;--red-soft:#3A211F;--green:#8FC46A;
   --money-in:#5AA9D6;--money-out:#FFC24F;
   --c1:#F5A65B;--c2:#E0803E;--c3:#F5CE5B;--c4:#8FC46A;--c5:#5AA9D6;--c6:#C76B9A;
 }
 [data-theme="slate"]{
-  --paper:#0F1419;--card:#182028;--line:#26313C;--ink:#E6EDF3;--muted:#8B99A6;--faint:#7A8893;
-  --accent:#4FD1C5;--accent-2:#2FB3A6;--soft:#1F2A33;
+  --paper:#0F1419;--card:#182028;--line:#546D85;--ink:#E6EDF3;--muted:#909EAA;--faint:#8F9BA4;
+  --accent:#4FD1C5;--accent-2:#2FB3A6;--soft:#25323C;
   --hero-a:#141C24;--hero-b:#10262A;--hero-ink:#E6EDF3;
   --red:#FF7A6B;--red-soft:#33201E;--green:#4FD1C5;
   --money-in:#63A4FF;--money-out:#FFCB6B;
@@ -100,15 +100,15 @@
    réduite du mouvement via la règle globale plus bas (transition:none!important). */
 @property --paper{syntax:'<color>';inherits:true;initial-value:#EEF0EA}
 @property --card{syntax:'<color>';inherits:true;initial-value:#FFFFFF}
-@property --line{syntax:'<color>';inherits:true;initial-value:#E0E3DA}
+@property --line{syntax:'<color>';inherits:true;initial-value:#828D6B}
 @property --ink{syntax:'<color>';inherits:true;initial-value:#20261E}
 @property --muted{syntax:'<color>';inherits:true;initial-value:#5C6355}
 @property --faint{syntax:'<color>';inherits:true;initial-value:#696F5F}
 @property --accent{syntax:'<color>';inherits:true;initial-value:#1E4D3B}
 @property --accent-2{syntax:'<color>';inherits:true;initial-value:#2E7D5B}
-@property --soft{syntax:'<color>';inherits:true;initial-value:#F6F7F3}
+@property --soft{syntax:'<color>';inherits:true;initial-value:#EEF0E8}
 @property --hero-a{syntax:'<color>';inherits:true;initial-value:#1E4D3B}
-@property --hero-b{syntax:'<color>';inherits:true;initial-value:#2E7D5B}
+@property --hero-b{syntax:'<color>';inherits:true;initial-value:#296E50}
 @property --hero-ink{syntax:'<color>';inherits:true;initial-value:#EDF3EA}
 @property --red{syntax:'<color>';inherits:true;initial-value:#B23A2E}
 @property --red-soft{syntax:'<color>';inherits:true;initial-value:#FBEDEB}
@@ -404,7 +404,7 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 @keyframes sbSpin{to{transform:rotate(360deg)}}
 .syncbadge .sbIcon.syncPop{animation:sbPop .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes sbPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
-@media (max-width:380px){.syncbadge{font-size:10px;padding:4px 7px}}
+@media (max-width:380px){.syncbadge{font-size:11px;padding:4px 7px}}
 .catrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .caticon{flex-shrink:0;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--soft);font-size:16px;cursor:pointer;display:grid;place-items:center}
 .catNameIn{flex:1;min-width:0;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:13.5px;font-weight:600;outline:none}
@@ -422,6 +422,30 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   padding:11px 18px;border-radius:16px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:60;box-shadow:0 8px 24px -10px rgba(0,0,0,.5);
   max-width:min(86vw,420px);text-align:center;line-height:1.45}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Toast d'historique (annuler/rétablir) : carte plus riche qu'un simple toast texte,
+   liste les changements réels au lieu d'un « Annulé » générique et sans info.
+   Chaque ligne porte une icône selon la nature du changement (thème, création, suppression,
+   renommage, valeur modifiée…) pour identifier le type de changement sans avoir à lire le texte. */
+.historyToast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px) scale(.97);
+  background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;
+  padding:12px 17px 13px;min-width:240px;max-width:min(94vw,460px);
+  box-shadow:0 16px 38px -16px rgba(0,0,0,.5);opacity:0;pointer-events:none;cursor:pointer;
+  transition:opacity .26s ease,transform .32s cubic-bezier(.16,1,.3,1);z-index:61}
+.historyToast.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);pointer-events:auto}
+.htHead{display:flex;align-items:center;gap:9px;font-weight:700;font-size:13px}
+.htIcon{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;
+  background:var(--soft);font-size:14px;flex-shrink:0;color:var(--accent)}
+.htTitle{flex:1;letter-spacing:.01em}
+.htList{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.htList li{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.4;color:var(--muted)}
+.htList li .liIcon{flex-shrink:0;width:19px;height:19px;border-radius:6px;background:var(--soft);
+  display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:1;margin-top:.5px}
+.htList li .liText{flex:1;min-width:0}
+.htList li.htMore{color:var(--faint);font-style:italic}
+.htList li.htMore .liIcon{background:transparent;font-size:13px}
+@media (max-width:460px){.historyToast{max-width:92vw}}
+@media (max-width:380px){.historyToast{padding:10px 13px 11px}.htHead{font-size:12px}.htList li{font-size:12px}.htList li .liIcon{width:17px;height:17px}}
 
 .hero{position:relative;z-index:0;overflow:hidden;background:linear-gradient(135deg,var(--hero-a),var(--hero-b));
   background-size:200% 200%;animation:heroDrift 12s ease-in-out infinite;
@@ -448,7 +472,7 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 @keyframes mvSlideNext{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
 @keyframes mvSlidePrev{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
 @keyframes flameWiggle{0%,100%{transform:rotate(-6deg) scale(1)}50%{transform:rotate(7deg) scale(1.1)}}
-.hero .lbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.72;font-weight:600}
+.hero .lbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.92;font-weight:600}
 .beachDecor{display:none}
 [data-theme="plage"] .beachDecor{display:block;position:absolute;inset:0;pointer-events:none;z-index:-1}
 [data-theme="plage"] .beachDecor .bd{position:absolute;opacity:.24;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}
@@ -462,7 +486,7 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   [data-theme="plage"] .bd{animation:none!important}
 }
 .hero .big{font-family:var(--mono);font-size:clamp(28px,9vw,38px);font-weight:600;letter-spacing:-.02em;margin:2px 0;line-height:1.05;overflow-wrap:anywhere}
-.hero .sub{font-size:12.5px;opacity:.85;min-height:16px}
+.hero .sub{font-size:12.5px;opacity:.97;min-height:16px}
 .bar{height:8px;border-radius:99px;background:rgba(255,255,255,.18);margin:14px 0 12px;overflow:hidden}
 .bar>i{display:block;height:100%;border-radius:99px;background:var(--hero-ink);transition:width .4s ease}
 .bar>i.over{background:#FFC9BF}
@@ -840,8 +864,8 @@ button.rowCatIcon:active{transform:scale(.92)}
 .app.compact .rtop{gap:5px}
 .app.compact .nameIn{font-size:13px;padding:1px 0}
 .app.compact .planIn{font-size:12.5px;width:50px}
-.app.compact .del,.app.compact .dupBtn{width:20px;height:20px;font-size:14px}
-.app.compact .dragHandle{width:16px;height:22px;font-size:13px}
+.app.compact .del,.app.compact .dupBtn{width:24px;height:24px;font-size:14px}
+.app.compact .dragHandle{width:22px;height:26px;font-size:13px}
 .app.compact .prog{margin:5px 0 5px;height:4px}
 .app.compact .rmeta{gap:5px}
 .app.compact .mtxt{font-size:10.5px}
@@ -933,7 +957,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .donutwrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center}
 .donut{width:130px;height:130px;flex-shrink:0;animation:donutPop .5s cubic-bezier(.34,1.56,.64,1) both}
 .dc-big{font-family:var(--mono);font-size:15px;font-weight:700;fill:var(--ink)}
-.dc-lbl{font-size:8px;fill:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.dc-lbl{font-size:10px;fill:var(--muted);letter-spacing:.08em;text-transform:uppercase}
 /* min-width élevé : sur téléphone la légende passe sous le donut et prend toute la largeur,
    au lieu de rester coincée dans une colonne étroite qui tronquait les noms à 2-3 lettres. */
 .legend{flex:1 1 220px;min-width:200px;display:flex;flex-direction:column;gap:8px}
@@ -966,7 +990,7 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
 .bars .axl{font-size:8px;fill:var(--faint);font-family:var(--mono)}
 .daysum{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:2px 0 4px}
 .dsum{background:var(--soft);border-radius:12px;padding:10px;min-width:0;overflow:hidden}
-.dsum .k{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsum .k{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dsum .v{font-family:var(--mono);font-weight:700;font-size:15px;margin-top:2px;color:var(--ink);overflow-wrap:break-word;word-break:break-word}
 .dayblock{margin-bottom:10px}
 .dayhd{display:flex;justify-content:space-between;align-items:baseline;margin:0 2px 6px;padding-top:6px}
@@ -1581,6 +1605,10 @@ html{scroll-behavior:smooth}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="historyToast" id="historyToast" role="status" aria-live="polite">
+  <div class="htHead"><span class="htIcon" id="htIcon">↶</span><span class="htTitle" id="htTitle">Annulé</span></div>
+  <ul class="htList" id="htList"></ul>
+</div>
 
 <div class="calcPopup" id="calcPopup">
   <div class="calcHead" id="calcDragHandle">
@@ -1689,12 +1717,17 @@ const ICON_GROUPS=[
   ]}
 ];
 const ICONS=ICON_GROUPS.flatMap(g=>g.items.map(it=>it.e));
-const eur=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:3}).format(Number.isFinite(n)?n:0);
+// Formateurs Intl.NumberFormat mis en cache (leur construction est coûteuse et eur()/num2()
+// sont appelés en boucle à chaque rendu de ligne/carte — les recréer à chaque appel était mesurable).
+const FMT_EUR=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:3});
+const FMT_NUM2=new Intl.NumberFormat("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:3});
+const eur=n=>FMT_EUR.format(Number.isFinite(n)?n:0);
 const eur0=eur; // ne plus arrondir à l'euro près : mêmes décimales que eur() partout
-const num2=n=>new Intl.NumberFormat("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:3}).format(Number.isFinite(n)?n:0); // comme eur(), sans le symbole € — pour gagner de la place
+const num2=n=>FMT_NUM2.format(Number.isFinite(n)?n:0); // comme eur(), sans le symbole € — pour gagner de la place
 // Montant compact arrondi à l'euro (sans centimes) — pour les tableaux denses (détail par mois)
 // où l'important est de tout voir sans défilement horizontal, même avec de gros chiffres.
-const eurT=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(Number.isFinite(n)?n:0);
+const FMT_EURT=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+const eurT=n=>FMT_EURT.format(Number.isFinite(n)?n:0);
 const mKey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 // Budgets personnalisés : des budgets à part, non liés au calendrier (ex. « Vacances »,
 // « Travaux »). Ils vivent dans state.customBudgets, repérés par une clé préfixée « cb: ».
@@ -1785,7 +1818,7 @@ function applyBudgetView(){
 document.querySelectorAll("#viewSeg .segBtn").forEach(b=>{
   b.onclick=()=>{const v=b.dataset.view==="flow"?"flow":"cards";
     if(v===state.budgetView){applyBudgetView();return;}
-    state.budgetView=v;applyBudgetView();save();render();};
+    state.budgetView=v;applyBudgetView();commit();render();};
 });
 
 /* ---------- AFFICHAGE COMPACT ---------- */
@@ -1795,7 +1828,7 @@ function applyCompact(){
   if(sw){sw.classList.toggle("on",!!state.compact);sw.setAttribute("aria-checked",state.compact?"true":"false");}
 }
 document.getElementById("compactSwitch").onclick=()=>{
-  state.compact=!state.compact;applyCompact();save();
+  state.compact=!state.compact;applyCompact();commit();
 };
 // Barre de recherche des dépenses : masquée par défaut, affichable dans les Réglages.
 function applyShowSearch(){
@@ -1806,7 +1839,7 @@ function applyShowSearch(){
 document.getElementById("showSearchSwitch").onclick=()=>{
   state.showSearch=!state.showSearch;
   if(!state.showSearch){budgetSearch="";const inp=document.getElementById("budgetSearch");if(inp)inp.value="";}
-  applyShowSearch();save();render();
+  applyShowSearch();commit();render();
 };
 function applyShowEntryPct(){
   document.querySelector(".app").classList.toggle("hideEntryPct",!state.showEntryPct);
@@ -1815,7 +1848,7 @@ function applyShowEntryPct(){
 }
 document.getElementById("showEntryPctSwitch").onclick=()=>{
   state.showEntryPct=!state.showEntryPct;
-  applyShowEntryPct();save();
+  applyShowEntryPct();commit();
 };
 
 /* ---------- MODE DÉPLACEMENT DES BUDGETS ---------- */
@@ -1825,7 +1858,7 @@ function applyMoveMode(){
   if(sw){sw.classList.toggle("on",!!state.moveMode);sw.setAttribute("aria-checked",state.moveMode?"true":"false");}
 }
 document.getElementById("moveModeSwitch").onclick=()=>{
-  state.moveMode=!state.moveMode;applyMoveMode();save();
+  state.moveMode=!state.moveMode;applyMoveMode();commit();
 };
 
 /* ---------- TRIS (réglages) ---------- */
@@ -1839,9 +1872,9 @@ function renderSortSettings(){
 }
 (function wireSortSelects(){
   const bs=document.getElementById("sortBudgetsSel");
-  if(bs)bs.onchange=()=>{if(BUDGET_SORT_KEYS.includes(bs.value)){state.sortBudgets=bs.value;save();render();}};
+  if(bs)bs.onchange=()=>{if(BUDGET_SORT_KEYS.includes(bs.value)){state.sortBudgets=bs.value;commit();render();}};
   const es=document.getElementById("sortExpensesSel");
-  if(es)es.onchange=()=>{if(EXPENSE_SORT_KEYS.includes(es.value)){state.sortExpenses=es.value;save();render();}};
+  if(es)es.onchange=()=>{if(EXPENSE_SORT_KEYS.includes(es.value)){state.sortExpenses=es.value;commit();render();}};
 })();
 
 /* ---------- CONFIRMATION AVANT SUPPRESSION (réglages) ---------- */
@@ -1858,7 +1891,7 @@ for(const kind in DELETE_CONFIRM_SWITCHES){
   if(sw)sw.onclick=()=>{
     if(!state.confirmDelete)state.confirmDelete=sanitizeConfirmDelete(null);
     state.confirmDelete[kind]=!state.confirmDelete[kind];
-    renderDeleteConfirmSettings();renderSortSettings();save();
+    renderDeleteConfirmSettings();renderSortSettings();commit();
   };
 }
 // Suppression conditionnée au réglage correspondant : si le réglage est désactivé, on supprime directement
@@ -2160,7 +2193,7 @@ function renderThemebar(){const bar=document.getElementById("themebar");bar.inne
   THEMES.forEach(([id,name,color])=>{const b=document.createElement("button");b.className="sw"+(state.theme===id?" on":"");
     b.innerHTML='<span class="dot" style="background:'+color+'"></span>'+name;
     b.onclick=()=>{
-      const go=()=>{state.theme=id;applyTheme();save();renderThemebar();render();};
+      const go=()=>{state.theme=id;applyTheme();commit();renderThemebar();render();};
       if(document.startViewTransition){document.startViewTransition(go);}
       else{document.documentElement.classList.add("theme-transition");go();setTimeout(()=>document.documentElement.classList.remove("theme-transition"),520);}
     };bar.append(b);});
@@ -2683,7 +2716,14 @@ function persistManualOrder(type){
   const linesOfType=m.lines.filter(l=>l.type===type);
   const byId=new Map(linesOfType.map(l=>[l.id,l]));
   const reordered=ids.map(id=>byId.get(id)).filter(Boolean);
-  if(reordered.length!==linesOfType.length)return; // rendu incohérent (recherche active, etc.) : on ne touche à rien
+  if(reordered.length!==linesOfType.length){
+    // Rendu incohérent avec l'état (ex. recherche active pendant le glisser) : on ne touche pas
+    // aux données, mais il faut re-render pour que la liste retrouve son ordre réel — sinon
+    // la carte reste visuellement à sa position glissée alors que rien n'a été enregistré.
+    toast("Réorganisation impossible ici — réessaie sans filtre de recherche actif");
+    render();
+    return;
+  }
   let idx=0;
   m.lines=m.lines.map(l=>l.type===type?reordered[idx++]:l);
   // Un glisser-déposer choisit le tri « manuel » : on conserve l'arrangement fait à la main.
@@ -3291,7 +3331,13 @@ function miniSparkline(vals){
   return '<polyline points="'+pts+'" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><circle cx="'+lastX+'" cy="'+lastY+'" r="2.6" fill="currentColor"/>';
 }
 let heroCurrentValue=null,heroRAF=null,heroSparkDrawnFor=null;
-const prefersReducedMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let prefersReducedMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if(window.matchMedia){
+  const mqReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)");
+  const onReducedMotionChange=e=>{prefersReducedMotion=e.matches;};
+  if(mqReducedMotion.addEventListener)mqReducedMotion.addEventListener("change",onReducedMotionChange);
+  else if(mqReducedMotion.addListener)mqReducedMotion.addListener(onReducedMotionChange); // anciens navigateurs
+}
 function animateHeroValue(to){
   const el=document.getElementById("heroBig");
   const wasSet=heroCurrentValue!=null;
@@ -3382,7 +3428,10 @@ function updateComputed(){
   const savInp=document.getElementById("savingsIn");
   if(savInp&&state.savings.detailed&&document.activeElement!==savInp){const v=t.savings;savInp.value=v===0?"":v;}
   document.getElementById("foot").innerHTML="Données enregistrées sur cet appareil.";
-  document.querySelectorAll("#tab-budgets .row").forEach(el=>{const line=m.lines.find(l=>l.id===el.dataset.id);if(line)applyRowState(el,line);});
+  // Map id->ligne construite une seule fois par appel plutôt qu'un .find() (O(n)) par ligne visible :
+  // évite un coût O(n²) à chaque frappe clavier sur les budgets avec beaucoup de postes.
+  const linesById=new Map(m.lines.map(l=>[l.id,l]));
+  document.querySelectorAll("#tab-budgets .row").forEach(el=>{const line=linesById.get(el.dataset.id);if(line)applyRowState(el,line);});
   if(detailLineId){const dline=m.lines.find(l=>l.id===detailLineId);if(dline)applyDetailState(dline);}
   renderRecap();
   let issues=0;m.lines.forEach(l=>{if(!(l.name||"").trim())issues++;issues+=entryIssues(l);});
@@ -4369,7 +4418,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;re
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
+const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -4400,11 +4449,149 @@ function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.custom
   state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
   state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
-  expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));}
-function undo(){if(hIndex<=0)return;clearTimeout(recTimer);hIndex--;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Annulé");}
-function redo(){if(hIndex>=history.length-1)return;clearTimeout(recTimer);hIndex++;restoreSnap(history[hIndex]);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();toast("Rétabli");}
+  expanded.clear();(d.expanded||[]).forEach(id=>expanded.add(id));
+  folded.clear();(d.folded||[]).forEach(id=>folded.add(id));}
+function undo(){
+  if(hIndex<=0){toast("Rien à annuler");return;}
+  clearTimeout(recTimer);
+  const before=history[hIndex];hIndex--;const after=history[hIndex];
+  restoreSnap(after);
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  queueHistoryChange("undo",diffSnapshots(before,after));
+}
+function redo(){
+  if(hIndex>=history.length-1){toast("Rien à rétablir");return;}
+  clearTimeout(recTimer);
+  const before=history[hIndex];hIndex++;const after=history[hIndex];
+  restoreSnap(after);
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  queueHistoryChange("redo",diffSnapshots(before,after));
+}
+
+/* ---------- Toast d'historique : décrit ce qui a réellement changé (annuler/rétablir) -----------
+   Plutôt qu'un « Annulé » générique, on compare l'état avant/après le clic et on affiche une
+   liste lisible des changements (postes ajoutés/supprimés, montants modifiés, revenus...).
+   Des clics rapprochés (annuler ×3, par ex.) accumulent leurs changements dans un seul toast
+   au lieu d'en afficher un par clic — sinon ils s'écraseraient les uns les autres. */
+function snapKeyLabel(key,bodyNew,bodyOld){
+  if(isCustom(key))return((bodyNew&&bodyNew.name)||(bodyOld&&bodyOld.name)||"Budget personnalisé").trim()||"Budget personnalisé";
+  const mm=/^(\d{4})-(\d{2})$/.exec(key);if(!mm)return key;
+  const d=new Date(+mm[1],+mm[2]-1,1);
+  const s=new Intl.DateTimeFormat("fr-FR",{month:"long",year:"numeric"}).format(d);
+  return s[0].toUpperCase()+s.slice(1);
+}
+function diffBudgetBody(a,b,label,msgs){
+  const local=[];
+  const incOf=x=>x.incomeDetailed?(x.incomeLines||[]).reduce((s,l)=>s+(+l.amount||0),0):(+x.income||0);
+  const incA=incOf(a),incB=incOf(b);
+  if(Math.abs(incA-incB)>0.004)local.push({type:"value",text:"Revenus : "+eur(incA)+" → "+eur(incB)});
+  const svOf=x=>{const sv=x.savings;if(!sv)return 0;return Array.isArray(sv.lines)&&sv.lines.length?sv.lines.reduce((s,l)=>s+(+l.amount||0),0):(+sv.total||0);};
+  const svA=svOf(a),svB=svOf(b);
+  if(Math.abs(svA-svB)>0.004)local.push({type:"value",text:"Épargne : "+eur(svA)+" → "+eur(svB)});
+  const byIdA=new Map((a.lines||[]).map(l=>[l.id,l])),byIdB=new Map((b.lines||[]).map(l=>[l.id,l]));
+  const added=[],removed=[],renamed=[],plannedCh=[];
+  let eAddN=0,eAddSum=0,eRemN=0,eRemSum=0,eChN=0;
+  byIdB.forEach((lb,id)=>{
+    const la=byIdA.get(id);
+    if(!la){added.push((lb.name||"").trim()||"(sans nom)");return;}
+    if((la.name||"")!==(lb.name||""))renamed.push({from:(la.name||"").trim()||"(sans nom)",to:(lb.name||"").trim()||"(sans nom)"});
+    if(round2(+la.planned||0)!==round2(+lb.planned||0))plannedCh.push({name:(lb.name||la.name||"").trim()||"(sans nom)",from:+la.planned||0,to:+lb.planned||0});
+    const eA=new Map((la.entries||[]).map(e=>[e.id,e])),eB=new Map((lb.entries||[]).map(e=>[e.id,e]));
+    eB.forEach((en,eid)=>{const oe=eA.get(eid);
+      if(!oe){eAddN++;eAddSum+=(+en.amount||0);}
+      else if(round2(+oe.amount||0)!==round2(+en.amount||0))eChN++;
+    });
+    eA.forEach((oe,eid)=>{if(!eB.has(eid)){eRemN++;eRemSum+=(+oe.amount||0);}});
+  });
+  byIdA.forEach((la,id)=>{if(!byIdB.has(id))removed.push((la.name||"").trim()||"(sans nom)");});
+  if(added.length===1)local.push({type:"add",text:"Poste « "+added[0]+" » ajouté"});
+  else if(added.length>1)local.push({type:"add",text:added.length+" postes ajoutés"});
+  if(removed.length===1)local.push({type:"remove",text:"Poste « "+removed[0]+" » supprimé"});
+  else if(removed.length>1)local.push({type:"remove",text:removed.length+" postes supprimés"});
+  if(renamed.length===1)local.push({type:"rename",text:"« "+renamed[0].from+" » renommé en « "+renamed[0].to+" »"});
+  else if(renamed.length>1)local.push({type:"rename",text:renamed.length+" postes renommés"});
+  if(plannedCh.length===1)local.push({type:"value",text:"Budget de « "+plannedCh[0].name+" » : "+eur(plannedCh[0].from)+" → "+eur(plannedCh[0].to)});
+  else if(plannedCh.length>1)local.push({type:"value",text:plannedCh.length+" budgets de poste modifiés"});
+  if(eAddN===1)local.push({type:"add",text:"Dépense de "+eur(eAddSum)+" ajoutée"});
+  else if(eAddN>1)local.push({type:"add",text:eAddN+" dépenses ajoutées ("+eur(eAddSum)+")"});
+  if(eRemN===1)local.push({type:"remove",text:"Dépense de "+eur(eRemSum)+" supprimée"});
+  else if(eRemN>1)local.push({type:"remove",text:eRemN+" dépenses supprimées ("+eur(eRemSum)+")"});
+  if(eChN===1)local.push({type:"value",text:"Montant d'une dépense modifié"});
+  else if(eChN>1)local.push({type:"value",text:eChN+" montants de dépense modifiés"});
+  local.forEach(m=>msgs.push({type:m.type,text:label+" — "+m.text}));
+}
+function diffBudgetsMap(oldMap,newMap,msgs){
+  const a=oldMap||{},b=newMap||{};
+  const allKeys=new Set([...Object.keys(a),...Object.keys(b)]);
+  allKeys.forEach(k=>{
+    const ba=a[k],bb=b[k];
+    if(ba&&!bb){msgs.push({type:"remove",text:snapKeyLabel(k,null,ba)+" — supprimé"});return;}
+    if(!ba&&bb){msgs.push({type:"create",text:snapKeyLabel(k,bb,null)+" — créé"});return;}
+    if(ba&&bb)diffBudgetBody(ba,bb,snapKeyLabel(k,bb,ba),msgs);
+  });
+}
+function diffCategories(a,b,msgs){
+  const byIdA=new Map((a||[]).map(c=>[c.id,c])),byIdB=new Map((b||[]).map(c=>[c.id,c]));
+  let added=0,removed=0,changed=0;
+  byIdB.forEach((cb,id)=>{const ca=byIdA.get(id);if(!ca)added++;else if(ca.name!==cb.name||ca.icon!==cb.icon)changed++;});
+  byIdA.forEach((ca,id)=>{if(!byIdB.has(id))removed++;});
+  if(added)msgs.push({type:"add",text:added===1?"1 catégorie ajoutée":added+" catégories ajoutées"});
+  if(removed)msgs.push({type:"remove",text:removed===1?"1 catégorie supprimée":removed+" catégories supprimées"});
+  if(changed)msgs.push({type:"rename",text:changed===1?"1 catégorie modifiée":changed+" catégories modifiées"});
+}
+function diffSnapshots(oldStr,newStr){
+  try{
+    const a=JSON.parse(oldStr),b=JSON.parse(newStr);
+    const msgs=[];
+    if(a.theme!==b.theme){const t=THEMES.find(t=>t[0]===b.theme);msgs.push({type:"theme",text:"Thème changé pour « "+(t?t[1]:b.theme)+" »"});}
+    diffCategories(a.categories,b.categories,msgs);
+    diffBudgetsMap(a.months,b.months,msgs);
+    diffBudgetsMap(a.customBudgets,b.customBudgets,msgs);
+    return msgs;
+  }catch(e){return [];}
+}
+let hToastQueue=[],hToastTimer=null,hToastDir=null,hToastCount=0,hToastHideT=null;
+function queueHistoryChange(dir,msgs){
+  if(hToastDir!==dir){hToastQueue=[];hToastCount=0;hToastDir=dir;} // changement de sens : on repart d'un toast propre
+  hToastCount++;hToastQueue.push(...msgs);
+  clearTimeout(hToastTimer);
+  hToastTimer=setTimeout(flushHistoryToast,260); // laisse le temps à des clics rapprochés de s'accumuler
+}
+function flushHistoryToast(){
+  showHistoryToast(hToastDir,hToastCount,hToastQueue);
+  hToastQueue=[];hToastCount=0;hToastDir=null;
+}
+// Icône par nature de changement — reconnaissable en un coup d'œil sans lire le texte.
+const HT_ICONS={theme:"🎨",create:"🆕",add:"➕",remove:"🗑",rename:"✏️",value:"💶"};
+function showHistoryToast(dir,count,msgs){
+  const el=document.getElementById("historyToast");if(!el)return;
+  document.getElementById("htIcon").textContent=dir==="redo"?"↷":"↶";
+  document.getElementById("htTitle").textContent=(dir==="redo"?"Rétabli":"Annulé")+(count>1?" ×"+count:"");
+  const list=document.getElementById("htList");list.innerHTML="";
+  // des clics répétés produisent parfois le même libellé — pas la peine de le répéter (dédup sur le texte)
+  const seen=new Set(),uniq=[];
+  msgs.forEach(m=>{if(!seen.has(m.text)){seen.add(m.text);uniq.push(m);}});
+  const MAX=4;
+  const mkLi=(icon,text,cls)=>{
+    const li=document.createElement("li");if(cls)li.className=cls;
+    const ic=document.createElement("span");ic.className="liIcon";ic.textContent=icon;
+    const tx=document.createElement("span");tx.className="liText";tx.textContent=text;
+    li.append(ic,tx);list.append(li);
+  };
+  if(uniq.length===0){
+    mkLi("•","Rien qui affecte tes données (navigation, réglage…)");
+  }else{
+    uniq.slice(0,MAX).forEach(m=>mkLi(HT_ICONS[m.type]||"•",m.text));
+    if(uniq.length>MAX)mkLi("…","+ "+(uniq.length-MAX)+" autre"+(uniq.length-MAX>1?"s":"")+" changement"+(uniq.length-MAX>1?"s":""),"htMore");
+  }
+  el.classList.add("show");
+  clearTimeout(hToastHideT);
+  const dur=Math.min(5200,2200+uniq.length*450);
+  hToastHideT=setTimeout(()=>el.classList.remove("show"),dur);
+}
+document.getElementById("historyToast").addEventListener("click",()=>{
+  document.getElementById("historyToast").classList.remove("show");clearTimeout(hToastHideT);
+});
 document.getElementById("undoBtn").onclick=undo;
 document.getElementById("redoBtn").onclick=redo;
 
@@ -4532,7 +4719,10 @@ function importData(file){
   r.onload=async()=>{try{const d=JSON.parse(r.result);
     if(!d||typeof d!=="object")throw 0;
     const cleanMonths=sanitizeMonths(d.months);
-    if(!cleanMonths||Object.keys(cleanMonths).length===0)throw 0;
+    const cleanCustom=sanitizeCustomBudgets(d.customBudgets);
+    // Un backup valide doit contenir au moins un mois OU un budget personnalisé — un fichier
+    // qui n'a que des budgets personnalisés (pas de mois) était rejeté à tort auparavant.
+    if((!cleanMonths||Object.keys(cleanMonths).length===0)&&Object.keys(cleanCustom).length===0)throw 0;
     const ok=await askConfirm({
       icon:"⬆️",danger:true,
       title:"Remplacer les données actuelles ?",
@@ -4540,8 +4730,8 @@ function importData(file){
       confirmText:"Remplacer"
     });
     if(!ok)return;
-    state.months=cleanMonths;
-    state.customBudgets=sanitizeCustomBudgets(d.customBudgets);
+    state.months=cleanMonths||{};
+    state.customBudgets=cleanCustom;
     state.categories=sanitizeCategories(d.categories)||DEFAULT_CATEGORIES.map(c=>({...c}));
     if(typeof d.current==="string"&&(/^\d{4}-\d{2}$/.test(d.current)||(isCustom(d.current)&&state.customBudgets[d.current])))state.current=d.current;
     if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;
@@ -5264,8 +5454,8 @@ function positionPopup(){
   calcPopup.style.right=right+"px";
   calcPopup.style.top=top+"px";
 }
-function openCalc(){positionPopup();calcPopup.classList.add("open");}
-function closeCalc(){calcPopup.classList.remove("open");calcPopup.classList.remove("scrollHidden");}
+function openCalc(){positionPopup();calcPopup.classList.add("open");document.addEventListener("scroll",calcOnScroll,true);}
+function closeCalc(){calcPopup.classList.remove("open");calcPopup.classList.remove("scrollHidden");document.removeEventListener("scroll",calcOnScroll,true);}
 
 // Défilement de l'appli : on efface la calculette le temps du scroll, puis on la ramène ~450 ms
 // après le dernier événement de scroll. Écoute en phase de capture pour attraper aussi les zones
@@ -5280,7 +5470,6 @@ function calcOnScroll(e){
   clearTimeout(calcScrollT);
   calcScrollT=setTimeout(()=>calcPopup.classList.remove("scrollHidden"),450);
 }
-document.addEventListener("scroll",calcOnScroll,true);
 
 fabTop.addEventListener("click",()=>{
   calcPopup.classList.contains("open") ? closeCalc() : openCalc();
@@ -5306,11 +5495,12 @@ document.querySelectorAll(".calcGrid button").forEach(b=>{
 });
 
 calcInsert.addEventListener("click",()=>{
-  if(lastFocusedField){
+  if(lastFocusedField && lastFocusedField.isConnected){
     lastFocusedField.value = calcVal.textContent;
     lastFocusedField.dispatchEvent(new Event("input",{bubbles:true}));
     if(typeof toast==="function") toast("Inséré dans le champ");
   }else{
+    lastFocusedField=null;
     if(typeof toast==="function") toast("Aucun champ actif — touche d'abord un champ");
   }
   closeCalc();
@@ -5367,6 +5557,7 @@ document.querySelectorAll("#calcSizeSeg button").forEach(b=>{
   b.addEventListener("click",()=>{
     calcSize=b.dataset.sz;
     applyCalcSize(calcSize);
+    if(!popupMovedManually) positionPopup();
     try{localStorage.setItem(CALC_SIZE_KEY,calcSize);}catch(_){}
   });
 });
