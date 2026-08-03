@@ -2656,8 +2656,16 @@ function attachDragHandle(handle,wrap){
 function onDragMove(ev){
   if(!dragCtx)return;
   dragCtx.lastY=ev.clientY;
-  const{wrap,startY,baseTop}=dragCtx;
-  wrap.style.top=(baseTop+(ev.clientY-startY))+"px";
+  const{wrap,container,startY,baseTop}=dragCtx;
+  let top=baseTop+(ev.clientY-startY);
+  // On bloque la carte aux bornes verticales de SA section (fixedList ou varList) : un poste
+  // fixe ne peut de toute façon jamais devenir variable (et inversement), donc autant arrêter
+  // net le glisser à la frontière plutôt que de laisser la carte flotter au-dessus de l'autre
+  // liste en donnant l'illusion que ça pourrait y déposer le poste.
+  const cRect=container.getBoundingClientRect();
+  const wrapH=wrap.getBoundingClientRect().height;
+  top=Math.max(cRect.top,Math.min(cRect.bottom-wrapH,top));
+  wrap.style.top=top+"px";
   repositionDragPlaceholder(ev.clientY);
 }
 // Replace le repère (placeholder) parmi les cartes selon la position verticale du doigt.
@@ -2685,12 +2693,19 @@ function dragAutoScrollStep(){
   const topbar=document.querySelector(".topbar");
   const topEdge=(topbar?topbar.getBoundingClientRect().bottom:0)+70; // zone sous la barre collante
   const botEdge=vh-90;
+  // Vitesse min garantie dès l'entrée dans la zone (2px), qui monte jusqu'à 20px/frame près du bord —
+  // assez pour traverser une longue liste sans coller le doigt au bord, mais assez lent pour garder
+  // le contrôle fin près de la frontière entre postes fixes et variables (ancien plafond : 46px/frame).
   let speed=0;
-  if(y<topEdge)speed=-Math.min(26,Math.ceil((topEdge-y)/5));
-  else if(y>botEdge)speed=Math.min(26,Math.ceil((y-botEdge)/5));
+  if(y<topEdge)speed=-Math.min(20,2+Math.ceil((topEdge-y)/4));
+  else if(y>botEdge)speed=Math.min(20,2+Math.ceil((y-botEdge)/4));
   if(speed!==0){
     const before=window.scrollY;
-    window.scrollBy(0,speed);
+    // behavior:"instant" est indispensable ici : <html> a scroll-behavior:smooth (pour les ancres/
+    // scrollIntoView), donc sans ce réglage chaque scrollBy relançait une animation smooth qui se
+    // faisait interrompre par le scrollBy suivant 16ms plus tard — le défilement semblait "collé"
+    // alors que la boucle tournait normalement à 60fps.
+    window.scrollBy({top:speed,left:0,behavior:"instant"});
     if(window.scrollY!==before)repositionDragPlaceholder(y); // la liste a bougé : on replace le repère
   }
   dragScrollRAF=requestAnimationFrame(dragAutoScrollStep);
