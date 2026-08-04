@@ -519,6 +519,8 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .glegend{display:flex;gap:14px;margin-top:10px;font-size:11.5px;color:var(--muted)}
 .glegend span span{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:middle;margin-right:4px}
 .gbarsRow{display:flex;align-items:flex-start;max-width:100%}
+.gbarsRow.fits{justify-content:center}
+.gbarsRow.fits .gbarsScroll{flex:0 1 auto}
 .gbarsAxisWrap{flex-shrink:0}
 svg.gbarsAxis{display:block;animation:panelIn .5s ease both}
 .gbarsScroll{flex:1 1 auto;min-width:0;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border-radius:10px}
@@ -1381,12 +1383,11 @@ html{scroll-behavior:smooth}
     </div>
     <div class="hr"></div>
     <div class="slabel">Onglet Comparer</div>
-    <p class="bkhint" style="margin-top:0">Mois affichés par défaut dans les graphiques — glisse horizontalement pour voir le reste.</p>
-    <div class="szSeg" id="cmpMonthsSeg">
-      <button type="button" data-n="3">3 mois</button>
-      <button type="button" data-n="6">6 mois</button>
-      <button type="button" data-n="9">9 mois</button>
-      <button type="button" data-n="12">12 mois</button>
+    <p class="bkhint" style="margin-top:0">Taille des barres dans les graphiques. Le nombre de mois affichés s'ajuste tout seul à la largeur de l'écran — plus de mois quand c'est large (déplié, paysage), moins quand c'est étroit. Glisse horizontalement pour voir le reste.</p>
+    <div class="szSeg" id="cmpDensitySeg">
+      <button type="button" data-d="min">Grandes</button>
+      <button type="button" data-d="med">Moyennes</button>
+      <button type="button" data-d="max">Fines</button>
     </div>
     <div class="hr"></div>
     <div class="slabel">Indicateurs d'en-tête</div>
@@ -1810,11 +1811,17 @@ function sanitizeStatsOrder(arr){
   return out;
 }
 function sanitizeHeroMetric(x){return STAT_META[x]?x:"reste";}
+// Épargne et Épargne déduite reposent sur le plan d'épargne mensuel global : dans un budget
+// personnalisé elles valent toujours 0, donc on les masque de l'en-tête. Si l'indicateur mis en
+// avant (le « héros ») est l'un des deux, on retombe sur « Reste réel » pour ce budget (sans
+// toucher au réglage, qui reste valable pour les mois).
+const CUST_HIDDEN_STATS=["savings","deducted"];
+function heroIdFor(cust){const id=sanitizeHeroMetric(state.heroMetric);return (cust&&CUST_HIDDEN_STATS.includes(id))?"reste":id;}
 function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id of STAT_IDS){const v=o[id];
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpListCount:2};
+let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpPoste:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2};
 // Tris (configurables dans les Réglages). Deux tris indépendants : les budgets (postes) et les
 // dépenses. Par défaut « plus récent d'abord » (ordre décroissant d'ajout). « Manuel » = ordre
 // choisi au glisser-déposer (postes uniquement). Un « seq » d'ordre d'ajout est attribué à chaque
@@ -1822,13 +1829,23 @@ let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",ca
 const BUDGET_SORTS=[["recent","Plus récent d'abord"],["oldest","Plus ancien d'abord"],["manual","Manuel (glisser-déposer)"],["name","Nom (A → Z)"],["budget_desc","Budget (gros → petit)"],["spent_desc","Dépensé (gros → petit)"],["over_desc","Dépassement d'abord"],["category","Catégorie (A → Z)"]];
 const EXPENSE_SORTS=[["recent","Plus récent d'abord"],["oldest","Plus ancien d'abord"],["date_desc","Date (récente → ancienne)"],["date_asc","Date (ancienne → récente)"],["amount_desc","Montant (gros → petit)"]];
 const BUDGET_SORT_KEYS=BUDGET_SORTS.map(x=>x[0]), EXPENSE_SORT_KEYS=EXPENSE_SORTS.map(x=>x[0]);
+// Densité des graphiques Comparer : 3 niveaux (largeur d'un groupe de barres, en px).
+// Le NOMBRE de mois visibles n'est plus figé — il découle de la largeur réelle disponible
+// (donc plus de mois quand l'écran est large : Fold déplié, paysage… et moins quand il est
+// plié). La densité ne règle que la « grosseur » des barres : min = grosses barres, peu de
+// mois par écran ; max = fines barres, beaucoup de mois par écran.
+const CMP_GW={min:66,med:44,max:28};
+const CMP_DENSITIES=["min","med","max"];
+const cmpGw=d=>CMP_GW[d]||CMP_GW.med;
+// Migration depuis l'ancien réglage numérique (3/6/9/12 mois) vers un niveau de densité.
+const cmpMonthsToDensity=n=>{n=+n;return n<=3?"min":(n>=12?"max":"med");};
 const nextSeq=()=>(state.seq=(Number(state.seq)||0)+1);
 let tab="budgets";
 const expanded=new Set();
 let detailLineId=null,detailEntrySearch="";
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med")}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -1886,12 +1903,13 @@ document.getElementById("moveModeSwitch").onclick=()=>{
   state.moveMode=!state.moveMode;applyMoveMode();commit();
 };
 
-/* ---------- ONGLET COMPARER : mois visibles (graphiques) et budgets visibles (liste) ---------- */
+/* ---------- ONGLET COMPARER : densité des graphiques et budgets visibles (liste) ---------- */
+// (nom conservé pour les appelants existants) — reflète le niveau de densité choisi.
 function applyCmpMonthsSeg(){
-  document.querySelectorAll("#cmpMonthsSeg button").forEach(b=>b.classList.toggle("active",+b.dataset.n===state.cmpMonths));
+  document.querySelectorAll("#cmpDensitySeg button").forEach(b=>b.classList.toggle("active",b.dataset.d===state.cmpDensity));
 }
-document.querySelectorAll("#cmpMonthsSeg button").forEach(b=>{
-  b.onclick=()=>{state.cmpMonths=+b.dataset.n||6;applyCmpMonthsSeg();save();if(tab==="comparer")renderComparer();};
+document.querySelectorAll("#cmpDensitySeg button").forEach(b=>{
+  b.onclick=()=>{state.cmpDensity=CMP_DENSITIES.includes(b.dataset.d)?b.dataset.d:"med";applyCmpMonthsSeg();save();if(tab==="comparer")renderComparer();};
 });
 // Limite la hauteur d'une liste de budgets (.cmpScroll) pour n'en montrer que `count` par défaut,
 // le reste devenant accessible en faisant défiler verticalement. Mesuré dynamiquement (plutôt
@@ -2039,7 +2057,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpListCount:state.cmpListCount}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,lines:[]};}
@@ -2329,9 +2347,11 @@ document.getElementById("addCatBtn").onclick=()=>{
 /* ---------- INDICATEURS D'EN-TÊTE : cartes (tous sauf le héros), dans l'ordre choisi ---------- */
 function renderHeroStats(){
   const wrap=document.querySelector(".stats");if(!wrap)return;
-  const heroId=sanitizeHeroMetric(state.heroMetric);
-  const cards=sanitizeStatsOrder(state.statsOrder).filter(id=>id!==heroId);
-  const sig=heroId+"|"+cards.map(id=>id+":"+metricLabel(id)).join(",");
+  const cust=isCustom(state.current);
+  const heroId=heroIdFor(cust);
+  let cards=sanitizeStatsOrder(state.statsOrder).filter(id=>id!==heroId);
+  if(cust)cards=cards.filter(id=>!CUST_HIDDEN_STATS.includes(id)); // toujours 0 en budget perso → masquées
+  const sig=(cust?"C|":"M|")+heroId+"|"+cards.map(id=>id+":"+metricLabel(id)).join(",");
   if(wrap.dataset.sig===sig)return; // rien n'a changé : on ne reconstruit pas (évite de relancer l'animation à chaque recalcul)
   wrap.dataset.sig=sig;
   wrap.innerHTML=cards.map(id=>{const m=STAT_META[id];
@@ -3438,7 +3458,7 @@ function updateComputed(){
   if(incWarn)incWarn.textContent=cust
     ?"⚠ Ajoute des revenus pour voir ton reste réel."
     :"⚠ Ajoute tes revenus du mois pour voir ton reste réel et ton budget par jour.";
-  const heroId=sanitizeHeroMetric(state.heroMetric),hm=STAT_META[heroId];
+  const heroId=heroIdFor(cust),hm=STAT_META[heroId];
   const hero=document.getElementById("hero"),over=hm.over(t);
   hero.className="hero"+(over?" over":"");
   const lblEl=document.getElementById("heroLbl");if(lblEl)lblEl.textContent=metricLabel(heroId);
@@ -3449,6 +3469,7 @@ function updateComputed(){
   // Valeurs des cartes (tous les indicateurs sauf le héros)
   sanitizeStatsOrder(state.statsOrder).forEach(id=>{
     if(id===heroId)return;
+    if(cust&&CUST_HIDDEN_STATS.includes(id))return; // carte masquée en budget perso
     const def=STAT_META[id],el=document.getElementById(def.el);
     if(!el)return;
     el.textContent=eur(def.get(t));el.className="v"+(def.neg(t)?" red":"");
@@ -3720,7 +3741,7 @@ function axisFmt(v){
   if(v>=1000){const k=v/1000;return k.toLocaleString("fr-FR",{maximumFractionDigits:k<10?1:0})+"k";}
   return Math.round(v).toLocaleString("fr-FR");
 }
-function groupedBars(data,visibleCount){
+function groupedBars(data,density){
   const N=data.length;if(N===0)return'<p class="empty">Pas encore de mois à comparer.</p>';
   const vals=data.flatMap(d=>[d.rev,d.dep]);
   const maxV=niceCeil(Math.max(1,...vals)); // haut de l'échelle, arrondi « rond »
@@ -3728,22 +3749,16 @@ function groupedBars(data,visibleCount){
   // La zone de tracé (barres + lignes de repère) est un SVG à part, qui défile horizontalement ;
   // l'axe Y (montants) est un second SVG fixe à gauche, hors de la zone de défilement, pour
   // rester visible en permanence pendant le glissement.
-  // Largeur d'un groupe (mois) : adaptée au nombre de mois à afficher (vc) pour que ce nombre
-  // tienne réellement dans la largeur visible d'un téléphone (~300px hors axe Y), au lieu d'une
-  // largeur fixe de 58px qui limitait toujours l'affichage à ~5 mois quel que soit le réglage
-  // (le conteneur flex se rétrécissait à la largeur d'écran quoi qu'il arrive).
-  // Jusqu'à ~5 mois les groupes restent à 58px (confortable) ; au-delà, ils se resserrent
-  // (plancher 22px) pour que le réglage tienne dans la largeur cible, et l'axe X saute des
-  // libellés quand c'est trop serré pour ne pas se chevaucher.
-  const vc=Math.max(1,+visibleCount||6);
-  const targetVisW=300-padL;
-  const gw=Math.max(22,Math.min(58,targetVisW/vc));
+  // La densité (réglage min/med/max) fixe UNIQUEMENT la largeur d'un groupe (gw). Le nombre de
+  // mois réellement visibles découle ensuite de la largeur disponible à l'écran (décidé après
+  // insertion par layoutGbars) : on n'impose donc plus de largeur cible « téléphone » — le SVG
+  // fait exactement N groupes de gw, la zone de défilement occupe toute la largeur du panneau,
+  // et le CSS/JS centre (si tout tient) ou fait défiler (sinon). Résultat : plié ⇒ moins de mois,
+  // déplié/paysage ⇒ plus de mois, sans zone vide ni scroll inutile.
+  const gw=cmpGw(density);
   const labelStep=gw>=42?1:(gw>=30?2:3);
-  const plotW=Math.max(targetVisW,N*gw)+padR;
-  // Largeur visible par défaut (le reste se découvre en faisant glisser horizontalement) : réglable
-  // dans Réglages > Onglet Comparer. Pas de limite si tout tient déjà dans cette largeur.
-  const visPlotW=Math.min(N,vc)*gw+padR;
-  const bw=Math.min(gw*0.34,20), gap=4;
+  const plotW=N*gw+padR;                // largeur totale du tracé (tous les mois, à la densité choisie)
+  const bw=Math.min(gw*0.34,24), gap=4;
   const usableH=H-padB-padT;
   const yFor=v=>padT+(1-v/maxV)*usableH;
   const zeroY=yFor(0);
@@ -3783,7 +3798,7 @@ function groupedBars(data,visibleCount){
     }
   });
   const svg='<svg class="gbars" viewBox="0 0 '+plotW+' '+H+'" width="'+plotW+'" height="'+H+'">'+s+'</svg>';
-  return'<div class="gbarsRow"><div class="gbarsAxisWrap">'+axisSvg+'</div><div class="gbarsScroll" style="max-width:'+visPlotW+'px">'+svg+'</div></div>';
+  return'<div class="gbarsRow" data-plotw="'+plotW.toFixed(1)+'"><div class="gbarsAxisWrap">'+axisSvg+'</div><div class="gbarsScroll">'+svg+'</div></div>';
 }
 // Touche/clique une barre d'un diagramme groupé (revenus vs dépensé) pour voir sa valeur exacte
 // dans un toast. Délégation sur document : fonctionne même après le remplacement du SVG par
@@ -3797,6 +3812,27 @@ document.addEventListener("keydown",e=>{
   const r=e.target.closest&&e.target.closest("svg.gbars rect[data-tip]");
   if(r){e.preventDefault();toast(r.dataset.tip);}
 });
+// Décide, à la LARGEUR RÉELLE de l'écran, si un graphique groupé tient en entier (→ centré, sans
+// défilement) ou non (→ on laisse défiler). Comme la largeur du panneau change quand l'appareil
+// est plié/déplié ou tourné, on relance ce calcul à chaque redimensionnement : le nombre de mois
+// visibles s'ajuste alors tout seul, sans re-rendu ni mesure au moment de construire le SVG.
+function layoutGbars(){
+  document.querySelectorAll(".gbarsRow").forEach(row=>{
+    if(!row.querySelector("svg.gbars"))return;               // squelette d'animation en cours : on repassera
+    const plotW=parseFloat(row.dataset.plotw)||0;
+    const axis=row.querySelector(".gbarsAxisWrap");
+    const avail=row.clientWidth-(axis?axis.offsetWidth:0);   // place réelle pour le tracé
+    row.classList.toggle("fits", plotW<=avail+0.5);
+  });
+}
+let gbarsResizeTimer=null;
+function scheduleLayoutGbars(){clearTimeout(gbarsResizeTimer);gbarsResizeTimer=setTimeout(layoutGbars,120);}
+addEventListener("resize",scheduleLayoutGbars);
+if(window.visualViewport)visualViewport.addEventListener("resize",scheduleLayoutGbars);
+// À appeler juste après avoir (re)construit un onglet contenant des graphiques groupés : mesure
+// tout de suite (cas « mouvement réduit » : le SVG est déjà là) et de nouveau après l'animation
+// d'apparition (withChartSkeleton reconstruit le SVG sur 2 frames — on repasse après).
+function refreshGbarsLayout(){layoutGbars();requestAnimationFrame(()=>requestAnimationFrame(layoutGbars));}
 function renderBudgetsList(){
   const keys=Object.keys(state.months).sort().reverse();
   let html='<div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
@@ -3932,7 +3968,7 @@ function renderComparerCustom(){
   const bars=cbKeys.map(k=>{const t=totals(ensure(k),true);return{label:shortName(k,7),cur:k===state.current,rev:t.income,dep:t.spent};});
   c.insertAdjacentHTML("beforeend",
     '<div class="panel"><h3>Revenus vs dépensé</h3><p class="psub">Tous tes budgets personnalisés</p>'
-    +groupedBars(bars,state.cmpMonths)
+    +groupedBars(bars,state.cmpDensity)
     +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Revenus</span>'
     +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
     +'<span><span style="background:'+gv("--red")+'"></span>Dépassé revenus</span></div></div>');
@@ -3971,7 +4007,17 @@ function renderComparerCustom(){
     const aSel=document.getElementById("cmpCbASel");if(aSel)aSel.onchange=()=>{state.cmpCbA=aSel.value;save();renderComparer();};
     const bSel=document.getElementById("cmpCbBSel");if(bSel)bSel.onchange=()=>{state.cmpCbB=bSel.value;save();renderComparer();};
   }
+
+  // Une même dépense comparée entre les différents budgets personnalisés
+  const cbPosteNames=[...new Set(cbKeys.flatMap(k=>(ensure(k).lines||[]).map(l=>(l.name||"").trim()).filter(Boolean)))].sort((a,b)=>a.localeCompare(b));
+  if(cbPosteNames.length){
+    const cbRows=cbKeys.map(k=>({k,label:shortName(k,7),cur:k===state.current}));
+    c.insertAdjacentHTML("beforeend",buildCbPostePanelHTML(cbRows,cbPosteNames));
+    attachCbPosteSelHandler(cbRows,cbPosteNames);
+  }
+
   withChartSkeleton(c);
+  refreshGbarsLayout();
 }
 // Panel "Une dépense dans le temps" isolé pour pouvoir le rafraîchir seul (sans recharger
 // tout l'onglet Comparer) quand on change la dépense sélectionnée.
@@ -3983,7 +4029,7 @@ function buildPostePanelHTML(rows,posteNames){
     return{label:r.label,cur:r.cur,rev,dep,revLabel:"Budget",depLabel:"Dépensé"};});
   return '<div class="panel" id="postePanel"><h3>Une dépense dans le temps</h3>'
     +'<div class="selrow"><label>Dépense</label><select id="posteSel">'+opts+'</select></div>'
-    +groupedBars(pdata,state.cmpMonths)
+    +groupedBars(pdata,state.cmpDensity)
     +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Budget</span>'
     +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
     +'<span><span style="background:'+gv("--red")+'"></span>Dépassé budget</span></div></div>';
@@ -3997,6 +4043,36 @@ function attachPosteSelHandler(rows,posteNames){
     if(!panel)return;
     panel.outerHTML=buildPostePanelHTML(rows,posteNames);
     attachPosteSelHandler(rows,posteNames);
+    layoutGbars();
+  };
+}
+// Variante budgets personnalisés : la MÊME dépense (par nom) comparée d'un budget perso à l'autre
+// (au lieu d'un mois à l'autre). Sélection isolée dans state.cmpCbPoste pour ne pas mélanger avec
+// la sélection mensuelle (state.cmpPoste).
+function buildCbPostePanelHTML(cbRows,posteNames){
+  if(!state.cmpCbPoste||!posteNames.includes(state.cmpCbPoste))state.cmpCbPoste=posteNames[0];
+  const opts=posteNames.map(n=>'<option'+(n===state.cmpCbPoste?' selected':'')+'>'+esc(n)+'</option>').join("");
+  const pdata=cbRows.map(r=>{const lines=(ensure(r.k).lines||[]).filter(l=>(l.name||"").trim()===state.cmpCbPoste);
+    const rev=lines.reduce((s,l)=>s+(+l.planned||0),0),dep=lines.reduce((s,l)=>s+spent(l),0);
+    return{label:r.label,cur:r.cur,rev,dep,revLabel:"Budget",depLabel:"Dépensé"};});
+  return '<div class="panel" id="cbPostePanel"><h3>Une dépense entre budgets</h3>'
+    +'<p class="psub">La même dépense comparée d\'un budget personnalisé à l\'autre</p>'
+    +'<div class="selrow"><label>Dépense</label><select id="cbPosteSel">'+opts+'</select></div>'
+    +groupedBars(pdata,state.cmpDensity)
+    +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Budget</span>'
+    +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
+    +'<span><span style="background:'+gv("--red")+'"></span>Dépassé budget</span></div></div>';
+}
+function attachCbPosteSelHandler(cbRows,posteNames){
+  const sel=document.getElementById("cbPosteSel");
+  if(!sel)return;
+  sel.onchange=()=>{
+    state.cmpCbPoste=sel.value;save();
+    const panel=document.getElementById("cbPostePanel");
+    if(!panel)return;
+    panel.outerHTML=buildCbPostePanelHTML(cbRows,posteNames);
+    attachCbPosteSelHandler(cbRows,posteNames);
+    layoutGbars();
   };
 }
 function renderComparer(){
@@ -4034,8 +4110,8 @@ function renderComparer(){
   // grouped bars revenus vs dépensé — tous les mois, défile horizontalement au-delà de cmpMonths
   const shown=rows;
   c.insertAdjacentHTML("beforeend",
-    '<div class="panel"><h3>Revenus vs dépensé</h3><p class="psub">'+shown.length+' mois'+(shown.length>state.cmpMonths?" · fais glisser pour voir le reste":"")+'</p>'
-    +groupedBars(shown,state.cmpMonths)
+    '<div class="panel"><h3>Revenus vs dépensé</h3><p class="psub">'+shown.length+' mois</p>'
+    +groupedBars(shown,state.cmpDensity)
     +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Revenus</span>'
     +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
     +'<span><span style="background:'+gv("--red")+'"></span>Dépassé revenus</span></div></div>');
@@ -4174,6 +4250,7 @@ function renderComparer(){
   tbl+='</div></div>';
   c.insertAdjacentHTML("beforeend",tbl);
   withChartSkeleton(c);
+  refreshGbarsLayout();
 }
 
 
@@ -4782,7 +4859,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpListCount:state.cmpListCount},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -4882,8 +4959,8 @@ function importData(file){
     state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
     state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
     state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
-    if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
-    if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths
+    if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
+    if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths)
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
     migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
@@ -5176,8 +5253,8 @@ function gdSerialize(){
     theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
     confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,
-    cmpPoste:state.cmpPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,
-    cmpMonths:state.cmpMonths,cmpListCount:state.cmpListCount});
+    cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,
+    cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount});
 }
 function gdApply(d){
   const cleanMonths=sanitizeMonths(d.months);
@@ -5193,8 +5270,8 @@ function gdApply(d){
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
   state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
-  if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
-  if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths
+  if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
+  if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths)
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
   folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
   migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
