@@ -193,16 +193,14 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   color:var(--ink);font-size:15px;cursor:pointer;display:grid;place-items:center}
 .iconbtn:active,.nav>button:active{transform:scale(.94)}
 .palette-dot{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-.settingsbtn{height:34px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);
-  font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0 12px 0 10px}
+.settingsbtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  font-size:15px;font-weight:700;cursor:pointer;display:grid;place-items:center;padding:0}
 .settingsbtn:active{transform:scale(.96)}
 .settingsbtn .gear{font-size:15px;line-height:1}
-.settingsbtn .stxt{white-space:nowrap}
+.settingsbtn .stxt{display:none}
 @media (max-width:400px){
   .topbarRow{gap:6px}
   .tleft,.tright,.nav{gap:5px}
-  .settingsbtn .stxt{display:none}
-  .settingsbtn{width:34px;padding:0;justify-content:center}
   .month{min-width:0;font-size:13.5px;padding:6px 2px}
   .nav>button:not(.month){width:32px;height:32px}
 }
@@ -517,11 +515,20 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .ctr .cval.mut{color:var(--muted)}
 .selrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .selrow label{font-size:12.5px;color:var(--muted);font-weight:600}
-.selrow select{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 10px;font-size:13.5px;font-weight:600;font-family:inherit}
+.selrow select{flex:1;min-width:0;max-width:100%;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 10px;font-size:13.5px;font-weight:600;font-family:inherit;text-overflow:ellipsis}
 .glegend{display:flex;gap:14px;margin-top:10px;font-size:11.5px;color:var(--muted)}
 .glegend span span{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:middle;margin-right:4px}
-svg.gbars{width:100%;height:auto;display:block;animation:panelIn .5s ease both}
+.gbarsRow{display:flex;align-items:flex-start;max-width:100%}
+.gbarsAxisWrap{flex-shrink:0}
+svg.gbarsAxis{display:block;animation:panelIn .5s ease both}
+.gbarsScroll{flex:1 1 auto;min-width:0;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border-radius:10px}
+.gbarsScroll::-webkit-scrollbar{height:6px}
+.gbarsScroll::-webkit-scrollbar-track{background:transparent}
+.gbarsScroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+svg.gbars{display:block;max-width:none;animation:panelIn .5s ease both}
 .gbars text{font-family:var(--mono)}
+.gbars rect[data-tip]{cursor:pointer}
+.gbars rect[data-tip]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 
 .income{margin:12px 2px 6px;padding:12px 14px;background:var(--card);border:1px solid var(--line);
   border-radius:14px;box-shadow:0 4px 16px -12px rgba(0,0,0,.3);transition:border-color .25s,background .25s}
@@ -968,6 +975,10 @@ button.rowCatIcon:active{transform:scale(.92)}
 .leg .lv{font-family:var(--mono);font-weight:700;color:var(--ink);flex-shrink:0}
 .leg .lp{font-family:var(--mono);color:var(--muted);font-size:11.5px;width:38px;text-align:right;flex-shrink:0}
 .cmp{display:flex;flex-direction:column;gap:12px}
+.cmpScroll{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.cmpScroll::-webkit-scrollbar{width:6px}
+.cmpScroll::-webkit-scrollbar-track{background:transparent}
+.cmpScroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
 .cmpItem .cmptop{display:flex;flex-wrap:wrap;justify-content:space-between;font-size:13px;margin-bottom:5px;row-gap:2px;column-gap:8px}
 .cmpItem .cn{font-weight:600;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 .cmpItem .cv{font-family:var(--mono);color:var(--muted);text-align:right;min-width:0;white-space:normal;overflow-wrap:normal;word-break:normal}
@@ -1369,6 +1380,15 @@ html{scroll-behavior:smooth}
       <button type="button" data-cols="5">5 colonnes</button>
     </div>
     <div class="hr"></div>
+    <div class="slabel">Onglet Comparer</div>
+    <p class="bkhint" style="margin-top:0">Mois affichés par défaut dans les graphiques — glisse horizontalement pour voir le reste.</p>
+    <div class="szSeg" id="cmpMonthsSeg">
+      <button type="button" data-n="3">3 mois</button>
+      <button type="button" data-n="6">6 mois</button>
+      <button type="button" data-n="9">9 mois</button>
+      <button type="button" data-n="12">12 mois</button>
+    </div>
+    <div class="hr"></div>
     <div class="slabel">Indicateurs d'en-tête</div>
     <div id="statOrderList" class="statOrder"></div>
     <p class="bkhint">Touche ★ pour choisir l'indicateur mis en avant en grand (le « héros »), renomme chaque libellé en tapant dedans, et réordonne les cartes avec les flèches.</p>
@@ -1741,6 +1761,11 @@ function mLabelShort(k){if(isCustom(k))return customName(k);const[y,m]=k.split("
   const label=s[0].toUpperCase()+s.slice(1);
   return y===new Date().getFullYear()?label:label+" "+y;}
 function mShort(k){if(isCustom(k))return customName(k);const[y,m]=k.split("-").map(Number);return new Intl.DateTimeFormat("fr-FR",{month:"short"}).format(new Date(y,m-1,1)).replace(".","");}
+// Comme mShort, mais ajoute l'année (sur 2 chiffres) quand withYear est vrai — utilisé sur les
+// axes/en-têtes qui peuvent mélanger plusieurs années, pour ne pas s'y perdre.
+function mShortY(k,withYear){if(isCustom(k)||!withYear)return mShort(k);return mShort(k)+" '"+k.slice(2,4);}
+// Vrai si les clés mois (format "AAAA-MM") fournies couvrent plus d'une année civile.
+function spansMultipleYears(keys){const ys=new Set(keys.filter(k=>!isCustom(k)).map(k=>k.slice(0,4)));return ys.size>1;}
 function shift(k,delta){const[y,m]=k.split("-").map(Number);return mKey(new Date(y,m-1+delta,1));}
 function daysIn(k){const[y,m]=k.split("-").map(Number);return new Date(y,m,0).getDate();}
 function defaultDate(k){const t=new Date();const today=mKey(t)+"-"+String(t.getDate()).padStart(2,"0");
@@ -1789,7 +1814,7 @@ function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id o
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false};
+let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpListCount:2};
 // Tris (configurables dans les Réglages). Deux tris indépendants : les budgets (postes) et les
 // dépenses. Par défaut « plus récent d'abord » (ordre décroissant d'ajout). « Manuel » = ordre
 // choisi au glisser-déposer (postes uniquement). Un « seq » d'ordre d'ajout est attribué à chaque
@@ -1803,7 +1828,7 @@ const expanded=new Set();
 let detailLineId=null,detailEntrySearch="";
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -1860,6 +1885,35 @@ function applyMoveMode(){
 document.getElementById("moveModeSwitch").onclick=()=>{
   state.moveMode=!state.moveMode;applyMoveMode();commit();
 };
+
+/* ---------- ONGLET COMPARER : mois visibles (graphiques) et budgets visibles (liste) ---------- */
+function applyCmpMonthsSeg(){
+  document.querySelectorAll("#cmpMonthsSeg button").forEach(b=>b.classList.toggle("active",+b.dataset.n===state.cmpMonths));
+}
+document.querySelectorAll("#cmpMonthsSeg button").forEach(b=>{
+  b.onclick=()=>{state.cmpMonths=+b.dataset.n||6;applyCmpMonthsSeg();save();if(tab==="comparer")renderComparer();};
+});
+// Limite la hauteur d'une liste de budgets (.cmpScroll) pour n'en montrer que `count` par défaut,
+// le reste devenant accessible en faisant défiler verticalement. Mesuré dynamiquement (plutôt
+// qu'une hauteur CSS fixe) car la taille d'une ligne varie selon l'affichage compact et le contenu.
+function fitListScroll(id,count){
+  const el=document.getElementById(id);if(!el)return;
+  const kids=[...el.children];
+  const rowIdxs=[];kids.forEach((k,i)=>{if(k.classList.contains("blistRow"))rowIdxs.push(i);});
+  if(rowIdxs.length<=count){el.style.maxHeight="";return;}
+  const cutIdx=rowIdxs[count-1];
+  const cs=getComputedStyle(el);
+  const gap=parseFloat(cs.rowGap||cs.gap||0)||0;
+  let h=0;
+  for(let i=0;i<=cutIdx;i++){h+=kids[i].getBoundingClientRect().height;if(i<cutIdx)h+=gap;}
+  el.style.maxHeight=Math.ceil(h)+"px";
+}
+function applyCmpListScrolls(){
+  fitListScroll("monthsListScroll",2);
+  fitListScroll("cbListScroll",2);
+}
+window.addEventListener("resize",()=>{if(tab==="comparer")applyCmpListScrolls();});
+
 
 /* ---------- TRIS (réglages) ---------- */
 function fillSortSelect(id,options,current){
@@ -1985,7 +2039,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpListCount:state.cmpListCount}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,lines:[]};}
@@ -3317,7 +3371,7 @@ function renderRecap(){
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function withChartSkeleton(container){
   if(prefersReducedMotion)return;
-  container.querySelectorAll("svg.donut,svg.gbars,svg.bars").forEach(svg=>{
+  container.querySelectorAll("svg.donut,svg.gbars,svg.gbarsAxis,svg.bars").forEach(svg=>{
     const real=svg.outerHTML;
     const isDonut=svg.classList.contains("donut");
     const h=svg.getBoundingClientRect().height;
@@ -3651,7 +3705,8 @@ function median(arr){
   const s=arr.slice().sort((a,b)=>a-b),n=s.length,mid=Math.floor(n/2);
   return n%2?s[mid]:(s[mid-1]+s[mid])/2;
 }
-let cmpPoste=null,cmpCat=null,cmpYear=null,cmpA=null,cmpB=null,cmpSpan=1,cmpCbA=null,cmpCbB=null;
+// Les choix de sélection (state.cmpPoste, state.cmpYear, state.cmpA, state.cmpB, state.cmpSpan, state.cmpCbA, state.cmpCbB) sont
+// désormais stockés dans state (voir plus haut) pour être sauvegardés entre les sessions.
 // Arrondit vers le haut à une valeur « ronde » pour l'échelle (1, 2, 2.5, 5, 10 × 10^n).
 function niceCeil(v){
   if(!(v>0))return 1;
@@ -3665,34 +3720,83 @@ function axisFmt(v){
   if(v>=1000){const k=v/1000;return k.toLocaleString("fr-FR",{maximumFractionDigits:k<10?1:0})+"k";}
   return Math.round(v).toLocaleString("fr-FR");
 }
-function groupedBars(data){
+function groupedBars(data,visibleCount){
   const N=data.length;if(N===0)return'<p class="empty">Pas encore de mois à comparer.</p>';
   const vals=data.flatMap(d=>[d.rev,d.dep]);
   const maxV=niceCeil(Math.max(1,...vals)); // haut de l'échelle, arrondi « rond »
   const padL=40,padR=8,padB=26,padT=12,H=180;
-  const W=Math.max(300,padL+padR+N*58);
-  const plotW=W-padL-padR, gw=plotW/N, bw=Math.min(gw*0.30,20), gap=4;
+  // La zone de tracé (barres + lignes de repère) est un SVG à part, qui défile horizontalement ;
+  // l'axe Y (montants) est un second SVG fixe à gauche, hors de la zone de défilement, pour
+  // rester visible en permanence pendant le glissement.
+  // Largeur d'un groupe (mois) : adaptée au nombre de mois à afficher (vc) pour que ce nombre
+  // tienne réellement dans la largeur visible d'un téléphone (~300px hors axe Y), au lieu d'une
+  // largeur fixe de 58px qui limitait toujours l'affichage à ~5 mois quel que soit le réglage
+  // (le conteneur flex se rétrécissait à la largeur d'écran quoi qu'il arrive).
+  // Jusqu'à ~5 mois les groupes restent à 58px (confortable) ; au-delà, ils se resserrent
+  // (plancher 22px) pour que le réglage tienne dans la largeur cible, et l'axe X saute des
+  // libellés quand c'est trop serré pour ne pas se chevaucher.
+  const vc=Math.max(1,+visibleCount||6);
+  const targetVisW=300-padL;
+  const gw=Math.max(22,Math.min(58,targetVisW/vc));
+  const labelStep=gw>=42?1:(gw>=30?2:3);
+  const plotW=Math.max(targetVisW,N*gw)+padR;
+  // Largeur visible par défaut (le reste se découvre en faisant glisser horizontalement) : réglable
+  // dans Réglages > Onglet Comparer. Pas de limite si tout tient déjà dans cette largeur.
+  const visPlotW=Math.min(N,vc)*gw+padR;
+  const bw=Math.min(gw*0.34,20), gap=4;
   const usableH=H-padB-padT;
   const yFor=v=>padT+(1-v/maxV)*usableH;
   const zeroY=yFor(0);
   const cIn=gv("--money-in"),cOut=gv("--money-out"),cRed=gv("--red"),cMut=gv("--muted"),cFaint=gv("--faint"),cLine=gv("--line");
-  let s="";
-  // Échelle : lignes horizontales repères + montants à gauche (0, ¼, ½, ¾, max).
   const steps=4;
+  // Axe Y (fixe) : montants + amorce des lignes de repère (0, ¼, ½, ¾, max).
+  let axis="";
   for(let i=0;i<=steps;i++){
     const v=maxV*i/steps, y=yFor(v);
-    s+='<line x1="'+padL+'" y1="'+y.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+y.toFixed(1)+'" stroke="'+cLine+'" stroke-width="1" opacity="'+(i===0?".9":".4")+'"/>';
-    s+='<text x="'+(padL-5)+'" y="'+(y+3.4).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="'+cMut+'">'+axisFmt(v)+'</text>';
+    axis+='<line x1="'+(padL-6)+'" y1="'+y.toFixed(1)+'" x2="'+padL+'" y2="'+y.toFixed(1)+'" stroke="'+cLine+'" stroke-width="1" opacity="'+(i===0?".9":".4")+'"/>';
+    axis+='<text x="'+(padL-5)+'" y="'+(y+3.4).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="'+cMut+'">'+axisFmt(v)+'</text>';
   }
-  data.forEach((d,i)=>{const cx=padL+i*gw+gw/2;
+  const axisSvg='<svg class="gbarsAxis" viewBox="0 0 '+padL+' '+H+'" width="'+padL+'" height="'+H+'">'+axis+'</svg>';
+  // Zone de tracé (défilante) : lignes de repère pleine largeur, barres, libellés des mois.
+  let s="";
+  for(let i=0;i<=steps;i++){
+    const y=yFor(maxV*i/steps);
+    s+='<line x1="0" y1="'+y.toFixed(1)+'" x2="'+plotW+'" y2="'+y.toFixed(1)+'" stroke="'+cLine+'" stroke-width="1" opacity="'+(i===0?".9":".4")+'"/>';
+  }
+  // Les libellés de l'axe X répètent l'année sur chaque barre (ex. "juil '26", "août '26"...),
+  // ce qui surcharge l'affichage. On n'affiche l'année que sur la 1re barre et quand elle change.
+  let prevYearTag=null;
+  data.forEach((d,i)=>{const cx=i*gw+gw/2;
     const x1=cx-bw-gap/2,x2=cx+gap/2;const over=d.dep>d.rev&&d.rev>0;
     const revY=yFor(d.rev),depY=yFor(d.dep);
-    s+='<rect x="'+x1.toFixed(1)+'" y="'+revY.toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,zeroY-revY).toFixed(1)+'" rx="3" fill="'+cIn+'"/>';
-    s+='<rect x="'+x2.toFixed(1)+'" y="'+depY.toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,zeroY-depY).toFixed(1)+'" rx="3" fill="'+(over?cRed:cOut)+'"/>';
-    s+='<text x="'+cx.toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle" font-size="11" fill="'+(d.cur?cMut:cFaint)+'" font-weight="'+(d.cur?"700":"400")+'">'+d.label+'</text>';
+    const revTip=esc((d.label||"")+" — "+(d.revLabel||"Revenus")+" : "+eur0(d.rev));
+    const depTip=esc((d.label||"")+" — "+(d.depLabel||"Dépensé")+" : "+eur0(d.dep));
+    s+='<rect x="'+x1.toFixed(1)+'" y="'+revY.toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,zeroY-revY).toFixed(1)+'" rx="3" fill="'+cIn+'" tabindex="0" role="button" data-tip="'+revTip+'"><title>'+revTip+'</title></rect>';
+    s+='<rect x="'+x2.toFixed(1)+'" y="'+depY.toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,zeroY-depY).toFixed(1)+'" rx="3" fill="'+(over?cRed:cOut)+'" tabindex="0" role="button" data-tip="'+depTip+'"><title>'+depTip+'</title></rect>';
+    // Quand les groupes sont serrés (beaucoup de mois affichés), on saute des libellés d'axe X
+    // pour éviter qu'ils se chevauchent — le mois courant reste toujours affiché.
+    if(i%labelStep===0||d.cur){
+      let axisLabel=d.label||"";
+      const ym=/^(.*?)(\s'\d{2})$/.exec(axisLabel);
+      if(ym){if(ym[2]===prevYearTag)axisLabel=ym[1];prevYearTag=ym[2];}else{prevYearTag=null;}
+      s+='<text x="'+cx.toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle" font-size="11" fill="'+(d.cur?cMut:cFaint)+'" font-weight="'+(d.cur?"700":"400")+'">'+esc(axisLabel)+'</text>';
+    }
   });
-  return'<svg class="gbars" viewBox="0 0 '+W+' '+H+'">'+s+'</svg>';
+  const svg='<svg class="gbars" viewBox="0 0 '+plotW+' '+H+'" width="'+plotW+'" height="'+H+'">'+s+'</svg>';
+  return'<div class="gbarsRow"><div class="gbarsAxisWrap">'+axisSvg+'</div><div class="gbarsScroll" style="max-width:'+visPlotW+'px">'+svg+'</div></div>';
 }
+// Touche/clique une barre d'un diagramme groupé (revenus vs dépensé) pour voir sa valeur exacte
+// dans un toast. Délégation sur document : fonctionne même après le remplacement du SVG par
+// withChartSkeleton() (animation d'apparition) puisque le SVG est reconstruit à l'identique.
+document.addEventListener("click",e=>{
+  const r=e.target.closest("svg.gbars rect[data-tip]");
+  if(r)toast(r.dataset.tip);
+});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  const r=e.target.closest&&e.target.closest("svg.gbars rect[data-tip]");
+  if(r){e.preventDefault();toast(r.dataset.tip);}
+});
 function renderBudgetsList(){
   const keys=Object.keys(state.months).sort().reverse();
   let html='<div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
@@ -3702,7 +3806,8 @@ function renderBudgetsList(){
     html+='<p class="empty" style="padding:8px 0 0">Aucun mois enregistré pour le moment.</p></div>';
     return html;
   }
-  html+='<p class="psub">'+keys.length+' mois enregistré'+(keys.length>1?"s":"")+' · touche un mois pour y aller</p><div class="cmp">';
+  html+='<p class="psub">'+keys.length+' mois enregistré'+(keys.length>1?"s":"")+' · touche un mois pour y aller'
+    +(keys.length>state.cmpListCount?" · défile pour voir le reste":"")+'</p><div class="cmp cmpScroll" id="monthsListScroll">';
   let curYear=null;
   keys.forEach(k=>{
     const y=k.slice(0,4);
@@ -3800,7 +3905,8 @@ function renderComparerCustom(){
     const nb0=document.getElementById("newCbBtn2");if(nb0)nb0.onclick=()=>openCbModal(null);
     return;
   }
-  list+='<p class="psub">'+cbKeys.length+' budget'+(cbKeys.length>1?"s":"")+' · touche pour y aller</p><div class="cmp">';
+  list+='<p class="psub">'+cbKeys.length+' budget'+(cbKeys.length>1?"s":"")+' · touche pour y aller'
+    +(cbKeys.length>state.cmpListCount?" · défile pour voir le reste":"")+'</p><div class="cmp cmpScroll" id="cbListScroll">';
   cbKeys.forEach(k=>{
     const t=totals(ensure(k),true),cur=k===state.current;
     list+='<div class="blistRow">'
@@ -3820,34 +3926,35 @@ function renderComparerCustom(){
   c.querySelectorAll(".blist[data-cbkey]").forEach(b=>b.onclick=()=>{const k=b.dataset.cbkey;if(!k||k===state.current)return;state.current=k;tab="budgets";save();render();});
   c.querySelectorAll(".blistDel[data-cbkey]").forEach(b=>b.onclick=e=>{e.stopPropagation();deleteCustomBudget(b.dataset.cbkey);});
   const nb=document.getElementById("newCbBtn2");if(nb)nb.onclick=()=>openCbModal(null);
+  fitListScroll("cbListScroll",state.cmpListCount);
 
   // Revenus vs dépensé — barres groupées sur tous les budgets personnalisés
   const bars=cbKeys.map(k=>{const t=totals(ensure(k),true);return{label:shortName(k,7),cur:k===state.current,rev:t.income,dep:t.spent};});
   c.insertAdjacentHTML("beforeend",
     '<div class="panel"><h3>Revenus vs dépensé</h3><p class="psub">Tous tes budgets personnalisés</p>'
-    +groupedBars(bars)
+    +groupedBars(bars,state.cmpMonths)
     +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Revenus</span>'
     +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
     +'<span><span style="background:'+gv("--red")+'"></span>Dépassé revenus</span></div></div>');
 
   // Comparer deux budgets, catégorie par catégorie
   if(cbKeys.length>=2){
-    if(!cmpCbA||!cbKeys.includes(cmpCbA))cmpCbA=cbKeys[0];
-    if(!cmpCbB||!cbKeys.includes(cmpCbB))cmpCbB=cbKeys[cbKeys.length-1];
-    const optsA=cbKeys.map(k=>'<option value="'+esc(k)+'"'+(k===cmpCbA?' selected':'')+'>'+esc(customName(k))+'</option>').join("");
-    const optsB=cbKeys.map(k=>'<option value="'+esc(k)+'"'+(k===cmpCbB?' selected':'')+'>'+esc(customName(k))+'</option>').join("");
+    if(!state.cmpCbA||!cbKeys.includes(state.cmpCbA))state.cmpCbA=cbKeys[0];
+    if(!state.cmpCbB||!cbKeys.includes(state.cmpCbB))state.cmpCbB=cbKeys[cbKeys.length-1];
+    const optsA=cbKeys.map(k=>'<option value="'+esc(k)+'"'+(k===state.cmpCbA?' selected':'')+'>'+esc(customName(k))+'</option>').join("");
+    const optsB=cbKeys.map(k=>'<option value="'+esc(k)+'"'+(k===state.cmpCbB?' selected':'')+'>'+esc(customName(k))+'</option>').join("");
     const cbCat=new Map();
-    (ensure(cmpCbA).lines||[]).forEach(l=>{const cat=catById(l.category||"");const cur=cbCat.get(cat.id)||{cat,a:0,b:0};cur.a=round2(cur.a+spent(l));cbCat.set(cat.id,cur);});
-    (ensure(cmpCbB).lines||[]).forEach(l=>{const cat=catById(l.category||"");const cur=cbCat.get(cat.id)||{cat,a:0,b:0};cur.b=round2(cur.b+spent(l));cbCat.set(cat.id,cur);});
+    (ensure(state.cmpCbA).lines||[]).forEach(l=>{const cat=catById(l.category||"");const cur=cbCat.get(cat.id)||{cat,a:0,b:0};cur.a=round2(cur.a+spent(l));cbCat.set(cat.id,cur);});
+    (ensure(state.cmpCbB).lines||[]).forEach(l=>{const cat=catById(l.category||"");const cur=cbCat.get(cat.id)||{cat,a:0,b:0};cur.b=round2(cur.b+spent(l));cbCat.set(cat.id,cur);});
     const rowsCat=[...cbCat.values()].filter(x=>x.a>0||x.b>0).sort((x,y)=>(y.a+y.b)-(x.a+x.b));
-    const same=cmpCbA===cmpCbB;
+    const same=state.cmpCbA===state.cmpCbB;
     let two='<div class="panel"><h3>Comparer deux budgets</h3><p class="psub">Dépenses par catégorie</p>'
       +'<div class="selrow"><label>A</label><select id="cmpCbASel">'+optsA+'</select></div>'
       +'<div class="selrow"><label>B</label><select id="cmpCbBSel">'+optsB+'</select></div>';
     if(same){two+='<p class="empty" style="padding:8px 0 0">Choisis deux budgets différents.</p></div>';}
     else if(rowsCat.length===0){two+='<p class="empty" style="padding:8px 0 0">Aucune dépense à comparer.</p></div>';}
     else{
-      two+='<div class="cmptable"><div class="ctr head"><span>Catégorie</span><span class="cval">'+esc(shortName(cmpCbA,8))+'</span><span class="cval">'+esc(shortName(cmpCbB,8))+'</span><span class="cval">Δ</span></div>';
+      two+='<div class="cmptable"><div class="ctr head"><span>Catégorie</span><span class="cval">'+esc(shortName(state.cmpCbA,8))+'</span><span class="cval">'+esc(shortName(state.cmpCbB,8))+'</span><span class="cval">Δ</span></div>';
       let totA=0,totB=0;
       rowsCat.forEach(x=>{totA=round2(totA+x.a);totB=round2(totB+x.b);const d=round2(x.b-x.a);
         two+='<div class="ctr"><span class="cm">'+x.cat.icon+' '+esc(x.cat.name)+'</span>'
@@ -3861,10 +3968,36 @@ function renderComparerCustom(){
       two+='</div></div>';
     }
     c.insertAdjacentHTML("beforeend",two);
-    const aSel=document.getElementById("cmpCbASel");if(aSel)aSel.onchange=()=>{cmpCbA=aSel.value;renderComparer();};
-    const bSel=document.getElementById("cmpCbBSel");if(bSel)bSel.onchange=()=>{cmpCbB=bSel.value;renderComparer();};
+    const aSel=document.getElementById("cmpCbASel");if(aSel)aSel.onchange=()=>{state.cmpCbA=aSel.value;save();renderComparer();};
+    const bSel=document.getElementById("cmpCbBSel");if(bSel)bSel.onchange=()=>{state.cmpCbB=bSel.value;save();renderComparer();};
   }
   withChartSkeleton(c);
+}
+// Panel "Une dépense dans le temps" isolé pour pouvoir le rafraîchir seul (sans recharger
+// tout l'onglet Comparer) quand on change la dépense sélectionnée.
+function buildPostePanelHTML(rows,posteNames){
+  if(!state.cmpPoste||!posteNames.includes(state.cmpPoste))state.cmpPoste=posteNames[0];
+  let opts=posteNames.map(n=>'<option'+(n===state.cmpPoste?' selected':'')+'>'+esc(n)+'</option>').join("");
+  const pdata=rows.map(r=>{const lines=state.months[r.k].lines.filter(l=>(l.name||"").trim()===state.cmpPoste);
+    const rev=lines.reduce((s,l)=>s+(+l.planned||0),0),dep=lines.reduce((s,l)=>s+spent(l),0);
+    return{label:r.label,cur:r.cur,rev,dep,revLabel:"Budget",depLabel:"Dépensé"};});
+  return '<div class="panel" id="postePanel"><h3>Une dépense dans le temps</h3>'
+    +'<div class="selrow"><label>Dépense</label><select id="posteSel">'+opts+'</select></div>'
+    +groupedBars(pdata,state.cmpMonths)
+    +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Budget</span>'
+    +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
+    +'<span><span style="background:'+gv("--red")+'"></span>Dépassé budget</span></div></div>';
+}
+function attachPosteSelHandler(rows,posteNames){
+  const sel=document.getElementById("posteSel");
+  if(!sel)return;
+  sel.onchange=()=>{
+    state.cmpPoste=sel.value;save();
+    const panel=document.getElementById("postePanel");
+    if(!panel)return;
+    panel.outerHTML=buildPostePanelHTML(rows,posteNames);
+    attachPosteSelHandler(rows,posteNames);
+  };
 }
 function renderComparer(){
   if(isCustom(state.current))return renderComparerCustom();
@@ -3874,10 +4007,13 @@ function renderComparer(){
   document.querySelectorAll(".blist").forEach(b=>b.onclick=()=>{
     const k=b.dataset.mkey;if(!k||k===state.current)return;
     state.current=k;save();tab="budgets";render();
+    window.scrollTo({top:0,behavior:"smooth"});
   });
   document.querySelectorAll(".blistDel").forEach(b=>b.onclick=e=>{e.stopPropagation();deleteMonth(b.dataset.mkey);});
+  fitListScroll("monthsListScroll",state.cmpListCount);
   const keys=Object.keys(state.months).sort();
-  const rows=keys.map(k=>{const t=totals(ensure(k));return{k,label:mShort(k),cur:k===state.current,
+  const multiYear=spansMultipleYears(keys);
+  const rows=keys.map(k=>{const t=totals(ensure(k));return{k,label:mShortY(k,multiYear),cur:k===state.current,
     rev:t.income,dep:t.spent,reste:t.remainReal,over:t.over};});
   if(rows.length===0)return;
 
@@ -3888,18 +4024,18 @@ function renderComparer(){
   c.insertAdjacentHTML("beforeend",
     '<div class="daysum" style="grid-template-columns:1fr 1fr">'
     +'<div class="dsum"><div class="k">Mois suivis</div><div class="v">'+rows.length+'</div></div>'
-    +'<div class="dsum"><div class="k">Meilleur reste</div><div class="v" style="text-transform:capitalize">'+mShort(best.k)+'</div></div>'
+    +'<div class="dsum"><div class="k">Meilleur reste</div><div class="v" style="text-transform:capitalize">'+mShortY(best.k,true)+'</div></div>'
     +'<div class="dsum"><div class="k">Dépense moy.</div><div class="v">'+eur0(avgDep)+'</div></div>'
     +'<div class="dsum"><div class="k">Dépense médiane</div><div class="v">'+eur0(medDep)+'</div></div>'
     +'<div class="dsum"><div class="k">Épargne</div><div class="v">'+eur0(curT.savings)+'</div></div>'
     +'<div class="dsum"><div class="k">Épargne déduite</div><div class="v">'+eur0(curT.deducted)+'</div></div>'
     +'</div>');
 
-  // grouped bars revenus vs dépensé (12 derniers mois max)
-  const shown=rows.slice(-12);
+  // grouped bars revenus vs dépensé — tous les mois, défile horizontalement au-delà de cmpMonths
+  const shown=rows;
   c.insertAdjacentHTML("beforeend",
-    '<div class="panel"><h3>Revenus vs dépensé</h3><p class="psub">'+shown.length+' derniers mois</p>'
-    +groupedBars(shown)
+    '<div class="panel"><h3>Revenus vs dépensé</h3><p class="psub">'+shown.length+' mois'+(shown.length>state.cmpMonths?" · fais glisser pour voir le reste":"")+'</p>'
+    +groupedBars(shown,state.cmpMonths)
     +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Revenus</span>'
     +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
     +'<span><span style="background:'+gv("--red")+'"></span>Dépassé revenus</span></div></div>');
@@ -3907,27 +4043,16 @@ function renderComparer(){
   // comparaison d'une dépense dans le temps
   const posteNames=[...new Set(keys.flatMap(k=>state.months[k].lines.map(l=>(l.name||"").trim()).filter(Boolean)))].sort((a,b)=>a.localeCompare(b));
   if(posteNames.length){
-    if(!cmpPoste||!posteNames.includes(cmpPoste))cmpPoste=posteNames[0];
-    let opts=posteNames.map(n=>'<option'+(n===cmpPoste?' selected':'')+'>'+esc(n)+'</option>').join("");
-    const pdata=rows.map(r=>{const lines=state.months[r.k].lines.filter(l=>(l.name||"").trim()===cmpPoste);
-      const rev=lines.reduce((s,l)=>s+(+l.planned||0),0),dep=lines.reduce((s,l)=>s+spent(l),0);
-      return{label:mShort(r.k),cur:r.cur,rev,dep};}).slice(-12);
-    c.insertAdjacentHTML("beforeend",
-      '<div class="panel"><h3>Une dépense dans le temps</h3>'
-      +'<div class="selrow"><label>Dépense</label><select id="posteSel">'+opts+'</select></div>'
-      +groupedBars(pdata)
-      +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Budget</span>'
-      +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
-      +'<span><span style="background:'+gv("--red")+'"></span>Dépassé budget</span></div></div>');
-    const sel=document.getElementById("posteSel");if(sel)sel.onchange=()=>{cmpPoste=sel.value;renderComparer();};
+    c.insertAdjacentHTML("beforeend",buildPostePanelHTML(rows,posteNames));
+    attachPosteSelHandler(rows,posteNames);
   }
 
   // vue annuelle : répartition des dépenses par catégorie sur l'année choisie
   const years=[...new Set(keys.map(k=>k.slice(0,4)))].sort();
   if(years.length){
-    if(!cmpYear||!years.includes(cmpYear))cmpYear=years[years.length-1];
-    const yopts=years.map(y=>'<option'+(y===cmpYear?' selected':'')+'>'+y+'</option>').join("");
-    const yKeys=keys.filter(k=>k.slice(0,4)===cmpYear);
+    if(!state.cmpYear||!years.includes(state.cmpYear))state.cmpYear=years[years.length-1];
+    const yopts=years.map(y=>'<option'+(y===state.cmpYear?' selected':'')+'>'+y+'</option>').join("");
+    const yKeys=keys.filter(k=>k.slice(0,4)===state.cmpYear);
     const catTotals=new Map();
     yKeys.forEach(k=>state.months[k].lines.forEach(l=>{const cat=catById(l.category||"");const s=spent(l);if(s<=0)return;
       catTotals.set(cat.id,round2((catTotals.get(cat.id)||0)+s));}));
@@ -3935,7 +4060,7 @@ function renderComparer(){
     const rawItems=[...catTotals.entries()].map(([id,value])=>{const cat=catById(id);return{name:cat.icon+" "+cat.name,value};}).sort((a,b)=>b.value-a.value);
     const items=rawItems.map((x,i)=>({...x,color:pal[i%6]}));
     let yearPanel='<div class="panel"><h3>Vue annuelle par catégorie</h3><div class="selrow"><label>Année</label><select id="yearSel">'+yopts+'</select></div>';
-    if(items.length===0){yearPanel+='<p class="empty" style="padding:8px 0 0">Aucune dépense enregistrée en '+cmpYear+'.</p></div>';}
+    if(items.length===0){yearPanel+='<p class="empty" style="padding:8px 0 0">Aucune dépense enregistrée en '+state.cmpYear+'.</p></div>';}
     else{
       const tot=items.reduce((s,i)=>s+i.value,0);
       let leg='<div class="legend">';
@@ -3944,21 +4069,21 @@ function renderComparer(){
       yearPanel+='<div class="donutwrap">'+donutSVG(items)+leg+'</div></div>';
     }
     c.insertAdjacentHTML("beforeend",yearPanel);
-    const ysel=document.getElementById("yearSel");if(ysel)ysel.onchange=()=>{cmpYear=ysel.value;renderComparer();};
+    const ysel=document.getElementById("yearSel");if(ysel)ysel.onchange=()=>{state.cmpYear=ysel.value;save();renderComparer();};
     c.insertAdjacentHTML("beforeend",
       '<div class="panel compPanel" style="text-align:center"><h3>✨ Bilan de l\'année</h3>'
-      +'<p class="psub">Revis ton année '+cmpYear+' en quelques cartes animées</p>'
-      +'<button type="button" id="wrapOpenBtn" class="addbtn" style="border-style:solid;color:var(--accent);border-color:var(--accent);font-weight:800">🎉 Voir mon bilan '+cmpYear+'</button></div>');
-    const wob=document.getElementById("wrapOpenBtn");if(wob)wob.onclick=()=>openWrapped(cmpYear);
+      +'<p class="psub">Revis ton année '+state.cmpYear+' en quelques cartes animées</p>'
+      +'<button type="button" id="wrapOpenBtn" class="addbtn" style="border-style:solid;color:var(--accent);border-color:var(--accent);font-weight:800">🎉 Voir mon bilan '+state.cmpYear+'</button></div>');
+    const wob=document.getElementById("wrapOpenBtn");if(wob)wob.onclick=()=>openWrapped(state.cmpYear);
 
     // comparaison année sur année : total annuel N vs N-1
-    const prevYear=String(+cmpYear-1);
+    const prevYear=String(+state.cmpYear-1);
     const sumYear=y=>{
       const yk=keys.filter(k=>k.slice(0,4)===y);
       return yk.reduce((acc,k)=>{const t=totals(ensure(k));acc.income+=t.income;acc.spent+=t.spent;acc.remain+=t.remainReal;return acc;},{income:0,spent:0,remain:0,months:yk.length});
     };
-    const curY=sumYear(cmpYear),prevY=sumYear(prevYear);
-    let yoy='<div class="panel"><h3>Année sur année</h3><p class="psub">Total annuel '+cmpYear+' vs '+prevYear+'</p>';
+    const curY=sumYear(state.cmpYear),prevY=sumYear(prevYear);
+    let yoy='<div class="panel"><h3>Année sur année</h3><p class="psub">Total annuel '+state.cmpYear+' vs '+prevYear+'</p>';
     if(prevY.months===0){yoy+='<p class="empty" style="padding:8px 0 0">Aucune donnée pour '+prevYear+' — pas de comparaison possible.</p></div>';}
     else{
       const rows2=[
@@ -3966,7 +4091,7 @@ function renderComparer(){
         {lbl:"Dépensé",a:prevY.spent,b:curY.spent},
         {lbl:"Reste",a:prevY.remain,b:curY.remain}
       ];
-      yoy+='<div class="cmptable"><div class="ctr head"><span>Total</span><span class="cval">'+prevYear+'</span><span class="cval">'+cmpYear+'</span><span class="cval">Δ</span></div>';
+      yoy+='<div class="cmptable"><div class="ctr head"><span>Total</span><span class="cval">'+prevYear+'</span><span class="cval">'+state.cmpYear+'</span><span class="cval">Δ</span></div>';
       rows2.forEach(r=>{const d=round2(r.b-r.a);
         yoy+='<div class="ctr"><span class="cm">'+r.lbl+'</span><span class="cval mut">'+eur0(r.a)+'</span><span class="cval mut">'+eur0(r.b)+'</span>'
           +'<span class="cval '+(r.lbl==="Dépensé"?(d>0?"neg":(d<0?"pos":"mut")):(d>0?"pos":(d<0?"neg":"mut")))+'">'+(d>0?"+":"")+eur0(d)+'</span></div>';
@@ -3978,19 +4103,20 @@ function renderComparer(){
 
   // comparaison détaillée de deux mois (ou deux plages de mois), catégorie par catégorie
   if(keys.length>=2){
-    if(!cmpA||!keys.includes(cmpA))cmpA=keys[keys.length-2];
-    if(!cmpB||!keys.includes(cmpB))cmpB=keys[keys.length-1];
+    if(!state.cmpA||!keys.includes(state.cmpA))state.cmpA=keys[keys.length-2];
+    if(!state.cmpB||!keys.includes(state.cmpB))state.cmpB=keys[keys.length-1];
     const spanOpts=[[1,"1 mois"],[3,"Trimestre (3 mois)"],[6,"Semestre (6 mois)"],[12,"Année (12 mois)"]];
-    const spanOptsHtml=spanOpts.map(([v,lbl])=>'<option value="'+v+'"'+(v===cmpSpan?' selected':'')+'>'+lbl+'</option>').join("");
-    // Plage de vrais mois calendaires se terminant à endKey (ex. cmpSpan=3 -> les 3 mois
+    const spanOptsHtml=spanOpts.map(([v,lbl])=>'<option value="'+v+'"'+(v===state.cmpSpan?' selected':'')+'>'+lbl+'</option>').join("");
+    // Plage de vrais mois calendaires se terminant à endKey (ex. state.cmpSpan=3 -> les 3 mois
     // calendaires consécutifs jusqu'à endKey), qu'ils aient ou non des données enregistrées —
     // avant, la plage était calculée par position dans la liste des mois existants, ce qui
     // donnait des résultats faux/trompeurs dès qu'il manquait un mois dans l'historique.
-    const rangeKeys=(endKey)=>{const out=[];for(let i=cmpSpan-1;i>=0;i--)out.push(shift(endKey,-i));return out;};
-    const rangeLabel=(rk)=>rk.length<=1?esc(mShort(rk[0])):esc(mShort(rk[0]))+"–"+esc(mShort(rk[rk.length-1]));
-    const rA=rangeKeys(cmpA),rB=rangeKeys(cmpB);
-    const optsA=keys.map(k=>'<option value="'+k+'"'+(k===cmpA?' selected':'')+'>'+esc(mLabel(k))+'</option>').join("");
-    const optsB=keys.map(k=>'<option value="'+k+'"'+(k===cmpB?' selected':'')+'>'+esc(mLabel(k))+'</option>').join("");
+    const rangeKeys=(endKey)=>{const out=[];for(let i=state.cmpSpan-1;i>=0;i--)out.push(shift(endKey,-i));return out;};
+    const rA=rangeKeys(state.cmpA),rB=rangeKeys(state.cmpB);
+    const rangeMultiYear=spansMultipleYears([...rA,...rB]);
+    const rangeLabel=(rk)=>rk.length<=1?esc(mShortY(rk[0],rangeMultiYear)):esc(mShortY(rk[0],rangeMultiYear))+"–"+esc(mShortY(rk[rk.length-1],rangeMultiYear));
+    const optsA=keys.map(k=>'<option value="'+k+'"'+(k===state.cmpA?' selected':'')+'>'+esc(mLabel(k))+'</option>').join("");
+    const optsB=keys.map(k=>'<option value="'+k+'"'+(k===state.cmpB?' selected':'')+'>'+esc(mLabel(k))+'</option>').join("");
     const cbCat=new Map();
     // Lecture directe de state.months (pas ensure()) : un mois calendaire de la plage qui n'a
     // jamais été créé compte simplement pour zéro, sans être ajouté en dur à l'historique.
@@ -4023,9 +4149,9 @@ function renderComparer(){
       two+='</div></div>';
     }
     c.insertAdjacentHTML("beforeend",two);
-    const spanSel=document.getElementById("cmpSpanSel");if(spanSel)spanSel.onchange=()=>{cmpSpan=+spanSel.value||1;renderComparer();};
-    const aSel=document.getElementById("cmpASel");if(aSel)aSel.onchange=()=>{cmpA=aSel.value;renderComparer();};
-    const bSel=document.getElementById("cmpBSel");if(bSel)bSel.onchange=()=>{cmpB=bSel.value;renderComparer();};
+    const spanSel=document.getElementById("cmpSpanSel");if(spanSel)spanSel.onchange=()=>{state.cmpSpan=+spanSel.value||1;save();renderComparer();};
+    const aSel=document.getElementById("cmpASel");if(aSel)aSel.onchange=()=>{state.cmpA=aSel.value;save();renderComparer();};
+    const bSel=document.getElementById("cmpBSel");if(bSel)bSel.onchange=()=>{state.cmpB=bSel.value;save();renderComparer();};
   }
 
   // tableau mois par mois (récent -> ancien), avec variation vs mois précédent
@@ -4040,7 +4166,7 @@ function renderComparer(){
       else if(diff<-0.5)varLine='<div style="font-size:9.5px;color:var(--green);margin-top:1px">▼ '+pct+'%</div>';
       else varLine='<div style="font-size:9.5px;color:var(--faint);margin-top:1px">= stable</div>';
     }else if(prev&&r.dep>0){varLine='<div style="font-size:9.5px;color:var(--red);margin-top:1px">▲ nouveau</div>';}
-    tbl+='<div class="ctr"><span class="cm">'+esc(mShort(r.k))+'</span>'
+    tbl+='<div class="ctr"><span class="cm">'+esc(r.label)+'</span>'
       +'<span class="cval mut">'+eurT(r.rev)+'</span>'
       +'<span class="cval">'+eurT(r.dep)+varLine+'</span>'
       +'<span class="cval '+(r.reste>=0?"pos":"neg")+'">'+eurT(r.reste)+'</span></div>';
@@ -4656,7 +4782,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpListCount:state.cmpListCount},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -4756,9 +4882,11 @@ function importData(file){
     state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
     state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
     state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
+    if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
+    if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -4925,7 +5053,7 @@ window.addEventListener("pagehide",flushSave);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushSave();});
 window.addEventListener("blur",flushSave);
 
-applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ---------- Raccourcis d'icône (manifest shortcuts, appui long sur l'icône Android) ----------
@@ -5047,7 +5175,9 @@ function gdSerialize(){
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,customBudgets:state.customBudgets,current:state.current,
     theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
-    confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
+    confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,
+    cmpPoste:state.cmpPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,
+    cmpMonths:state.cmpMonths,cmpListCount:state.cmpListCount});
 }
 function gdApply(d){
   const cleanMonths=sanitizeMonths(d.months);
@@ -5063,9 +5193,11 @@ function gdApply(d){
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
   state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
+  if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
+  if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
   folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
