@@ -534,7 +534,6 @@ svg.gbars{display:block;max-width:none;animation:panelIn .5s ease both}
 
 .income{margin:12px 2px 6px;padding:12px 14px;background:var(--card);border:1px solid var(--line);
   border-radius:14px;box-shadow:0 4px 16px -12px rgba(0,0,0,.3);transition:border-color .25s,background .25s}
-.income .incRow{display:flex;align-items:center;justify-content:space-between}
 .income .k{font-size:13px;color:var(--muted);font-weight:600}
 .income .field{display:flex;align-items:center;gap:2px}
 .income input{width:110px;text-align:right;border:none;background:transparent;font-family:var(--mono);
@@ -545,10 +544,7 @@ svg.gbars{display:block;max-width:none;animation:panelIn .5s ease both}
 .income.warn .warnMsg{display:block}
 .income.warn .k{color:var(--red)}
 .income input:disabled{color:var(--muted)}
-.detailToggleRow{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:6px}
-.detailToggle{border:none;background:var(--soft);color:var(--muted);border-radius:99px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer}
-.detailToggle:active{filter:brightness(.96)}
-.detailToggle.on{color:var(--accent);background:var(--card);box-shadow:inset 0 0 0 1px var(--accent)}
+.detailToggleRow{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:0}
 .detailWrap{margin-top:8px}
 .foldBtn{flex-shrink:0;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:99px;
   width:26px;height:26px;display:grid;place-items:center;cursor:pointer}
@@ -567,9 +563,6 @@ svg.gbars{display:block;max-width:none;animation:panelIn .5s ease both}
 .miniCur{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .miniDel{flex-shrink:0;width:22px;height:22px;border:none;background:transparent;color:var(--faint);font-size:15px;cursor:pointer;border-radius:6px}
 .miniDel:active{color:var(--red)}
-.svDeductRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 2px 2px;cursor:pointer}
-.svDeductRow>span{font-size:12.5px;color:var(--muted);font-weight:600}
-.svDeductRow.hidden{display:none}
 .settingSwitchRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 2px}
 .settingSwitchRow+.settingSwitchRow{border-top:1px dashed var(--line)}
 .settingSwitchRow .ssTxt{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1493,15 +1486,11 @@ html{scroll-behavior:smooth}
         <div class="sechd-r"><span class="tot" id="incomeTot"><span class="totVal" id="incomeTotVal">0 €</span><span class="noteBadge" id="incomeSubBadge"></span></span></div>
       </div>
       <div class="income" id="incomeBox">
-        <div class="incRow">
-          <span class="k" id="incomeRowLabel">Revenus du mois</span>
-          <div class="field"><input id="incomeIn" type="text" inputmode="decimal" autocomplete="off" placeholder="0" /><span class="cur">€</span></div>
-        </div>
         <div class="detailToggleRow">
-          <button type="button" class="detailToggle" id="incomeDetailToggle">+ Détailler</button>
-          <button type="button" class="foldBtn hidden" id="incomeFoldBtn" aria-label="Replier le détail des revenus" aria-expanded="true"><span class="chev">⌄</span></button>
+          <span class="k" id="incomeRowLabel">Revenus du mois</span>
+          <button type="button" class="foldBtn" id="incomeFoldBtn" aria-label="Replier le détail des revenus" aria-expanded="true"><span class="chev">⌄</span></button>
         </div>
-        <div class="detailWrap hidden" id="incomeDetailWrap">
+        <div class="detailWrap" id="incomeDetailWrap">
           <div class="foldWrap" id="incomeFoldWrap">
             <div id="incomeLinesList"></div>
             <button type="button" class="addentry" id="addIncomeLine">+ Source de revenu</button>
@@ -1553,25 +1542,17 @@ html{scroll-behavior:smooth}
         <div class="sechd-r"><span class="tot" id="savingsTot"><span class="totVal" id="savingsTotVal">0 €</span><span class="noteBadge" id="savingsDedBadge"></span></span></div>
       </div>
       <div class="income" id="savingsBox">
-        <div class="incRow">
-          <span class="k">Mis de côté</span>
-          <div class="field"><input id="savingsIn" type="text" inputmode="decimal" autocomplete="off" placeholder="0" /><span class="cur">€</span></div>
-        </div>
-        <label class="svDeductRow" id="savingsDeductRow">
-          <span>Déduire des revenus</span>
-          <button type="button" class="switch" id="savingsDeductSwitch" role="switch" aria-checked="false" aria-label="Déduire l'épargne des revenus"></button>
-        </label>
         <div class="detailToggleRow">
-          <button type="button" class="detailToggle" id="savingsDetailToggle">+ Détailler</button>
-          <button type="button" class="foldBtn hidden" id="savingsFoldBtn" aria-label="Replier le détail de l'épargne" aria-expanded="true"><span class="chev">⌄</span></button>
+          <span class="k">Mis de côté</span>
+          <button type="button" class="foldBtn" id="savingsFoldBtn" aria-label="Replier le détail de l'épargne" aria-expanded="true"><span class="chev">⌄</span></button>
         </div>
-        <div class="detailWrap hidden" id="savingsDetailWrap">
+        <div class="detailWrap" id="savingsDetailWrap">
           <div class="foldWrap" id="savingsFoldWrap">
             <div id="savingsLinesList"></div>
             <button type="button" class="addentry" id="addSavingsLine">+ Ligne d'épargne</button>
           </div>
         </div>
-        <p class="svHint" id="savingsHint">Suivi de ce que tu mets de côté. Active « déduire des revenus » pour qu'un montant soit retiré du disponible.</p>
+        <p class="svHint" id="savingsHint">Suivi de ce que tu mets de côté. Active « Déduire des revenus » sur une ligne pour qu'elle soit retirée du disponible.</p>
       </div>
     </div>
   </div>
@@ -1591,9 +1572,7 @@ html{scroll-behavior:smooth}
   <div class="modalCard">
     <h3 id="nmTitle">Nouveau mois</h3>
     <p class="modalSub" id="nmSub"></p>
-    <button class="modalOpt" type="button" id="nmAll">↻ Copier tout le mois précédent<span>Fixes, variables, revenus et épargne repris</span></button>
-    <button class="modalOpt" type="button" id="nmAllUndeduct">↻ Tout, sans déduire l'épargne<span>Toute l'épargne est reprise, mais l'option « déduire des revenus » est décochée</span></button>
-    <button class="modalOpt" type="button" id="nmFixed">⬇ Fixes + récurrentes<span>Autres dépenses variables non reprises · épargne reprise</span></button>
+    <button class="modalOpt" type="button" id="nmAllUndeduct">↻ Tout<span>Budget fixe, variable, récurrent et épargne repris (« déduire des revenus » décoché) · les revenus ne sont jamais repris</span></button>
     <button class="modalOpt" type="button" id="nmEmpty">🗎 Mois vide<span>Tout à zéro, rien n'est repris</span></button>
     <button class="modalCancel" type="button" id="nmCancel">Annuler</button>
   </div>
@@ -1978,6 +1957,21 @@ async function confirmThenDelete(kind,{title,message,icon="🗑️",confirmText=
   return true;
 }
 
+// Ancienne notion de « simple » vs « détaillé » supprimée : le montant unique éventuel
+// (jamais placé en ligne) devient une ligne, une seule fois, pour que la somme des lignes
+// soit toujours la seule vérité — plus de divergence possible entre les deux affichages.
+function foldSimpleIncomeToLines(m){
+  if((!m.incomeLines||m.incomeLines.length===0)&&(+m.income||0)!==0){
+    m.incomeLines=[{id:uid(),name:"Revenu",amount:+m.income||0}];
+  }
+  m.incomeDetailed=true;
+}
+function foldSimpleSavingsToLines(sv){
+  if((!sv.lines||sv.lines.length===0)&&(+sv.total||0)!==0){
+    sv.lines=[{id:uid(),name:"Épargne",amount:+sv.total||0,deduct:!!sv.deduct}];
+  }
+  sv.detailed=true;
+}
 function migrate(){
   if(!Array.isArray(state.categories)||state.categories.length===0)state.categories=DEFAULT_CATEGORIES.map(c=>({...c}));
   for(const k in state.months){const m=state.months[k];for(const l of m.lines){
@@ -1995,6 +1989,7 @@ function migrate(){
   // drapeau « déduire des revenus », au niveau global du mois et de chaque ligne).
   m.savings=sanitizeGlobalSavings(m.savings);
 }
+
   // --- Épargne : ancien plan « global » conservé le temps de migrer ---
   // On mémorise si les données proviennent de l'ère « épargne globale » AVANT de rebasculer les
   // drapeaux : cela détermine la source de vérité de la migration par mois ci-dessous.
@@ -2054,6 +2049,12 @@ function migrate(){
     if(!b.savings||typeof b.savings!=="object")b.savings=emptySavings();
     if(!Array.isArray(b.savings.lines))b.savings.lines=[];
   }
+  // Ancienne notion de « revenu simple » / « épargne simple » : supprimée. Tout montant saisi
+  // en mode simple (jamais détaillé en lignes) est replié dans une ligne unique, une bonne fois
+  // pour toutes (après toutes les bascules d'épargne ci-dessus), pour que le total ne dépende
+  // plus jamais d'un mode d'affichage.
+  for(const k in state.months){const m=state.months[k];foldSimpleIncomeToLines(m);foldSimpleSavingsToLines(m.savings);}
+  for(const k in state.customBudgets){const b=state.customBudgets[k];foldSimpleIncomeToLines(b);foldSimpleSavingsToLines(b.savings);}
 }
 function sanitizeConfirmDelete(o){
   const def={budget:true,expense:false,income:false,savings:false};
@@ -2259,16 +2260,13 @@ function parseAmt(str){
 }
 const spent=l=>round2(l.entries.reduce((s,e)=>s+(+e.amount||0),0));
 function monthIncome(m){
-  if(m.incomeDetailed)return round2((m.incomeLines||[]).reduce((s,l)=>s+(+l.amount||0),0));
-  return (+m.income||0);
+  return round2((m.incomeLines||[]).reduce((s,l)=>s+(+l.amount||0),0));
 }
 // Épargne propre à un mois (objet {detailed,total,deduct,lines}).
 function savingsTotal(sv){sv=sv||{lines:[]};
-  if(sv.detailed)return round2((sv.lines||[]).reduce((s,l)=>s+(+l.amount||0),0));
-  return (+sv.total||0);}
+  return round2((sv.lines||[]).reduce((s,l)=>s+(+l.amount||0),0));}
 function savingsDeduct(sv){sv=sv||{lines:[]};
-  if(sv.detailed)return round2((sv.lines||[]).reduce((s,l)=>s+(l.deduct?(+l.amount||0):0),0));
-  return sv.deduct?(+sv.total||0):0;}
+  return round2((sv.lines||[]).reduce((s,l)=>s+(l.deduct?(+l.amount||0):0),0));}
 function totals(m,cust){let planned=0,sp=0,over=0,pFixed=0,pVar=0;
   for(const l of m.lines){const p=(+l.planned||0);planned+=p;if(l.type==="fixed")pFixed+=p;else pVar+=p;const s=spent(l);sp+=s;if(s>p)over+=s-p;}
   planned=round2(planned);sp=round2(sp);over=round2(over);pFixed=round2(pFixed);pVar=round2(pVar);
@@ -3278,109 +3276,61 @@ function savingsLineEl(item,onChange,onDelete,onToggleDeduct){
 }
 function renderIncomeBox(){
   const m=ensure(state.current);
-  const inc=document.getElementById("incomeIn");
-  const toggle=document.getElementById("incomeDetailToggle");
-  const wrap=document.getElementById("incomeDetailWrap");
   const list=document.getElementById("incomeLinesList");
   const foldBtn=document.getElementById("incomeFoldBtn");
   const foldWrap=document.getElementById("incomeFoldWrap");
-  toggle.textContent=m.incomeDetailed?"Revenu simple":"+ Détailler";
-  toggle.classList.toggle("on",m.incomeDetailed);
-  wrap.classList.toggle("hidden",!m.incomeDetailed);
-  inc.disabled=!!m.incomeDetailed;
-  foldBtn.classList.toggle("hidden",!m.incomeDetailed);
   const collapsed=isFolded("income-detail");
   foldBtn.classList.toggle("closed",collapsed);
   foldBtn.setAttribute("aria-expanded",collapsed?"false":"true");
   foldWrap.classList.toggle("hidden",collapsed);
-  const displayVal=m.incomeDetailed?monthIncome(m):(+m.income||0);
-  if(document.activeElement!==inc)inc.value=displayVal===0?"":displayVal;
   list.innerHTML="";
-  if(m.incomeDetailed){
-    if(m.incomeLines.length===0){const e=document.createElement("div");e.className="empty";e.style.padding="6px 0 4px";e.textContent="Ajoute chaque source : salaire, prime, cadeau…";list.append(e);}
-    m.incomeLines.forEach(l=>{
-      list.append(miniLineEl(l,
-        ()=>{touch();updateComputed();},
-        ()=>{confirmThenDelete("income",{
-          title:"Supprimer "+(l.name?'« '+l.name+' »':"cette source de revenu")+" ?",
-          message:"Cette source de revenu sera supprimée. Rattrapable avec ↶ juste après."
-        },()=>{m.incomeLines=m.incomeLines.filter(x=>x.id!==l.id);commit();render();});}
-      ));
-    });
-  }
+  if(m.incomeLines.length===0){const e=document.createElement("div");e.className="empty";e.style.padding="6px 0 4px";e.textContent="Ajoute chaque source : salaire, prime, cadeau…";list.append(e);}
+  m.incomeLines.forEach(l=>{
+    list.append(miniLineEl(l,
+      ()=>{touch();updateComputed();},
+      ()=>{confirmThenDelete("income",{
+        title:"Supprimer "+(l.name?'« '+l.name+' »':"cette source de revenu")+" ?",
+        message:"Cette source de revenu sera supprimée. Rattrapable avec ↶ juste après."
+      },()=>{m.incomeLines=m.incomeLines.filter(x=>x.id!==l.id);commit();render();});}
+    ));
+  });
 }
 function renderSavingsBox(){
   const sv=ensure(state.current).savings;
-  const inp=document.getElementById("savingsIn");
-  const toggle=document.getElementById("savingsDetailToggle");
-  const wrap=document.getElementById("savingsDetailWrap");
   const list=document.getElementById("savingsLinesList");
   const foldBtn=document.getElementById("savingsFoldBtn");
   const foldWrap=document.getElementById("savingsFoldWrap");
-  toggle.textContent=sv.detailed?"Épargne simple":"+ Détailler";
-  toggle.classList.toggle("on",sv.detailed);
-  wrap.classList.toggle("hidden",!sv.detailed);
-  inp.disabled=!!sv.detailed;
-  foldBtn.classList.toggle("hidden",!sv.detailed);
   const collapsedSv=isFolded("savings-detail");
   foldBtn.classList.toggle("closed",collapsedSv);
   foldBtn.setAttribute("aria-expanded",collapsedSv?"false":"true");
   foldWrap.classList.toggle("hidden",collapsedSv);
-  const displayVal=sv.detailed?savingsTotal(sv):(+sv.total||0);
-  if(document.activeElement!==inp)inp.value=displayVal===0?"":displayVal;
-  // Bascule "déduire des revenus" en mode simple
-  const dedRow=document.getElementById("savingsDeductRow");
-  const dedSw=document.getElementById("savingsDeductSwitch");
-  if(dedRow)dedRow.classList.toggle("hidden",!!sv.detailed);
-  if(dedSw){dedSw.classList.toggle("on",!!sv.deduct);dedSw.setAttribute("aria-checked",sv.deduct?"true":"false");}
-  // Note dynamique : montant déduit des revenus
+  // Note d'aide : masquée quand le badge d'en-tête affiche déjà le montant déduit (redondant).
   const hint=document.getElementById("savingsHint");
   if(hint){const d=savingsDeduct(sv);
-    hint.textContent=d>0?("Dont "+eur(d)+" déduits de tes revenus disponibles ce mois-ci.")
-      :"Suivi de ce que tu mets de côté ce mois-ci. Active « déduire des revenus » pour qu'un montant soit retiré du disponible.";}
+    hint.classList.toggle("hidden",d>0);
+    if(d<=0)hint.textContent="Suivi de ce que tu mets de côté ce mois-ci. Active « Déduire des revenus » sur une ligne pour qu'elle soit retirée du disponible.";}
   list.innerHTML="";
-  if(sv.detailed){
-    if(sv.lines.length===0){const e=document.createElement("div");e.className="empty";e.style.padding="6px 0 4px";e.textContent="Ajoute chaque ligne : livret, virement, cash…";list.append(e);}
-    sv.lines.forEach(l=>{
-      list.append(savingsLineEl(l,
-        ()=>{touch();updateComputed();},
-        ()=>{confirmThenDelete("savings",{
-          title:"Supprimer "+(l.name?'« '+l.name+' »':"cette ligne d'épargne")+" ?",
-          message:"Cette ligne d'épargne sera supprimée. Rattrapable avec ↶ juste après."
-        },()=>{sv.lines=sv.lines.filter(x=>x.id!==l.id);commit();render();});},
-        ()=>{l.deduct=!l.deduct;commit();render();}
-      ));
-    });
-  }
+  if(sv.lines.length===0){const e=document.createElement("div");e.className="empty";e.style.padding="6px 0 4px";e.textContent="Ajoute chaque ligne : livret, virement, cash…";list.append(e);}
+  sv.lines.forEach(l=>{
+    list.append(savingsLineEl(l,
+      ()=>{touch();updateComputed();},
+      ()=>{confirmThenDelete("savings",{
+        title:"Supprimer "+(l.name?'« '+l.name+' »':"cette ligne d'épargne")+" ?",
+        message:"Cette ligne d'épargne sera supprimée. Rattrapable avec ↶ juste après."
+      },()=>{sv.lines=sv.lines.filter(x=>x.id!==l.id);commit();render();});},
+      ()=>{l.deduct=!l.deduct;commit();render();}
+    ));
+  });
 }
-document.getElementById("incomeDetailToggle").onclick=()=>{
-  const m=ensure(state.current);
-  m.incomeDetailed=!m.incomeDetailed;
-  if(m.incomeDetailed&&m.incomeLines.length===0&&(+m.income||0)>0){
-    m.incomeLines.push({id:uid(),name:"Salaire",amount:+m.income||0});
-  }
-  commit();render();
-};
 document.getElementById("addIncomeLine").onclick=()=>{
   const m=ensure(state.current);m.incomeLines.push({id:uid(),name:"",amount:0});commit();render();
   const inputs=document.querySelectorAll("#incomeLinesList .miniName");const last=inputs[inputs.length-1];
   if(last)last.focus();
 };
-document.getElementById("savingsDetailToggle").onclick=()=>{
-  const sv=ensure(state.current).savings;
-  sv.detailed=!sv.detailed;
-  if(sv.detailed&&sv.lines.length===0&&(+sv.total||0)>0){
-    sv.lines.push({id:uid(),name:"Épargne",amount:+sv.total||0,deduct:!!sv.deduct});
-  }
-  commit();render();
-};
 document.getElementById("addSavingsLine").onclick=()=>{
   ensure(state.current).savings.lines.push({id:uid(),name:"",amount:0,deduct:true});commit();render();
   const inputs=document.querySelectorAll("#savingsLinesList .miniName");const last=inputs[inputs.length-1];
   if(last)last.focus();
-};
-document.getElementById("savingsDeductSwitch").onclick=()=>{
-  const sv=ensure(state.current).savings;sv.deduct=!sv.deduct;commit();render();
 };
 document.getElementById("incomeFoldBtn").onclick=()=>{toggleFolded("income-detail");renderIncomeBox();};
 document.getElementById("savingsFoldBtn").onclick=()=>{toggleFolded("savings-detail");renderSavingsBox();};
@@ -3405,12 +3355,6 @@ function applySectionFolds(){
     }
   });
 }
-document.getElementById("savingsIn").addEventListener("input",e=>{
-  const sv=ensure(state.current).savings;
-  if(sv.detailed)return;
-  const v=parseAmt(e.target.value);sv.total=v!=null?(v):0;
-  updateComputed();touch();
-});
 function renderRecap(){
   const el=document.getElementById("recap");
   if(el){el.innerHTML="";el.className="recap";el.style.display="none";}
@@ -3540,10 +3484,6 @@ function updateComputed(){
   const incTotVal=document.getElementById("incomeTotVal");if(incTotVal)incTotVal.textContent=eur(t.income);
   const incSubBadge=document.getElementById("incomeSubBadge");
   if(incSubBadge){const negSum=incomeNegativeSum(m);incSubBadge.textContent=negSum<0?("dont "+eur(-negSum)+" soustraits"):"";}
-  const incIn=document.getElementById("incomeIn");
-  if(incIn&&m.incomeDetailed&&document.activeElement!==incIn){const v=t.income;incIn.value=v===0?"":v;}
-  const savInp=document.getElementById("savingsIn");
-  if(savInp&&(m.savings&&m.savings.detailed)&&document.activeElement!==savInp){const v=t.savings;savInp.value=v===0?"":v;}
   document.getElementById("foot").innerHTML="Données enregistrées sur cet appareil.";
   // Map id->ligne construite une seule fois par appel plutôt qu'un .find() (O(n)) par ligne visible :
   // évite un coût O(n²) à chaque frappe clavier sur les budgets avec beaucoup de postes.
@@ -3807,6 +3747,17 @@ function groupedBars(data,density){
   }
   // Les libellés de l'axe X répètent l'année sur chaque barre (ex. "juil '26", "août '26"...),
   // ce qui surcharge l'affichage. On n'affiche l'année que sur la 1re barre et quand elle change.
+  // Précalcule quels mois reçoivent un libellé : le pas régulier, plus le mois courant (toujours
+  // affiché). Si le mois courant tombe hors de ce pas, ses voisins réguliers trop proches sont
+  // retirés — sinon leurs textes se chevauchent (ex. « déc » collé à « janv '27 »).
+  const curIdx=data.findIndex(d=>d.cur);
+  const labelIdx=new Set();
+  data.forEach((d,i)=>{if(i%labelStep===0)labelIdx.add(i);});
+  if(curIdx>=0){
+    labelIdx.add(curIdx);
+    const minGapIdx=Math.max(labelStep,Math.ceil(46/gw)); // écart mini (en nb de groupes) pour ne pas chevaucher le texte
+    for(const i of [...labelIdx])if(i!==curIdx&&Math.abs(i-curIdx)<minGapIdx)labelIdx.delete(i);
+  }
   let prevYearTag=null;
   data.forEach((d,i)=>{const cx=i*gw+gw/2;
     const x1=cx-bw-gap/2,x2=cx+gap/2;const over=d.dep>d.rev&&d.rev>0;
@@ -3817,7 +3768,7 @@ function groupedBars(data,density){
     s+='<rect x="'+x2.toFixed(1)+'" y="'+depY.toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,zeroY-depY).toFixed(1)+'" rx="3" fill="'+(over?cRed:cOut)+'" tabindex="0" role="button" data-tip="'+depTip+'"><title>'+depTip+'</title></rect>';
     // Quand les groupes sont serrés (beaucoup de mois affichés), on saute des libellés d'axe X
     // pour éviter qu'ils se chevauchent — le mois courant reste toujours affiché.
-    if(i%labelStep===0||d.cur){
+    if(labelIdx.has(i)){
       let axisLabel=d.label||"";
       const ym=/^(.*?)(\s'\d{2})$/.exec(axisLabel);
       if(ym){if(ym[2]===prevYearTag)axisLabel=ym[1];prevYearTag=ym[2];}else{prevYearTag=null;}
@@ -4449,24 +4400,20 @@ function openNewMonthModal(){
   document.getElementById("nmSub").textContent=prevKey
     ?"Ce mois n'existe pas encore. Reprendre des éléments de "+mLabel(prevKey)+" ?"
     :"Ce mois n'existe pas encore et aucun mois précédent n'est disponible.";
-  document.getElementById("nmAll").classList.toggle("hidden",!prevKey);
   document.getElementById("nmAllUndeduct").classList.toggle("hidden",!prevKey);
-  document.getElementById("nmFixed").classList.toggle("hidden",!prevKey);
   document.getElementById("newMonthModal").classList.remove("hidden");
 }
 function closeNewMonthModal(){document.getElementById("newMonthModal").classList.add("hidden");pendingMonth=null;}
 function finishNewMonth(mode){
   const key=pendingMonth;if(!key)return;
   if(mode==="empty")state.months[key]={income:0,incomeDetailed:false,incomeLines:[],lines:[],savings:emptySavings()};
-  else if(mode==="all_undeduct")buildFromPrevInto(key,"all",{savings:"undeduct"});
+  else if(mode==="all_undeduct")buildFromPrevInto(key,"all",{savings:"undeduct",income:false});
   else buildFromPrevInto(key,mode);
   state.current=key;pendingMonth=null;
   document.getElementById("newMonthModal").classList.add("hidden");
   commit();render();toast("Mois créé ✓");
 }
-document.getElementById("nmAll").onclick=()=>finishNewMonth("all");
 document.getElementById("nmAllUndeduct").onclick=()=>finishNewMonth("all_undeduct");
-document.getElementById("nmFixed").onclick=()=>finishNewMonth("fixed");
 document.getElementById("nmEmpty").onclick=()=>finishNewMonth("empty");
 document.getElementById("nmCancel").onclick=closeNewMonthModal;
 document.getElementById("newMonthModal").addEventListener("click",e=>{if(e.target.id==="newMonthModal")closeNewMonthModal();});
@@ -4654,10 +4601,6 @@ document.addEventListener("click",e=>{
 });
 document.getElementById("addFixed").onclick=()=>addLine("fixed");
 document.getElementById("addVar").onclick=()=>addLine("variable");
-document.getElementById("incomeIn").addEventListener("input",e=>{const m=ensure(state.current);
-  if(m.incomeDetailed)return;
-  const v=parseAmt(e.target.value);m.income=v!=null?(v):0;
-  updateComputed();touch();});
 document.getElementById("paletteBtn").onclick=()=>{document.getElementById("settings").classList.remove("hidden");
   renderResetSection();renderSortSettings();
   const cur=document.querySelector("#themebar .sw.on");if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});};
@@ -5006,11 +4949,12 @@ document.getElementById("importBtn").onclick=()=>document.getElementById("import
 document.getElementById("importFile").onchange=e=>{const f=e.target.files[0];if(f)importData(f);e.target.value="";};
 function buildFromPrevInto(key,mode,opts){
   const savingsMode=(opts&&opts.savings)||"full"; // "full" | "undeduct" | "none" | "keep"
+  const copyIncome=!opts||opts.income!==false;
   const prevKey=Object.keys(state.months).filter(x=>x<key).sort().pop();
   const prev=prevKey?state.months[prevKey]:null;
-  const income=prev?(prev.income||0):0;
-  const incomeDetailed=prev?!!prev.incomeDetailed:false;
-  const incomeLines=prev?(prev.incomeLines||[]).map(l=>({id:uid(),name:l.name,amount:+l.amount||0})):[];
+  const income=(prev&&copyIncome)?(prev.income||0):0;
+  const incomeDetailed=(prev&&copyIncome)?!!prev.incomeDetailed:false;
+  const incomeLines=(prev&&copyIncome)?(prev.incomeLines||[]).map(l=>({id:uid(),name:l.name,amount:+l.amount||0})):[];
   let lines=[];
   if(prev){const src=mode==="fixed"?prev.lines.filter(l=>l.type==="fixed"||l.recurring):prev.lines;
     lines=src.map(l=>({id:uid(),name:l.name,planned:l.planned,type:l.type,category:l.category||"",recurring:!!l.recurring,entries:[]}));}
