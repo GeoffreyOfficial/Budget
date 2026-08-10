@@ -270,6 +270,85 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 @media (min-width:1500px){.settingsBody{max-width:1060px}}
 .settings .slabel{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 2px 10px}
 .settings .hr{height:1px;background:var(--line);margin:14px 0}
+
+/* ---------- Sous-page détail d'un indicateur du hero (clic sur une carte / le héros) ---------- */
+.statDetail .settingsHead{background:var(--paper)}
+.sdHero{border-radius:20px;padding:20px 18px 18px;color:var(--hero-ink);position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--hero-a),var(--hero-b));background-size:200% 200%;animation:heroDrift 12s ease-in-out infinite;
+  box-shadow:0 12px 26px -16px rgba(0,0,0,.5);margin-bottom:16px}
+.sdHero.over{background:linear-gradient(135deg,color-mix(in srgb,var(--red) 55%,black),color-mix(in srgb,var(--red) 25%,black))}
+.sdIcon{font-size:26px;line-height:1;margin-bottom:6px;display:inline-block;animation:sdPop .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes sdPop{from{transform:scale(.5) rotate(-8deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.sdLbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.85;font-weight:700}
+.sdBig{font-family:var(--mono);font-size:clamp(30px,10vw,42px);font-weight:700;letter-spacing:-.02em;margin:4px 0 2px;line-height:1.05;
+  animation:bigPop .5s cubic-bezier(.34,1.56,.64,1) both}
+.sdSub{font-size:12.5px;opacity:.92}
+.sdDelta{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:5px 11px;border-radius:99px;font-size:12.5px;font-weight:700;
+  background:rgba(255,255,255,.16)}
+.sdDelta.up{color:#B9F5D4}.sdDelta.down{color:#FFC9C0}
+.sdMiniStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.sdMiniStats .sdm{background:rgba(255,255,255,.1);border-radius:12px;padding:8px 9px;min-width:0}
+.sdMiniStats .sdm .k{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;opacity:.72}
+.sdMiniStats .sdm .v{font-family:var(--mono);font-size:13px;font-weight:700;margin-top:2px}
+.statDetail .sdSection h3{margin:0 0 4px;font-size:14.5px;font-weight:800;letter-spacing:0;text-transform:none;color:var(--ink);display:flex;align-items:center;gap:7px}
+.statDetail .sdSection .psub{margin:0 0 10px}
+.sdRow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line)}
+.sdRow:last-child{border-bottom:none}
+.sdRow .sdName{font-size:13px;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1 1 auto}
+.sdRow .sdAmt{font-family:var(--mono);font-weight:700;font-size:13.5px;color:var(--ink);flex-shrink:0}
+.sdRow .sdAmt.neg{color:var(--red)}
+.sdRow .sdBadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--soft);color:var(--muted);flex-shrink:0}
+.sdRow .sdBadge.on{background:var(--red-soft);color:var(--red)}
+.sdEmpty{color:var(--muted);font-size:13px;padding:6px 2px}
+.sdWaterfall{display:flex;flex-direction:column;gap:10px}
+.sdWfRow{display:flex;align-items:center;gap:10px}
+.sdWfLbl{font-size:12.5px;color:var(--muted);width:112px;flex-shrink:0}
+.sdWfTrack{flex:1 1 auto;height:12px;border-radius:99px;background:var(--soft);overflow:hidden;position:relative}
+.sdWfTrack i{display:block;height:100%;border-radius:99px}
+.sdWfAmt{font-family:var(--mono);font-weight:700;font-size:12.5px;width:82px;text-align:right;flex-shrink:0}
+.sdWfRow.total .sdWfLbl,.sdWfRow.total .sdWfAmt{font-weight:800;color:var(--ink)}
+/* Reflet lumineux + pulsation (dépassement) sur la carte héros de la sous-page détail, comme sur le hero principal */
+.sdHero{animation:sdHeroIn .55s cubic-bezier(.16,1,.3,1) both,heroDrift 12s ease-in-out infinite}
+.sdHero.over{animation:sdHeroIn .55s cubic-bezier(.16,1,.3,1) both,heroDrift 12s ease-in-out infinite,sdOverPulse 2s ease-in-out infinite}
+@keyframes sdHeroIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes sdOverPulse{0%,100%{box-shadow:0 12px 26px -16px rgba(0,0,0,.5)}50%{box-shadow:0 14px 34px -10px rgba(220,70,70,.55)}}
+.sdHero::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.16) 45%,rgba(255,255,255,.3) 50%,rgba(255,255,255,.16) 55%,transparent 70%);
+  background-size:250% 250%;animation:heroSheen 6s ease-in-out infinite;mix-blend-mode:overlay}
+.sdIcon{animation:sdPop .5s cubic-bezier(.34,1.56,.64,1) both,sdGlow 2.4s ease-in-out .65s infinite}
+@keyframes sdGlow{0%,100%{filter:drop-shadow(0 0 0 rgba(255,255,255,0))}50%{filter:drop-shadow(0 0 7px rgba(255,255,255,.6))}}
+.sdDelta{animation:sdDeltaPop .4s cubic-bezier(.34,1.56,.64,1) both .24s}
+@keyframes sdDeltaPop{from{opacity:0;transform:scale(.7) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+/* Entrée en cascade des sections de la sous-page détail, pour le même effet vivant que le panneau de poste */
+#sdBody>*{animation-delay:0s}
+#sdBody>*:nth-child(1){animation-delay:.02s}
+#sdBody>*:nth-child(2){animation-delay:.1s}
+#sdBody>*:nth-child(3){animation-delay:.17s}
+#sdBody>*:nth-child(4){animation-delay:.24s}
+#sdBody>*:nth-child(n+5){animation-delay:.3s}
+.sdMiniStats .sdm{animation:sdmPop .45s cubic-bezier(.34,1.56,.64,1) both .32s}
+.sdMiniStats .sdm:nth-child(2){animation-delay:.38s}
+.sdMiniStats .sdm:nth-child(3){animation-delay:.44s}
+@keyframes sdmPop{from{opacity:0;transform:scale(.85) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.statDetail .sdRow,.statDetail .leg{animation:sdRowIn .4s cubic-bezier(.16,1,.3,1) both}
+.statDetail .sdRow:nth-child(1),.statDetail .leg:nth-child(1){animation-delay:.04s}
+.statDetail .sdRow:nth-child(2),.statDetail .leg:nth-child(2){animation-delay:.08s}
+.statDetail .sdRow:nth-child(3),.statDetail .leg:nth-child(3){animation-delay:.12s}
+.statDetail .sdRow:nth-child(4),.statDetail .leg:nth-child(4){animation-delay:.16s}
+.statDetail .sdRow:nth-child(5),.statDetail .leg:nth-child(5){animation-delay:.2s}
+.statDetail .sdRow:nth-child(n+6),.statDetail .leg:nth-child(n+6){animation-delay:.24s}
+@keyframes sdRowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.sdWfRow{animation:sdRowIn .4s cubic-bezier(.16,1,.3,1) both}
+.sdWfRow:nth-child(1){animation-delay:.06s}
+.sdWfRow:nth-child(2){animation-delay:.14s}
+.sdWfRow:nth-child(3){animation-delay:.22s}
+.sdWfRow:nth-child(n+4){animation-delay:.3s}
+.sdWfTrack i{animation:sdBarGrow .6s cubic-bezier(.16,1,.3,1) both;transform-origin:left center}
+.sdWfRow:nth-child(1) .sdWfTrack i{animation-delay:.18s}
+.sdWfRow:nth-child(2) .sdWfTrack i{animation-delay:.26s}
+.sdWfRow:nth-child(3) .sdWfTrack i{animation-delay:.34s}
+.sdWfRow:nth-child(n+4) .sdWfTrack i{animation-delay:.42s}
+@keyframes sdBarGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 /* ---------- Panneau détail d'un budget (plein écran) ---------- */
 .expandBtn{flex-shrink:0;border:none;background:var(--soft);color:var(--muted);border-radius:50%;width:30px;height:30px;
   font-size:13px;cursor:pointer;display:grid;place-items:center}
@@ -417,7 +496,7 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .icongbtn{border:1px solid transparent;background:var(--card);border-radius:8px;font-size:16px;padding:6px 0;cursor:pointer}
 .icongbtn.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--paper);
-  padding:11px 18px;border-radius:16px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:60;box-shadow:0 8px 24px -10px rgba(0,0,0,.5);
+  padding:11px 18px;border-radius:16px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:320;box-shadow:0 8px 24px -10px rgba(0,0,0,.5);
   max-width:min(86vw,420px);text-align:center;line-height:1.45}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -429,7 +508,7 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
   background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;
   padding:12px 17px 13px;min-width:240px;max-width:min(94vw,460px);
   box-shadow:0 16px 38px -16px rgba(0,0,0,.5);opacity:0;pointer-events:none;cursor:pointer;
-  transition:opacity .26s ease,transform .32s cubic-bezier(.16,1,.3,1);z-index:61}
+  transition:opacity .26s ease,transform .32s cubic-bezier(.16,1,.3,1);z-index:321}
 .historyToast.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);pointer-events:auto}
 .htHead{display:flex;align-items:center;gap:9px;font-weight:700;font-size:13px}
 .htIcon{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;
@@ -523,9 +602,32 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 @media (min-width:560px){.stats{grid-template-columns:1fr 1fr 1fr 1fr}}
 .heroProj{margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.16);font-size:12.5px;line-height:1.5;opacity:.92}
 .heroProj b{font-weight:700}
-.stat{background:rgba(255,255,255,.1);border-radius:12px;padding:9px 10px;min-width:0}
+/* Repli discret du hero : pas de fond/bordure par défaut (contrairement aux foldBtn classiques),
+   pour ne pas ajouter de bouton visuellement lourd sur la carte la plus visible de l'appli.
+   Il ne s'affirme qu'au survol/tap/focus. */
+.heroTopL{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.heroTopR{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.heroFoldAmt{display:none;font-family:var(--mono);font-weight:600;font-size:12.5px;opacity:.9;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero.folded .heroFoldAmt{display:inline-block}
+.heroFoldBtn{flex-shrink:0;border:none;background:transparent;color:var(--hero-ink);opacity:.5;
+  padding:5px;margin:-5px;border-radius:8px;cursor:pointer;display:grid;place-items:center;
+  transition:opacity .15s ease,background-color .15s ease}
+.heroFoldBtn:hover{opacity:.85;background:rgba(255,255,255,.10)}
+.heroFoldBtn:active{opacity:1}
+.heroFoldBtn:focus-visible{opacity:1;outline:2px solid var(--hero-ink);outline-offset:1px}
+.heroFoldBtn .chev{display:inline-block;transition:transform .2s;font-size:12px;line-height:1}
+.heroFoldBtn.closed .chev{transform:rotate(-90deg)}
+.heroFoldWrap{overflow:hidden}
+.heroFoldWrap.hidden{display:none}
+.hero.folded{padding-bottom:16px}
+.stat{background:rgba(255,255,255,.1);border-radius:12px;padding:9px 10px;min-width:0;cursor:pointer;transition:background .15s,transform .15s;border:none;text-align:left;-webkit-tap-highlight-color:transparent}
+.stat:hover{background:rgba(255,255,255,.17)}
+.stat:active{transform:scale(.96)}
 .stat .k{font-size:10px;letter-spacing:.05em;text-transform:uppercase;opacity:.72}
 .stat .v{font-family:var(--mono);font-size:14px;font-weight:600;margin-top:2px;overflow-wrap:anywhere;word-break:break-word}
+#heroMain{cursor:pointer;display:block;width:100%;background:none;border:none;text-align:left;padding:0;margin:0;font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;border-radius:10px;transition:opacity .15s}
+#heroMain:active{opacity:.8}
 .stat .v.red{color:#FFC9BF}
 
 .tabs{display:flex;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:4px;margin:14px 0 4px;gap:3px}
@@ -562,6 +664,8 @@ svg.gbars{display:block;max-width:none;animation:panelIn .5s ease both}
 .gbars text{font-family:var(--mono)}
 .gbars rect[data-tip]{cursor:pointer}
 .gbars rect[data-tip]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.bars rect[data-tip]{cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+.bars .vbar.sel{stroke:#000;stroke-width:1.5}
 
 .income{margin:12px 2px 6px;padding:12px 14px;background:var(--card);border:1px solid var(--line);
   border-radius:14px;box-shadow:0 4px 16px -12px rgba(0,0,0,.3);transition:border-color .25s,background .25s}
@@ -1025,11 +1129,12 @@ button.rowCatIcon:active{transform:scale(.92)}
 .track>i{display:block;height:100%;border-radius:99px;background:var(--accent-2);transition:width .5s}
 .track>i.over{background:var(--red)}
 svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
+.sdTrendWrap{width:100%}
 .bars .axl{font-size:8px;fill:var(--faint);font-family:var(--mono)}
-.daysum{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:2px 0 4px}
+.daysum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 4px}
 .dsum{background:var(--soft);border-radius:12px;padding:10px;min-width:0;overflow:hidden}
 .dsum .k{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dsum .v{font-family:var(--mono);font-weight:700;font-size:15px;margin-top:2px;color:var(--ink);overflow-wrap:break-word;word-break:break-word}
+.dsum .v{font-family:var(--mono);font-weight:700;font-size:15px;margin-top:2px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dayblock{margin-bottom:10px}
 .dayhd{display:flex;justify-content:space-between;align-items:baseline;margin:0 2px 6px;padding-top:6px}
 .dayhd .dd{font-weight:700;font-size:14px;color:var(--ink);text-transform:capitalize}
@@ -1075,7 +1180,7 @@ svg.bars{width:100%;height:140px;display:block;animation:panelIn .5s ease both}
   background-size:400% 100%;animation:shimmer 1.3s ease-in-out infinite;width:100%}
 .chartSkeleton.donut{width:130px;height:130px;border-radius:50%;flex-shrink:0}
 .heroTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.heroSpark{width:76px;height:26px;display:block;flex-shrink:0;opacity:.9;color:var(--hero-ink)}
+.heroSpark{width:92px;height:30px;display:block;flex-shrink:0;opacity:.95;color:var(--hero-ink)}
 .heroPace{display:none;margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,.16);font-size:12.5px;line-height:1.5}
 .heroPace.show{display:block}
 .dupwarn{display:none;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--money-out);font-weight:700;margin-top:2px}
@@ -1204,10 +1309,192 @@ html{scroll-behavior:smooth}
 .tab.on{animation:tabPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes tabPop{from{transform:scale(.94)}to{transform:scale(1)}}
 .segBtn.on{animation:tabPop .3s cubic-bezier(.34,1.56,.64,1)}
+
+/* ---------- Grand écran "wahou" : tap sur la sparkline du hero -> courbe plein écran ---------- */
+.heroSpark{cursor:pointer;border-radius:8px}
+.heroSpark:focus-visible{outline:2px solid var(--hero-ink);outline-offset:2px}
+.sparkBurst{position:fixed;inset:0;z-index:500;overflow:hidden;will-change:transform,opacity}
+.sparkBurst.hidden{display:none}
+.sbBg{position:absolute;inset:0;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--hero-a) 82%,transparent),color-mix(in srgb,var(--hero-b) 82%,transparent));
+  backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%)}
+.sbBlob{position:absolute;border-radius:50%;filter:blur(42px);opacity:.5;mix-blend-mode:overlay;pointer-events:none}
+.sbBlob1{width:260px;height:260px;background:var(--accent-2);top:-70px;left:-70px;animation:sbFloat1 9s ease-in-out infinite}
+.sbBlob2{width:230px;height:230px;background:var(--accent);bottom:-60px;right:-50px;animation:sbFloat2 11s ease-in-out infinite}
+.sbBlob3{width:190px;height:190px;background:#fff;top:38%;left:58%;animation:sbFloat3 13s ease-in-out infinite}
+@keyframes sbFloat1{0%,100%{transform:translate(0,0)}50%{transform:translate(28px,36px)}}
+@keyframes sbFloat2{0%,100%{transform:translate(0,0)}50%{transform:translate(-24px,-28px)}}
+@keyframes sbFloat3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-18px,18px) scale(1.15)}}
+.sbRing{position:absolute;left:var(--rx,50%);top:var(--ry,50%);width:40px;height:40px;margin:-20px 0 0 -20px;
+  border-radius:50%;border:2px solid rgba(255,255,255,.65);opacity:0;pointer-events:none;
+  animation:sbRingOut .8s ease-out both}
+@keyframes sbRingOut{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(14)}}
+.sbSparkles{position:absolute;inset:0;pointer-events:none;z-index:2}
+.sbSpark{position:absolute;left:var(--sx,50%);top:var(--sy,50%);font-size:var(--ss,18px);opacity:0;
+  animation:sbSparkOut .95s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--sd,0s)}
+@keyframes sbSparkOut{0%{opacity:0;transform:translate(0,0) scale(.3) rotate(0)}
+  22%{opacity:1}
+  100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1) rotate(var(--tr,80deg))}}
+.sbPanel{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;
+  padding:calc(18px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));color:var(--hero-ink);
+  max-width:640px;margin:0 auto;width:100%;box-sizing:border-box;overflow-y:auto}
+@media (min-width:900px){.sbPanel{max-width:760px}}
+@media (min-width:1200px){.sbPanel{max-width:900px}}
+.sparkBurst.animIn .sbPanel{opacity:0;transform:scale(.94);animation:sbPanelIn .5s .18s cubic-bezier(.16,1,.3,1) both}
+@keyframes sbPanelIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.sbHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex:0 0 auto}
+.sbLbl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;font-weight:700}
+.sbBig{font-family:var(--mono);font-size:clamp(30px,10vw,46px);font-weight:700;letter-spacing:-.02em;
+  margin-top:4px;line-height:1.05}
+.sparkBurst.animIn .sbBig{animation:bigPop .5s .35s cubic-bezier(.34,1.56,.64,1) both}
+.sbDelta{font-size:12.5px;margin-top:4px;opacity:.92;font-weight:600}
+.sbClose{flex:0 0 auto;width:38px;height:38px;border-radius:99px;border:1px solid rgba(255,255,255,.35);
+  background:rgba(0,0,0,.18);color:var(--hero-ink);font-size:16px;cursor:pointer;display:grid;place-items:center}
+.sbClose:active{transform:scale(.92)}
+.sbChartArea{position:relative;flex:1 1 auto;display:flex;min-height:150px}
+.sbChartWrap{flex:1 1 auto;display:flex;align-items:center;margin-top:6px}
+.sbChartWrap svg{width:100%;height:100%;display:block;overflow:visible}
+.sbTooltip{position:absolute;left:0;top:0;transform:translate(-50%,-100%);margin-top:-12px;
+  background:rgba(0,0,0,.74);color:#fff;padding:7px 11px;border-radius:10px;font-size:12.5px;font-weight:700;
+  white-space:nowrap;pointer-events:none;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);z-index:5;
+  animation:sbTipPop .22s cubic-bezier(.34,1.56,.64,1)}
+.sbTooltip.hidden{display:none}
+.sbTooltip::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:rgba(0,0,0,.74)}
+.sbTooltip.below{transform:translate(-50%,18px);margin-top:0}
+.sbTooltip.below::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:rgba(0,0,0,.74)}
+@keyframes sbTipPop{from{opacity:0;transform:translate(-50%,-92%) scale(.85)}to{opacity:1;transform:translate(-50%,-100%) scale(1)}}
+.sbStats{flex:0 0 auto;display:flex;gap:8px;margin-top:8px}
+.sbStat{flex:1;min-width:0;background:rgba(255,255,255,.14);border-radius:14px;padding:9px 10px;backdrop-filter:blur(6px)}
+.sbStat .k{font-size:10px;letter-spacing:.07em;text-transform:uppercase;opacity:.82;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbStat .v{font-family:var(--mono);font-size:14.5px;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbFill{fill:url(#sbFade);opacity:0;transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0)}
+.sbFill.reveal{animation:sbFillGrow 1s cubic-bezier(.16,1,.3,1) both}
+@keyframes sbFillGrow{from{opacity:0;transform:scaleY(0)}to{opacity:1;transform:scaleY(1)}}
+.sbLine{fill:none;stroke:var(--hero-ink);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sbGrid,.sbAxl{opacity:0;animation:sbGridIn .5s ease both}
+@keyframes sbGridIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+.sbDot{fill:var(--hero-ink);opacity:0;transform-box:fill-box;transform-origin:center;
+  animation:sbDotPop .4s cubic-bezier(.34,1.56,.64,1) both}
+.sbDot.cur{fill:var(--accent-2)}
+.sbDot.sel{stroke:#fff;stroke-width:2.2px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}
+@keyframes sbDotPop{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+.sbGrid{stroke:rgba(255,255,255,.16);stroke-width:1}
+.sbAxl{font-size:10px;fill:var(--hero-ink);opacity:.78;font-family:var(--mono)}
+.sbHit{cursor:pointer}
+.sbDot{cursor:pointer}
+/* ---------- Petit chat noir surprise (easter egg discret, occasionnel) ----------
+   Séquence "comme un vrai chat" : il marche sur ses 4 pattes (démarche diagonale, comme un
+   vrai quadrupède), s'arrête, parfois grimpe se lover sur un bouton de la barre du haut
+   (Réglages, calculette, ↶/↷, mois), s'étire (dos arqué, pattes avant tendues, arrière-train
+   relevé), puis repart marcher hors de l'écran.
+   Positionnement : "bottom:10px" natif (comme avant) pour le sol — robuste aux variations de
+   hauteur de viewport sur mobile (barre d'adresse qui apparaît/disparaît au scroll). Seul le
+   décalage horizontal ET, pendant le "grimper" sur un bouton, un décalage vertical RELATIF à
+   ce sol sont pilotés en JS via translate(x,y) — jamais une position absolue recalculée sur
+   un vh capturé une seule fois, ce qui provoquait des sauts/téléportations si le viewport
+   changeait pendant l'animation. Chaque partie du chat (corps+pattes, tête, queue) est un
+   groupe SVG animé indépendamment. */
+.easterCat{position:fixed;left:0;bottom:10px;width:58px;height:28px;z-index:300;
+  pointer-events:none;user-select:none;
+  transform:translateX(-70px);transition:transform 2.2s cubic-bezier(.4,0,.2,1);will-change:transform}
+/* Couche verticale : le saut/la chute sont portés ici, séparément du déplacement horizontal, pour
+   dessiner une vraie trajectoire (montée décélérée par la "gravité", chute accélérée). */
+.easterCat .catLift{display:block;width:100%;height:100%;transform:translateY(0);
+  transition:transform .5s cubic-bezier(.4,0,.2,1);will-change:transform;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.32))}
+/* Bond vers le haut : départ vif puis décélération (arrivée en douceur sur le perchoir). */
+.easterCat.leaping .catLift{transition:transform .52s cubic-bezier(.12,.62,.24,1)}
+/* Retombée : accélération façon gravité. */
+.easterCat.dropping .catLift{transition:transform .46s cubic-bezier(.5,.02,.86,.4)}
+.easterCat svg{display:block;width:100%;height:100%;overflow:visible}
+.easterCat .catRig{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:50px 32px}
+.easterCat .cTail{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:19px 20px}
+.easterCat .cHead{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:52px 16px}
+.easterCat [class^="cLeg"] rect{transform-box:fill-box;transform-origin:50% 0%;transition:transform .35s ease}
+/* démarche : pattes diagonales en opposition de phase (avant-gauche+arrière-droite vs avant-droit+arrière-gauche) */
+.easterCat.walking .cLegFL rect,.easterCat.walking .cLegBR rect{animation:legSwingA .36s ease-in-out infinite}
+.easterCat.walking .cLegFR rect,.easterCat.walking .cLegBL rect{animation:legSwingB .36s ease-in-out infinite}
+.easterCat.walking .catRig{animation:bodyBob .36s ease-in-out infinite}
+.easterCat.walking .cTail{animation:tailSway .72s ease-in-out infinite}
+@keyframes legSwingA{0%,100%{transform:rotate(-24deg)}50%{transform:rotate(24deg)}}
+@keyframes legSwingB{0%,100%{transform:rotate(24deg)}50%{transform:rotate(-24deg)}}
+@keyframes bodyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.4px)}}
+@keyframes tailSway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
+/* Anticipation avant le bond : le chat se tasse sur ses pattes (squash), tête un peu baissée.
+   Uniquement des scale/rotate autour des ancrages existants — jamais de translate combiné. */
+.easterCat.crouch .catRig{transition:transform .18s ease-out;transform:translateY(2px) scaleY(.8) scaleX(1.07)}
+.easterCat.crouch [class^="cLeg"] rect{transition:transform .18s ease-out;transform:scaleY(.66)}
+.easterCat.crouch .cHead{transform:rotate(8deg)}
+.easterCat.crouch .cTail{transform:rotate(-24deg)}
+/* Détente / vol : corps étiré vers l'avant (stretch), pattes tendues, queue qui file derrière. */
+.easterCat.leaping .catRig{transition:transform .22s cubic-bezier(.2,.7,.3,1);transform:scaleY(1.12) scaleX(.93) rotate(-9deg)}
+.easterCat.leaping .cLegFL rect,.easterCat.leaping .cLegFR rect{transform:rotate(26deg) scaleY(1.18)}
+.easterCat.leaping .cLegBL rect,.easterCat.leaping .cLegBR rect{transform:rotate(-20deg) scaleY(1.22)}
+.easterCat.leaping .cTail{transform:rotate(-52deg)}
+.easterCat.leaping .cHead{transform:rotate(-8deg)}
+/* Réception : léger écrasement à l'atterrissage (squash), puis retour au calme. */
+.easterCat.land .catRig{transition:transform .13s ease-out;transform:scaleY(.86) scaleX(1.08)}
+.easterCat.land [class^="cLeg"] rect{transition:transform .13s ease-out;transform:scaleY(.8)}
+/* étirement : dos arqué (bascule autour des pattes avant), pattes avant tendues, arrière-train relevé.
+   Important : chaque règle ne combine JAMAIS translate() avec rotate()/scale() sur un même élément
+   animé autour d'un transform-origin fixe — sinon la translation déplace la forme AVANT la rotation,
+   qui tourne alors autour d'un point où la forme n'est plus (effet "détaché du corps"). On ne fait
+   donc tourner/grossir qu'autour du point d'ancrage déjà défini par transform-origin. */
+.easterCat.stretch .catRig{transform:rotate(-15deg) scaleY(1.06)}
+.easterCat.stretch .cLegFL rect,.easterCat.stretch .cLegFR rect{transform:rotate(42deg) scaleY(1.2)}
+.easterCat.stretch .cLegBL rect,.easterCat.stretch .cLegBR rect{transform:rotate(-8deg) scaleY(1.28)}
+.easterCat.stretch .cTail{transform:rotate(-46deg)}
+.easterCat.stretch .cHead{transform:rotate(-10deg)}
+/* pelotonné : pattes repliées sous le corps, tête baissée, queue enroulée */
+.easterCat.curl .catRig{transform-origin:36px 22px;transform:scale(.68)}
+.easterCat.curl [class^="cLeg"] rect{transform:rotate(72deg) scaleY(.45);opacity:.9}
+.easterCat.curl .cTail{transform:rotate(96deg) scale(.72)}
+.easterCat.curl .cHead{transform:rotate(20deg)}
+/* respiration lente quand il est pelotonné (poitrine qui se soulève) */
+.easterCat.curl .catRig{animation:catBreathe 3.4s ease-in-out infinite}
+@keyframes catBreathe{0%,100%{transform:scale(.68)}50%{transform:scale(.665) translateY(.5px)}}
+/* ---- Poses supplémentaires : variété aléatoire de comportement ---- */
+/* Debout, mais vivant : respiration lente + queue qui balance doucement. */
+.easterCat.idle .catRig{animation:idleBreathe 3.8s ease-in-out infinite}
+.easterCat.idle .cTail{animation:tailSway 2.6s ease-in-out infinite}
+@keyframes idleBreathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.03)}}
+/* "Pain de mie" : pattes repliées sous le corps, éveillé, queue ramenée le long du flanc. */
+.easterCat.loaf .catRig{transform:scaleY(.9)}
+.easterCat.loaf [class^="cLeg"] rect{transform:scaleY(.2);opacity:.85}
+.easterCat.loaf .cTail{transform:rotate(30deg) scale(.94)}
+/* Regarde autour de lui : la tête pivote d'un côté puis de l'autre. */
+.easterCat.look .cHead{animation:headLook 2.4s ease-in-out}
+@keyframes headLook{0%{transform:rotate(0)}18%{transform:rotate(-20deg)}42%{transform:rotate(-20deg)}64%{transform:rotate(16deg)}86%{transform:rotate(16deg)}100%{transform:rotate(0)}}
+.easterCat.look .cTail{animation:tailSway 2.6s ease-in-out infinite}
+/* Toilette : la tête plonge vers le flanc par petits coups de langue répétés. */
+.easterCat.groom .cHead{animation:groomLick .52s ease-in-out infinite}
+@keyframes groomLick{0%,100%{transform:rotate(32deg)}50%{transform:rotate(50deg)}}
+.easterCat.groom .catRig{transform:scaleY(.97)}
+/* Frétillement d'avant-bond : l'arrière-train se dandine, queue dressée, tête basse (guette). */
+.easterCat.wiggle .catRig{transform-origin:52px 24px;animation:wiggle .26s ease-in-out infinite}
+.easterCat.wiggle .cTail{transform:rotate(-56deg)}
+.easterCat.wiggle .cHead{transform:rotate(6deg)}
+@keyframes wiggle{0%,100%{transform:rotate(-2.6deg)}50%{transform:rotate(2.6deg)}}
+/* Coup de queue vif de contentement. */
+.easterCat.flick .cTail{animation:tailFlick .62s ease-in-out infinite}
+@keyframes tailFlick{0%,100%{transform:rotate(8deg)}30%{transform:rotate(-30deg)}62%{transform:rotate(2deg)}}
+/* Orientation : chat tourné vers la gauche (entrée par la droite). */
+.easterCat.faceLeft svg{transform:scaleX(-1);transform-origin:center}
+@media (prefers-reduced-motion: reduce){
+  .easterCat{transition:opacity .6s ease!important}
+  .easterCat,.easterCat *{animation:none!important}
+  .easterCat .catLift,.easterCat .catRig,.easterCat .cTail,.easterCat .cHead,.easterCat [class^="cLeg"] rect{transition:none!important;transform:none!important}
+  .sbBlob1,.sbBlob2,.sbBlob3,.sbRing,.sbSpark{animation:none!important}
+  .sbBlob1,.sbBlob2,.sbBlob3{opacity:.35}
+  .sparkBurst.animIn .sbPanel,.sparkBurst.animIn .sbBig{animation:none!important;opacity:1!important;transform:none!important}
+  .sbDot,.sbGrid,.sbAxl{animation:none!important;opacity:1!important;transform:none!important}
+  .sbFill{animation:none!important;opacity:1!important;transform:none!important}
+}
 </style>
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <style>
 /* ===================== Calculette flottante ===================== */
 .calcFabTop{flex-shrink:0}
@@ -1467,6 +1754,37 @@ html{scroll-behavior:smooth}
     <div class="settingsBody" id="bdBody"></div>
   </div>
 
+  <div class="settings hidden statDetail" id="statDetailPanel">
+    <div class="settingsHead">
+      <button type="button" class="settingsCloseBtn" id="sdCloseBtn" aria-label="Fermer le détail">✕ Fermer</button>
+    </div>
+    <div class="settingsBody" id="sdBody"></div>
+  </div>
+
+  <div class="sparkBurst hidden" id="sparkBurst" role="dialog" aria-modal="true" aria-label="Courbe détaillée en grand">
+    <div class="sbBg" id="sbBg" aria-hidden="true">
+      <span class="sbBlob sbBlob1"></span>
+      <span class="sbBlob sbBlob2"></span>
+      <span class="sbBlob sbBlob3"></span>
+    </div>
+    <div class="sbSparkles" id="sbSparkles" aria-hidden="true"></div>
+    <div class="sbPanel" id="sbPanel">
+      <div class="sbHead">
+        <div class="sbHeadTxt">
+          <div class="sbLbl" id="sbLbl">Reste réel</div>
+          <div class="sbBig" id="sbBig">0,00 €</div>
+          <div class="sbDelta" id="sbDelta"></div>
+        </div>
+        <button type="button" class="sbClose" id="sbClose" aria-label="Fermer">✕</button>
+      </div>
+      <div class="sbChartArea" id="sbChartArea">
+        <div class="sbChartWrap" id="sbChartWrap"></div>
+        <div class="sbTooltip hidden" id="sbTooltip"></div>
+      </div>
+      <div class="sbStats" id="sbStats"></div>
+    </div>
+  </div>
+
   <div class="driveAlert hidden" id="driveAlert" role="alert" aria-live="polite">
     <button type="button" class="daClose" id="driveAlertClose" aria-label="Masquer l'alerte">×</button>
     <div class="daMain">
@@ -1491,19 +1809,29 @@ html{scroll-behavior:smooth}
       <span class="bd bd7">🐟</span>
     </div>
     <div class="heroTop">
-      <div class="lbl" id="heroLbl">Reste réel</div>
-      <svg class="heroSpark hidden" id="heroSpark"></svg>
+      <div class="heroTopL">
+        <div class="lbl" id="heroLbl">Reste réel</div>
+        <span class="heroFoldAmt" id="heroFoldAmt"></span>
+      </div>
+      <div class="heroTopR">
+        <svg class="heroSpark hidden" id="heroSpark" tabindex="0" role="button" aria-label="Agrandir la courbe d'évolution"></svg>
+        <button type="button" class="heroFoldBtn" id="heroFoldBtn" aria-label="Replier le résumé" aria-expanded="true"><span class="chev">⌄</span></button>
+      </div>
     </div>
-    <div class="big" id="heroBig">0,00 €</div>
-    <div class="sub" id="heroSub"></div>
-    <div class="bar"><i id="heroBar" style="width:0%"></i></div>
-    <div class="stats">
-      <div class="stat"><div class="k">Revenus</div><div class="v" id="sIncome">0 €</div></div>
-      <div class="stat"><div class="k">Budget total</div><div class="v" id="sBudget">0 €</div></div>
-      <div class="stat"><div class="k">Dépensé</div><div class="v" id="sSpent">0 €</div></div>
-      <div class="stat"><div class="k">Solde provisoire</div><div class="v" id="sSolde">0 €</div></div>
-      <div class="stat"><div class="k">Épargne</div><div class="v" id="sSavings">0 €</div></div>
-      <div class="stat"><div class="k">Épargne déduite</div><div class="v" id="sDeducted">0 €</div></div>
+    <div class="heroFoldWrap" id="heroFoldWrap">
+      <button type="button" id="heroMain" aria-label="Voir le détail de cet indicateur">
+        <div class="big" id="heroBig">0,00 €</div>
+        <div class="sub" id="heroSub"></div>
+        <div class="bar"><i id="heroBar" style="width:0%"></i></div>
+      </button>
+      <div class="stats">
+        <div class="stat"><div class="k">Revenus</div><div class="v" id="sIncome">0 €</div></div>
+        <div class="stat"><div class="k">Budget total</div><div class="v" id="sBudget">0 €</div></div>
+        <div class="stat"><div class="k">Dépensé</div><div class="v" id="sSpent">0 €</div></div>
+        <div class="stat"><div class="k">Solde provisoire</div><div class="v" id="sSolde">0 €</div></div>
+        <div class="stat"><div class="k">Épargne</div><div class="v" id="sSavings">0 €</div></div>
+        <div class="stat"><div class="k">Épargne déduite</div><div class="v" id="sDeducted">0 €</div></div>
+      </div>
     </div>
   </div>
 
@@ -2137,7 +2465,7 @@ function buildMonth(k){
     income:p.income||0,
     incomeDetailed:!!p.incomeDetailed,
     incomeLines:(p.incomeLines||[]).map(l=>({id:uid(),name:l.name,amount:+l.amount||0})),
-    lines:p.lines.map(l=>({id:uid(),name:l.name,planned:l.planned,type:l.type,category:l.category||"",recurring:!!l.recurring,entries:[]})),
+    lines:p.lines.filter(l=>l.type==="fixed"||l.recurring).map(l=>({id:uid(),name:l.name,planned:l.planned,type:l.type,category:l.category||"",recurring:!!l.recurring,entries:[]})),
     savings:copySavings(p.savings,false)
   };
 }
@@ -2421,7 +2749,7 @@ function renderHeroStats(){
   if(wrap.dataset.sig===sig)return; // rien n'a changé : on ne reconstruit pas (évite de relancer l'animation à chaque recalcul)
   wrap.dataset.sig=sig;
   wrap.innerHTML=cards.map(id=>{const m=STAT_META[id];
-    return '<div class="stat"><div class="k">'+esc(metricLabel(id))+'</div><div class="v" id="'+m.el+'">0 €</div></div>';}).join("");
+    return '<div class="stat" data-stat="'+id+'"><div class="k">'+esc(metricLabel(id))+'</div><div class="v" id="'+m.el+'">0 €</div></div>';}).join("");
 }
 function renderStatOrderSettings(){
   const wrap=document.getElementById("statOrderList");if(!wrap)return;
@@ -3386,6 +3714,23 @@ document.getElementById("addSavingsLine").onclick=()=>{
 };
 document.getElementById("incomeFoldBtn").onclick=()=>{toggleFolded("income-detail");renderIncomeBox();};
 document.getElementById("savingsFoldBtn").onclick=()=>{toggleFolded("savings-detail");renderSavingsBox();};
+// Repli discret du hero : la classe "folded" sur #hero est aussi réappliquée à chaque
+// updateComputed() (voir plus haut) puisque hero.className y est réécrit à chaque rendu —
+// applyHeroFold() reste nécessaire pour synchroniser le bouton et le aria-* dès le clic.
+function applyHeroFold(){
+  const collapsed=isFolded("hero-summary");
+  const hero=document.getElementById("hero");
+  const btn=document.getElementById("heroFoldBtn");
+  const wrap=document.getElementById("heroFoldWrap");
+  if(hero)hero.classList.toggle("folded",collapsed);
+  if(btn){
+    btn.classList.toggle("closed",collapsed);
+    btn.setAttribute("aria-expanded",collapsed?"false":"true");
+    btn.setAttribute("aria-label",collapsed?"Déplier le résumé":"Replier le résumé");
+  }
+  if(wrap)wrap.classList.toggle("hidden",collapsed);
+}
+document.getElementById("heroFoldBtn").onclick=()=>{toggleFolded("hero-summary");applyHeroFold();};
 document.getElementById("foldFixedBtn").onclick=()=>{toggleFolded("sec-fixed");applySectionFolds();};
 document.getElementById("foldVarBtn").onclick=()=>{toggleFolded("sec-variable");applySectionFolds();};
 function applySectionFolds(){
@@ -3432,16 +3777,234 @@ function withChartSkeleton(container){
 function cumulativeBalance(uptoKey){
   return round2(Object.keys(state.months).filter(k=>k<=uptoKey).sort().reduce((s,k)=>s+totals(state.months[k]).remainReal,0));
 }
+// Convertit une série de points en chemin SVG lissé (Catmull-Rom -> Bézier cubique), passant
+// exactement par chaque point (contrairement à un simple lissage approximatif).
+function smoothPathD(pts){
+  const N=pts.length;
+  if(N<2)return"";
+  if(N===2)return"M"+pts[0][0].toFixed(1)+","+pts[0][1].toFixed(1)+" L"+pts[1][0].toFixed(1)+","+pts[1][1].toFixed(1);
+  let d="M"+pts[0][0].toFixed(1)+","+pts[0][1].toFixed(1);
+  for(let i=0;i<N-1;i++){
+    const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    const c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6;
+    const c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;
+    d+=" C"+c1x.toFixed(1)+","+c1y.toFixed(1)+" "+c2x.toFixed(1)+","+c2y.toFixed(1)+" "+p2[0].toFixed(1)+","+p2[1].toFixed(1);
+  }
+  return d;
+}
 function miniSparkline(vals){
   const N=vals.length;if(N<2)return"";
-  const W=76,H=26,pad=3;
+  const W=92,H=30,pad=4;
   const max=Math.max(...vals),min=Math.min(...vals),range=(max-min)||1;
   const xf=i=>pad+i*(W-pad*2)/(N-1);
   const yf=v=>pad+(max-v)/range*(H-pad*2);
-  const pts=vals.map((v,i)=>xf(i).toFixed(1)+","+yf(v).toFixed(1)).join(" ");
-  const lastX=xf(N-1).toFixed(1),lastY=yf(vals[N-1]).toFixed(1);
-  return '<polyline points="'+pts+'" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><circle cx="'+lastX+'" cy="'+lastY+'" r="2.6" fill="currentColor"/>';
+  const pts=vals.map((v,i)=>[xf(i),yf(v)]);
+  const lineD=smoothPathD(pts);
+  const lastX=pts[N-1][0].toFixed(1),lastY=pts[N-1][1].toFixed(1),firstX=pts[0][0].toFixed(1);
+  const areaD=lineD+" L"+lastX+","+H+" L"+firstX+","+H+" Z";
+  return '<defs><linearGradient id="sparkFade" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0%" stop-color="currentColor" stop-opacity=".32"/>'
+    +'<stop offset="100%" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>'
+    +'<path class="sparkArea" d="'+areaD+'" fill="url(#sparkFade)" stroke="none"/>'
+    +'<path class="sparkLine" d="'+lineD+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity=".92"/>'
+    +'<circle cx="'+lastX+'" cy="'+lastY+'" r="2.8" fill="currentColor"/>';
 }
+// Grand graphique animé (courbe) affiché en plein écran quand on touche la sparkline du hero.
+function bigSparkChartSVG(vals,keys,boxW,boxH){
+  const N=vals.length;
+  const W=Math.max(260,Math.round(boxW)||340),H=Math.max(150,Math.round(boxH)||230);
+  const padT=18,padB=30,padX=12,padL=Math.min(92,Math.max(42,W*0.16));
+  const rawMax=Math.max(...vals),rawMin=Math.min(...vals);
+  const span=(rawMax-rawMin)||Math.max(1,Math.abs(rawMax)||1);
+  const max=rawMax+span*0.14,min=rawMin-span*0.14,range=(max-min)||1;
+  const xf=i=>N>1?padL+i*(W-padL-padX)/(N-1):W/2;
+  const yf=v=>padT+(max-v)/range*(H-padT-padB);
+  const pts=vals.map((v,i)=>[xf(i),yf(v)]);
+  const lineD=smoothPathD(pts);
+  const lastX=pts[N-1][0].toFixed(1),firstX=pts[0][0].toFixed(1);
+  const areaD=lineD+" L"+lastX+","+(H-padB).toFixed(1)+" L"+firstX+","+(H-padB).toFixed(1)+" Z";
+  const fontSm=Math.max(10,Math.min(15,W/34));
+  let grid="",gridN=H<190?2:3;
+  for(let g=0;g<=gridN;g++){
+    const v=min+range*g/gridN,y=yf(v),gd=(g*0.07).toFixed(3);
+    grid+='<line class="sbGrid" style="animation-delay:'+gd+'s" x1="'+padL+'" y1="'+y.toFixed(1)+'" x2="'+(W-padX)+'" y2="'+y.toFixed(1)+'"/>'
+      +'<text class="sbAxl" style="font-size:'+fontSm.toFixed(1)+'px;animation-delay:'+gd+'s" x="'+(padL-10)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end">'+eur0(v)+'</text>';
+  }
+  let dots="",delay=0.55,step=N>1?(W-padL-padX)/(N-1):0;
+  vals.forEach((v,i)=>{
+    const isCur=i===N-1;
+    dots+='<circle class="sbDot'+(isCur?" cur":"")+'" data-i="'+i+'" cx="'+pts[i][0].toFixed(1)+'" cy="'+pts[i][1].toFixed(1)+'" r="'+(isCur?5.5:4)+'" style="animation-delay:'+(delay+i*0.045).toFixed(3)+'s"/>';
+  });
+  let hits="";
+  vals.forEach((v,i)=>{
+    const x=xf(i),hw=step||W-padL-padX;
+    hits+='<rect class="sbHit" data-i="'+i+'" data-px="'+pts[i][0].toFixed(1)+'" data-py="'+pts[i][1].toFixed(1)+'" x="'+(x-hw/2).toFixed(1)+'" y="'+padT+'" width="'+hw.toFixed(1)+'" height="'+(H-padT-padB).toFixed(1)+'" fill="#000" fill-opacity="0" data-tip="'+esc(mLabel(keys[i])+" : "+eur0(v))+'"/>';
+  });
+  // Espace les repères de mois pour qu'ils ne se chevauchent jamais, quelle que soit la largeur d'écran.
+  const maxLabels=Math.max(2,Math.floor((W-padL-padX)/(fontSm*4.6)));
+  const labelEvery=Math.max(1,Math.ceil(N/maxLabels));
+  let ticks="";
+  keys.forEach((k,i)=>{
+    if(i%labelEvery!==0&&i!==N-1)return;
+    ticks+='<text class="sbAxl" style="font-size:'+fontSm.toFixed(1)+'px;animation-delay:'+(0.2+i*0.02).toFixed(3)+'s" x="'+xf(i).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle">'+esc(mShortY(k,true))+'</text>';
+  });
+  return {W,H,html:'<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'
+    +'<defs><linearGradient id="sbFade" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0%" stop-color="currentColor" stop-opacity=".38"/>'
+    +'<stop offset="100%" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>'
+    +grid+'<path class="sbFill" d="'+areaD+'"/>'
+    +'<path class="sbLine" id="sbLinePath" d="'+lineD+'"/>'
+    +dots+ticks+hits+'</svg>'};
+}
+let sparkBurstAnimTimer=null,sbCurrentVals=null,sbCurrentKeys=null,sbResizeTimer=null;
+function renderSbChart(skipEntrance){
+  if(!sbCurrentVals)return;
+  const wrap=document.getElementById("sbChartWrap");
+  const w=wrap.clientWidth,h=wrap.clientHeight;
+  if(w<10||h<10)return;
+  wrap.innerHTML=bigSparkChartSVG(sbCurrentVals,sbCurrentKeys,w,h).html;
+  const tip=document.getElementById("sbTooltip");if(tip)tip.classList.add("hidden");
+  if(skipEntrance||prefersReducedMotion){
+    wrap.querySelectorAll(".sbGrid,.sbAxl").forEach(el=>{el.style.animation="none";el.style.opacity="1";});
+    wrap.querySelectorAll(".sbDot").forEach(el=>{el.style.animation="none";el.style.opacity="1";el.style.transform="scale(1)";});
+    const fill=wrap.querySelector(".sbFill");
+    if(fill){fill.style.animation="none";fill.style.opacity="1";fill.style.transform="scaleY(1)";}
+    const line=wrap.querySelector("#sbLinePath");
+    if(line){line.style.strokeDasharray="none";line.style.strokeDashoffset="0";}
+  }
+}
+function scheduleSbResize(){
+  if(document.getElementById("sparkBurst").classList.contains("hidden"))return;
+  clearTimeout(sbResizeTimer);sbResizeTimer=setTimeout(()=>renderSbChart(true),120);
+}
+addEventListener("resize",scheduleSbResize);
+if(window.visualViewport)window.visualViewport.addEventListener("resize",scheduleSbResize);
+function buildSparkleBurst(count){
+  let html="";
+  for(let i=0;i<count;i++){
+    const ang=(Math.PI*2*i/count)+(Math.random()*.6-.3);
+    const dist=90+Math.random()*140;
+    const tx=(Math.cos(ang)*dist).toFixed(0)+"px",ty=(Math.sin(ang)*dist).toFixed(0)+"px";
+    const emo=["✨","💫","⭐️","🎉"][i%4];
+    const delay=(Math.random()*.25).toFixed(2);
+    const size=(14+Math.random()*10).toFixed(0)+"px";
+    html+='<span class="sbSpark" style="--tx:'+tx+';--ty:'+ty+';--sd:'+delay+'s;--ss:'+size+';--tr:'+(Math.random()*140-70).toFixed(0)+'deg">'+emo+'</span>';
+  }
+  return html;
+}
+function openSparkBurst(originEl){
+  const cust=isCustom(state.current);
+  const heroId=heroIdFor(cust),hm=STAT_META[heroId];
+  const keys=cust?[]:Object.keys(state.months).filter(k=>k<=state.current).sort().slice(-12);
+  const vals=keys.map(k=>hm.get(totals(state.months[k],false)));
+  if(vals.length<2)return;
+  const t=totals(ensure(state.current),cust);
+  const burst=document.getElementById("sparkBurst");
+  document.getElementById("sbLbl").textContent=metricLabel(heroId);
+  document.getElementById("sbBig").textContent=eur(hm.get(t));
+  let deltaTxt="";
+  if(!cust&&keys.length>=2){
+    const delta=round2(vals[vals.length-1]-vals[vals.length-2]);
+    if(Math.abs(delta)>=0.005){
+      const up=delta>0;
+      deltaTxt=(up?"↑ ":"↓ ")+eur0(Math.abs(delta))+" vs "+mShort(keys[keys.length-2]);
+    }
+  }
+  document.getElementById("sbDelta").textContent=deltaTxt;
+  const avg=round2(vals.reduce((s,v)=>s+v,0)/vals.length);
+  let bestI=0,worstI=0;vals.forEach((v,i)=>{if(v>vals[bestI])bestI=i;if(v<vals[worstI])worstI=i;});
+  document.getElementById("sbStats").innerHTML=
+    '<div class="sbStat"><div class="k">Moy. '+vals.length+' mois</div><div class="v">'+eur0(avg)+'</div></div>'
+    +'<div class="sbStat"><div class="k">Meilleur</div><div class="v">'+eur0(vals[bestI])+'</div></div>'
+    +'<div class="sbStat"><div class="k">Plus bas</div><div class="v">'+eur0(vals[worstI])+'</div></div>';
+  sbCurrentVals=vals;sbCurrentKeys=keys;
+
+  const rect=originEl.getBoundingClientRect();
+  const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+  const sparkles=document.getElementById("sbSparkles");
+  sparkles.style.setProperty("--sx",cx+"px");sparkles.style.setProperty("--sy",cy+"px");
+
+  clearTimeout(sparkBurstAnimTimer);
+  burst.classList.remove("hidden");
+  document.body.style.overflow="hidden";
+  // Mesure le conteneur réel du graphique (sans transformation appliquée pour l'instant) afin que
+  // le viewBox du SVG corresponde exactement à son rectangle d'affichage : sans ça, un ratio
+  // différent forcerait un étirement non uniforme du texte et des courbes.
+  renderSbChart();
+  if(prefersReducedMotion){
+    burst.classList.remove("animIn","morph");
+    burst.style.transform="";burst.style.opacity="";
+    sparkles.innerHTML="";
+    document.querySelectorAll("#sbBg .sbRing").forEach(r=>r.remove());
+  }else{
+    const vw=window.innerWidth,vh=window.innerHeight;
+    const scaleX=Math.max(.04,rect.width/vw),scaleY=Math.max(.04,rect.height/vh);
+    const tx=(cx-vw/2),ty=(cy-vh/2);
+    burst.classList.add("animIn");
+    burst.style.transition="none";
+    burst.style.transformOrigin="50% 50%";
+    burst.style.transform="translate("+tx.toFixed(1)+"px,"+ty.toFixed(1)+"px) scale("+scaleX.toFixed(3)+","+scaleY.toFixed(3)+")";
+    burst.style.opacity="0.15";
+    burst.style.borderRadius="10px";
+    void burst.offsetWidth;
+    burst.style.transition="transform .62s cubic-bezier(.16,1,.3,1), opacity .4s ease, border-radius .5s ease";
+    burst.style.transform="translate(0,0) scale(1,1)";
+    burst.style.opacity="1";
+    burst.style.borderRadius="0px";
+    const ring=document.createElement("span");
+    ring.className="sbRing";
+    ring.style.setProperty("--rx",cx+"px");ring.style.setProperty("--ry",cy+"px");
+    document.getElementById("sbBg").appendChild(ring);
+    setTimeout(()=>ring.remove(),900);
+    sparkles.innerHTML=buildSparkleBurst(12);
+    sparkBurstAnimTimer=setTimeout(()=>{
+      const line=document.getElementById("sbLinePath"),fill=document.querySelector(".sbFill");
+      if(line){
+        const len=line.getTotalLength?line.getTotalLength():300;
+        line.style.strokeDasharray=len;line.style.strokeDashoffset=len;
+        requestAnimationFrame(()=>{
+          line.style.transition="stroke-dashoffset .9s cubic-bezier(.16,1,.3,1)";
+          line.style.strokeDashoffset="0";
+        });
+      }
+      if(fill)fill.classList.add("reveal");
+    },420);
+  }
+  const chartWrap=document.getElementById("sbChartWrap");
+  chartWrap.onclick=e=>{
+    const h=e.target.closest(".sbHit");
+    if(!h)return;
+    const svg=chartWrap.querySelector("svg");
+    if(svg)svg.querySelectorAll(".sbDot.sel").forEach(d=>d.classList.remove("sel"));
+    const dot=svg&&svg.querySelector('.sbDot[data-i="'+h.dataset.i+'"]');
+    if(dot)dot.classList.add("sel");
+    const tip=document.getElementById("sbTooltip");
+    tip.textContent=h.dataset.tip;
+    tip.classList.remove("hidden");
+    const px=parseFloat(h.dataset.px),py=parseFloat(h.dataset.py);
+    const wrapW=chartWrap.clientWidth;
+    tip.style.left=Math.max(36,Math.min(wrapW-36,px))+"px";
+    tip.style.top=py+"px";
+    tip.classList.toggle("below",py<40);
+  };
+}
+function closeSparkBurst(){
+  const burst=document.getElementById("sparkBurst");
+  clearTimeout(sparkBurstAnimTimer);
+  burst.classList.add("hidden");
+  burst.classList.remove("animIn","morph");
+  burst.style.transition="";burst.style.transform="";burst.style.opacity="";burst.style.borderRadius="";
+  document.body.style.overflow="";
+  const tip=document.getElementById("sbTooltip");if(tip)tip.classList.add("hidden");
+}
+document.getElementById("heroSpark").addEventListener("click",e=>{e.stopPropagation();openSparkBurst(e.currentTarget);});
+document.getElementById("heroSpark").addEventListener("keydown",e=>{
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();e.stopPropagation();openSparkBurst(e.currentTarget);}
+});
+document.getElementById("sbClose").addEventListener("click",closeSparkBurst);
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&!document.getElementById("sparkBurst").classList.contains("hidden"))closeSparkBurst();
+});
 let heroCurrentValue=null,heroRAF=null,heroSparkDrawnFor=null;
 let prefersReducedMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 if(window.matchMedia){
@@ -3483,9 +4046,10 @@ function updateComputed(){
     :"⚠ Ajoute tes revenus du mois pour voir ton reste réel et ton budget par jour.";
   const heroId=heroIdFor(cust),hm=STAT_META[heroId];
   const hero=document.getElementById("hero"),over=hm.over(t);
-  hero.className="hero"+(over?" over":"");
+  hero.className="hero"+(over?" over":"")+(isFolded("hero-summary")?" folded":"");
   const lblEl=document.getElementById("heroLbl");if(lblEl)lblEl.textContent=metricLabel(heroId);
   animateHeroValue(hm.get(t));
+  const foldAmtEl=document.getElementById("heroFoldAmt");if(foldAmtEl)foldAmtEl.textContent=eur(hm.get(t));
   document.getElementById("heroSub").textContent=hm.sub(t);
   const pct=t.income>0?Math.min(100,t.spent/t.income*100):0;
   const bar=document.getElementById("heroBar");bar.style.width=Math.max(0,Math.min(100,pct))+"%";bar.className=over?"over":"";
@@ -3502,18 +4066,20 @@ function updateComputed(){
     // La courbe est un historique de mois : sans objet pour un budget personnalisé.
     const sparkKeys=cust?[]:Object.keys(state.months).filter(k=>k<=state.current).sort().slice(-6);
     if(sparkKeys.length>=2){
-      spark.setAttribute("viewBox","0 0 76 26");
+      spark.setAttribute("viewBox","0 0 92 30");
       spark.innerHTML=miniSparkline(sparkKeys.map(k=>hm.get(totals(state.months[k]))));
       spark.classList.remove("hidden");
       if(heroSparkDrawnFor!==state.current&&!prefersReducedMotion){
-        const poly=spark.querySelector("polyline"),dot=spark.querySelector("circle");
-        if(poly){
-          const len=poly.getTotalLength?poly.getTotalLength():140;
-          poly.style.strokeDasharray=len;poly.style.strokeDashoffset=len;
+        const line=spark.querySelector(".sparkLine"),area=spark.querySelector(".sparkArea"),dot=spark.querySelector("circle");
+        if(line){
+          const len=line.getTotalLength?line.getTotalLength():140;
+          line.style.strokeDasharray=len;line.style.strokeDashoffset=len;
+          if(area)area.style.opacity="0";
           if(dot)dot.style.opacity="0";
           requestAnimationFrame(()=>{
-            poly.style.transition="stroke-dashoffset .9s ease";
-            poly.style.strokeDashoffset="0";
+            line.style.transition="stroke-dashoffset .9s ease";
+            line.style.strokeDashoffset="0";
+            if(area){area.style.transition="opacity .9s ease .1s";area.style.opacity="1";}
             if(dot){dot.style.transition="opacity .3s ease .75s";dot.style.opacity="1";}
           });
         }
@@ -3574,8 +4140,155 @@ function duplicateLine(line){
   commit();render();toast("Dépense dupliquée ✓");
 }
 
+/* ---------- SOUS-PAGE DÉTAIL D'UN INDICATEUR DU HERO ---------- */
+const STAT_ICONS={reste:"💰",income:"💶",budget:"📊",spent:"🧾",solde:"⚖️",savings:"🐖",deducted:"➖"};
+function openStatDetail(id){
+  if(!STAT_META[id])return;
+  const cust=isCustom(state.current);
+  const m=ensure(state.current),t=totals(m,cust);
+  document.getElementById("sdBody").innerHTML=buildStatDetailBody(id,cust,m,t);
+  const panel=document.getElementById("statDetailPanel");
+  panel.classList.remove("hidden");
+  document.getElementById("sdBody").scrollTop=0;
+  renderSdTrendChart();
+}
+function closeStatDetail(){document.getElementById("statDetailPanel").classList.add("hidden");}
+function buildStatDetailBody(id,cust,m,t){
+  const meta=STAT_META[id],icon=STAT_ICONS[id]||"📈",label=metricLabel(id),val=meta.get(t);
+  const over=meta.over(t)||meta.neg(t);
+  // Historique : mois réels jusqu'au mois courant (jamais pour un budget personnalisé, qui n'a pas d'historique daté)
+  const keys=cust?[]:Object.keys(state.months).filter(k=>k<=state.current).sort().slice(-12);
+  const histVals=keys.map(k=>meta.get(totals(state.months[k],false)));
+  const curIdx=keys.length-1;
+  let deltaHTML="";
+  if(!cust){
+    const prevKey=Object.keys(state.months).filter(x=>x<state.current).sort().pop();
+    if(prevKey){
+      const prevVal=meta.get(totals(state.months[prevKey],false));
+      const delta=round2(val-prevVal);
+      if(Math.abs(delta)>=0.005){
+        const up=delta>0,goodUp=!(id==="spent"||id==="budget");
+        const cls=(up===goodUp)?"up":"down";
+        deltaHTML='<div class="sdDelta '+cls+'">'+(up?"↑":"↓")+" "+eur0(Math.abs(delta))+" vs "+esc(mShort(prevKey))+'</div>';
+      }
+    }
+  }
+  let miniHTML="";
+  if(histVals.length>=2){
+    const avg=round2(histVals.reduce((s,v)=>s+v,0)/histVals.length);
+    let bestI=0,worstI=0;
+    histVals.forEach((v,i)=>{if(v>histVals[bestI])bestI=i;if(v<histVals[worstI])worstI=i;});
+    miniHTML='<div class="sdMiniStats">'
+      +'<div class="sdm"><div class="k">Moy. '+histVals.length+' mois</div><div class="v">'+eur0(avg)+'</div></div>'
+      +'<div class="sdm"><div class="k">Meilleur</div><div class="v">'+eur0(histVals[bestI])+'</div></div>'
+      +'<div class="sdm"><div class="k">Plus bas</div><div class="v">'+eur0(histVals[worstI])+'</div></div>'
+      +'</div>';
+  }
+  let html='<div class="sdHero'+(over?" over":"")+'">'
+    +'<div class="sdIcon">'+icon+'</div>'
+    +'<div class="sdLbl">'+esc(label)+'</div>'
+    +'<div class="sdBig">'+eur(val)+'</div>'
+    +'<div class="sdSub">'+esc(meta.sub(t))+'</div>'
+    +deltaHTML+miniHTML+'</div>';
+  if(histVals.length>=2){
+    const tips=keys.map((k,i)=>mLabel(k)+" : "+eur0(histVals[i]));
+    sdTrendData={vals:histVals,labels:keys.map(k=>mShortY(k,true)),todayIdx:curIdx,tips};
+    html+='<div class="panel sdSection"><h3>📈 Tendance</h3><p class="psub">Évolution sur '+histVals.length+' mois · touche une barre pour voir le détail</p>'
+      +'<div class="sdTrendWrap" id="sdTrendWrap">'+barsSVG(histVals,keys.map(k=>mShortY(k,true)),curIdx,tips)+'</div></div>';
+  }else{
+    sdTrendData=null;
+  }
+  html+=buildStatDetailBreakdown(id,cust,m,t);
+  return html;
+}
+function buildStatCategoryBreakdown(m,useSpent,pal,centerLbl){
+  const byCat=new Map();
+  m.lines.forEach(l=>{
+    const val=useSpent?spent(l):round2(+l.planned||0);
+    if(val<=0)return;
+    const cat=catById(l.category||"");
+    const cur=byCat.get(cat.id)||{cat,total:0};
+    cur.total=round2(cur.total+val);
+    byCat.set(cat.id,cur);
+  });
+  const cats=[...byCat.values()].sort((a,b)=>b.total-a.total);
+  let donutHTML;
+  if(cats.length){
+    const items=cats.map((x,i)=>({label:x.cat.icon+" "+x.cat.name,value:x.total,color:pal[i%6]}));
+    const tot=items.reduce((s,i)=>s+i.value,0);
+    let leg='<div class="legend">';
+    items.forEach(i=>{leg+='<div class="leg"><span class="ld" style="background:'+i.color+'"></span><span class="ln">'+esc(i.label)+'</span><span class="lv">'+eur0(i.value)+'</span><span class="lp">'+Math.round(i.value/tot*100)+'%</span></div>';});
+    leg+='</div>';
+    donutHTML='<div class="donutwrap">'+donutSVG(items,centerLbl)+leg+'</div>';
+  }else donutHTML='<div class="sdEmpty">'+(useSpent?"Aucune dépense enregistrée.":"Aucun budget planifié.")+'</div>';
+  return '<div class="panel sdSection"><h3>🗂️ Répartition par catégorie</h3><p class="psub">'+mLabel(state.current)+'</p>'+donutHTML+'</div>';
+}
+function buildStatDetailBreakdown(id,cust,m,t){
+  if(id==="income"){
+    const lines=(m.incomeLines||[]).slice().sort((a,b)=>(+b.amount||0)-(+a.amount||0));
+    const rows=lines.length?lines.map(l=>{const amt=+l.amount||0;
+      return '<div class="sdRow"><span class="sdName">'+esc((l.name||"").trim()||"Revenu")+'</span><span class="sdAmt'+(amt<0?" neg":"")+'">'+eur0(amt)+'</span></div>';
+    }).join(""):'<div class="sdEmpty">Aucune source de revenu renseignée.</div>';
+    return '<div class="panel sdSection"><h3>💶 Détail des revenus</h3><p class="psub">'+(cust?"Sources de ce budget":"Sources de "+mLabel(state.current))+'</p>'+rows+'</div>';
+  }
+  if(id==="budget"||id==="spent"){
+    const useSpent=id==="spent",pal=palette(),centerLbl=useSpent?"dépensé":"prévu";
+    const catHTML=buildStatCategoryBreakdown(m,useSpent,pal,centerLbl);
+    const withVal=m.lines.map(l=>({name:(l.name||"").trim()||"Dépense",value:useSpent?spent(l):round2(+l.planned||0)}))
+      .filter(x=>x.value>0).sort((a,b)=>b.value-a.value);
+    let donutHTML="";
+    if(withVal.length){
+      const items=withVal.map((x,i)=>({label:x.name,value:x.value,color:pal[i%6]}));
+      const tot=items.reduce((s,i)=>s+i.value,0);
+      let leg='<div class="legend">';
+      items.forEach(i=>{leg+='<div class="leg"><span class="ld" style="background:'+i.color+'"></span><span class="ln">'+esc(i.label)+'</span><span class="lv">'+eur0(i.value)+'</span><span class="lp">'+Math.round(i.value/tot*100)+'%</span></div>';});
+      leg+='</div>';
+      donutHTML='<div class="donutwrap">'+donutSVG(items,centerLbl)+leg+'</div>';
+    }else donutHTML='<div class="sdEmpty">'+(useSpent?"Aucune dépense enregistrée.":"Aucun budget planifié.")+'</div>';
+    const lineHTML='<div class="panel sdSection"><h3>'+(useSpent?"🧾 Répartition du dépensé par poste":"📊 Répartition du budget par poste")+'</h3><p class="psub">'+mLabel(state.current)+'</p>'+donutHTML+'</div>';
+    return catHTML+lineHTML;
+  }
+  if(id==="solde"||id==="reste"){
+    const isReste=id==="reste";
+    const rows=[{lbl:"Revenus",val:t.income,color:"var(--green)"},
+      {lbl:isReste?"Dépensé":"Budget prévu",val:-(isReste?t.spent:t.planned),color:"var(--red)"}];
+    if(t.deducted>0)rows.push({lbl:"Épargne déduite",val:-t.deducted,color:"var(--red)"});
+    const finalVal=isReste?t.remainReal:t.soldeProvisoire;
+    rows.push({lbl:isReste?"Reste réel":"Solde provisoire",val:finalVal,color:finalVal>=0?"var(--green)":"var(--red)",total:true});
+    const maxAbs=Math.max(1,...rows.map(r=>Math.abs(r.val)));
+    const wf=rows.map(r=>{const pct=Math.max(4,Math.abs(r.val)/maxAbs*100);
+      return '<div class="sdWfRow'+(r.total?" total":"")+'"><span class="sdWfLbl">'+esc(r.lbl)+'</span>'
+        +'<span class="sdWfTrack"><i style="width:'+pct+'%;background:'+r.color+'"></i></span>'
+        +'<span class="sdWfAmt" style="color:'+r.color+'">'+(r.val>=0&&!r.total?"+":"")+eur0(r.val)+'</span></div>';
+    }).join("");
+    const wfHTML='<div class="panel sdSection"><h3>⚖️ Comment ce montant se construit</h3><p class="psub">'+mLabel(state.current)+'</p><div class="sdWaterfall">'+wf+'</div></div>';
+    // Le reste/solde dépend directement de ce qui est dépensé (reste) ou prévu (solde) : la
+    // répartition par catégorie éclaire immédiatement quels postes pèsent le plus dans ce montant.
+    const catHTML=buildStatCategoryBreakdown(m,isReste,palette(),isReste?"dépensé":"prévu");
+    return wfHTML+catHTML;
+  }
+  if(id==="savings"||id==="deducted"){
+    let lines=(m.savings&&m.savings.lines)||[];
+    if(id==="deducted")lines=lines.filter(l=>l.deduct);
+    lines=lines.slice().sort((a,b)=>(+b.amount||0)-(+a.amount||0));
+    const rows=lines.length?lines.map(l=>{const amt=+l.amount||0;
+      return '<div class="sdRow"><span class="sdName">'+esc((l.name||"").trim()||"Épargne")+'</span>'
+        +'<span class="sdBadge'+(l.deduct?" on":"")+'">'+(l.deduct?"déduite":"non déduite")+'</span>'
+        +'<span class="sdAmt">'+eur0(amt)+'</span></div>';
+    }).join(""):'<div class="sdEmpty">'+(id==="deducted"?"Aucune ligne d'épargne déduite des revenus.":"Aucune ligne d'épargne renseignée.")+'</div>';
+    return '<div class="panel sdSection"><h3>🐖 Détail de l\'épargne</h3><p class="psub">'+(cust?"Ce budget":mLabel(state.current))+'</p>'+rows+'</div>';
+  }
+  return "";
+}
+document.getElementById("sdCloseBtn").addEventListener("click",closeStatDetail);
+document.addEventListener("click",e=>{
+  const card=e.target.closest(".stats .stat[data-stat]");
+  if(card){openStatDetail(card.dataset.stat);return;}
+  if(e.target.closest("#heroMain")){openStatDetail(heroIdFor(isCustom(state.current)));}
+});
+
 /* ---------- ANALYSE TAB ---------- */
-function donutSVG(items){
+function donutSVG(items,centerLabel){
   const total=items.reduce((s,i)=>s+i.value,0);if(total<=0)return"";
   const r=48,C=2*Math.PI*r;let off=0;
   const segs=items.map(i=>{const len=i.value/total*C;
@@ -3584,10 +4297,10 @@ function donutSVG(items){
   // Le montant central est contraint en largeur pour ne jamais déborder de l'anneau (gros montants).
   const c0=eur0(total);
   const fit=c0.length>8?' textLength="70" lengthAdjust="spacingAndGlyphs"':'';
-  return '<svg viewBox="0 0 120 120" class="donut">'+segs+'<text x="60" y="57" text-anchor="middle" class="dc-big"'+fit+'>'+c0+'</text><text x="60" y="71" text-anchor="middle" class="dc-lbl">dépensé</text></svg>';
+  return '<svg viewBox="0 0 120 120" class="donut">'+segs+'<text x="60" y="57" text-anchor="middle" class="dc-big"'+fit+'>'+c0+'</text><text x="60" y="71" text-anchor="middle" class="dc-lbl">'+esc(centerLabel||"dépensé")+'</text></svg>';
 }
-function barsSVG(vals,labels,todayIdx){
-  const N=vals.length,W=Math.max(320,N*11),H=140,padB=16,padT=10,padX=6;
+function barsSVG(vals,labels,todayIdx,tips,containerW){
+  const N=vals.length,W=Math.max(280,Math.round(containerW)||Math.max(320,N*11)),H=140,padB=16,padT=10,padX=10;
   const maxV=Math.max(1,...vals,0),minV=Math.min(0,...vals);
   const range=(maxV-minV)||1;
   const cw=(W-padX*2)/N,bw=Math.min(cw*0.6,14);
@@ -3600,11 +4313,40 @@ function barsSVG(vals,labels,todayIdx){
     const x=padX+i*cw+(cw-bw)/2,vY=yFor(vals[i]);
     const y=Math.min(vY,zeroY),h=Math.abs(vY-zeroY);
     const col=vals[i]<0?red:(vals[i]===0?cLine:(i===todayIdx?acc2:acc));
-    bars+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="2" fill="'+col+'"/>';}
-  let ticks="";[0,Math.floor(N/2),N-1].forEach(i=>{const x=padX+i*cw+cw/2;
-    ticks+='<text x="'+x.toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle" class="axl">'+labels[i]+'</text>';});
-  return '<svg class="bars" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+bars+ticks+'</svg>';
+    // Zone de clic élargie invisible (au moins toute la hauteur du graphe) : les petites barres
+    // restent difficiles à toucher précisément sur mobile sinon.
+    const tip=tips&&tips[i];
+    if(tip){
+      const hitX=padX+i*cw;
+      bars+='<rect x="'+hitX.toFixed(1)+'" y="'+padT+'" width="'+cw.toFixed(1)+'" height="'+usableH.toFixed(1)+'" fill="#000" fill-opacity="0" data-tip="'+esc(tip)+'" data-i="'+i+'"><title>'+esc(tip)+'</title></rect>';
+    }
+    bars+='<rect class="vbar" data-i="'+i+'" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="2" fill="'+col+'" pointer-events="none"/>';}
+  // Le nombre de repères de dates s'adapte à la largeur réelle disponible (au lieu de n'en montrer
+  // que 3 fixes) : sur un grand écran on affiche davantage de mois, jamais chevauchés.
+  const maxLabels=Math.max(3,Math.floor((W-padX*2)/44));
+  const labelEvery=Math.max(1,Math.ceil(N/maxLabels));
+  let ticks="";
+  for(let i=0;i<N;i++){
+    if(i%labelEvery!==0&&i!==N-1&&i!==0)continue;
+    const x=padX+i*cw+cw/2;
+    ticks+='<text x="'+x.toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle" class="axl">'+labels[i]+'</text>';
+  }
+  return '<svg class="bars" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+bars+ticks+'</svg>';
 }
+let sdTrendData=null,sdTrendResizeTimer=null;
+function renderSdTrendChart(){
+  const wrap=document.getElementById("sdTrendWrap");
+  if(!wrap||!sdTrendData)return;
+  const w=wrap.clientWidth;
+  if(w<10)return;
+  wrap.innerHTML=barsSVG(sdTrendData.vals,sdTrendData.labels,sdTrendData.todayIdx,sdTrendData.tips,w);
+}
+function scheduleSdTrendResize(){
+  if(document.getElementById("statDetailPanel").classList.contains("hidden"))return;
+  clearTimeout(sdTrendResizeTimer);sdTrendResizeTimer=setTimeout(renderSdTrendChart,120);
+}
+addEventListener("resize",scheduleSdTrendResize);
+if(window.visualViewport)window.visualViewport.addEventListener("resize",scheduleSdTrendResize);
 function renderMonthSummary(){
   const m=ensure(state.current);
   const cust=isCustom(state.current);
@@ -3833,14 +4575,25 @@ function groupedBars(data,density){
 // Touche/clique une barre d'un diagramme groupé (revenus vs dépensé) pour voir sa valeur exacte
 // dans un toast. Délégation sur document : fonctionne même après le remplacement du SVG par
 // withChartSkeleton() (animation d'apparition) puisque le SVG est reconstruit à l'identique.
+// Pour le graphique de tendance des sous-pages détail (svg.bars), la barre touchée est en plus
+// mise en évidence par un contour noir tant qu'une autre n'est pas sélectionnée.
+function selectBarTip(r){
+  toast(r.dataset.tip);
+  const svg=r.closest("svg.bars");
+  if(svg){
+    svg.querySelectorAll(".vbar.sel").forEach(b=>b.classList.remove("sel"));
+    const vb=svg.querySelector('.vbar[data-i="'+r.dataset.i+'"]');
+    if(vb)vb.classList.add("sel");
+  }
+}
 document.addEventListener("click",e=>{
-  const r=e.target.closest("svg.gbars rect[data-tip]");
-  if(r)toast(r.dataset.tip);
+  const r=e.target.closest("svg.gbars rect[data-tip], svg.bars rect[data-tip]");
+  if(r)selectBarTip(r);
 });
 document.addEventListener("keydown",e=>{
   if(e.key!=="Enter"&&e.key!==" ")return;
-  const r=e.target.closest&&e.target.closest("svg.gbars rect[data-tip]");
-  if(r){e.preventDefault();toast(r.dataset.tip);}
+  const r=e.target.closest&&e.target.closest("svg.gbars rect[data-tip], svg.bars rect[data-tip]");
+  if(r){e.preventDefault();selectBarTip(r);}
 });
 // Décide, à la LARGEUR RÉELLE de l'écran, si un graphique groupé tient en entier (→ centré, sans
 // défilement) ou non (→ on laisse défiler). Comme la largeur du panneau change quand l'appareil
@@ -4700,7 +5453,7 @@ function undo(){
   clearTimeout(recTimer);
   const before=history[hIndex];hIndex--;const after=history[hIndex];
   restoreSnap(after);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
   queueHistoryChange("undo",diffSnapshots(before,after));
 }
 function redo(){
@@ -4708,7 +5461,7 @@ function redo(){
   clearTimeout(recTimer);
   const before=history[hIndex];hIndex++;const after=history[hIndex];
   restoreSnap(after);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
   queueHistoryChange("redo",diffSnapshots(before,after));
 }
 
@@ -4990,7 +5743,7 @@ function importData(file){
     if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths)
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -5157,19 +5910,194 @@ function hasInvalidFields(){
   for(const k in (state.customBudgets||{}))if(scan(state.customBudgets[k],k))return true;
   return false;
 }
+// flushAll() : sauvegarde locale immédiate + tentative d'envoi Drive immédiate si une synchro
+// était encore en attente (debounce de 2,5s non écoulé). Sans ça, une modif faite juste avant
+// de fermer l'app reste bien sur le téléphone (localStorage) mais peut ne jamais partir vers
+// Drive tant qu'aucune autre modif ne relance une synchro — donc absente du backup cloud.
+function flushAll(){ flushSave(); if(typeof gdFlushPush==="function") gdFlushPush(); }
 window.addEventListener("beforeunload",e=>{
-  flushSave();
+  flushAll();
   if(hasInvalidFields()){e.preventDefault();e.returnValue="";return e.returnValue;}
 });
 // Filet de sécurité supplémentaire pour la sauvegarde différée (scheduleSave/flushSave, voir plus
 // haut) : sur mobile, "beforeunload" ne se déclenche pas toujours (l'app est juste mise en arrière-
 // plan). "pagehide" et "visibilitychange" (onglet caché) sont plus fiables pour ce cas.
-window.addEventListener("pagehide",flushSave);
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushSave();});
-window.addEventListener("blur",flushSave);
+window.addEventListener("pagehide",flushAll);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushAll();});
+window.addEventListener("blur",flushAll);
 
-applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
+
+/* ---------- Petit chat noir surprise ----------
+   Un clin d'œil discret : de temps en temps, un petit chat noir traverse le bas de l'écran
+   en marchant sur ses 4 pattes, s'arrête — parfois pour grimper se lover sur un bouton de la
+   barre du haut (Réglages, ↶/↷, calculette, mois) — puis s'étire (dos arqué, comme un vrai
+   chat) avant de repartir. Purement décoratif : pointer-events:none, aucune interaction ni
+   donnée stockée. Cadence calquée sur celle des poissons (thème plage) mais un peu moins
+   fréquente. */
+(function(){
+  // Boutons "grimpables" de la barre du haut : sticky en haut, donc toujours visibles.
+  const CLIMB_SELECTORS=["#paletteBtn","#calcFabTop","#undoBtn","#redoBtn","#monthLabel"];
+  function pickClimbTarget(vw,vh){
+    const cands=CLIMB_SELECTORS.map(s=>document.querySelector(s)).filter(elm=>{
+      if(!elm||elm.offsetParent===null)return false;
+      if(elm.classList&&elm.classList.contains("hidden"))return false;
+      const r=elm.getBoundingClientRect();
+      return r.width>10&&r.height>10&&r.top>=0&&r.top<vh*0.5&&r.left>=0&&r.right<=vw;
+    });
+    if(!cands.length)return null;
+    const r=cands[Math.floor(Math.random()*cands.length)].getBoundingClientRect();
+    return {x:r.left+r.width/2, top:r.top, h:r.height};
+  }
+  function spawnEasterCat(){
+    if(document.querySelector(".easterCat"))return;
+    if(document.hidden)return;
+    const CAT_W=58,CAT_H=28;
+    const vw=Math.max(200,window.innerWidth||360);
+    const vh=Math.max(300,window.innerHeight||640);
+    const el=document.createElement("div");
+    el.className="easterCat";
+    el.innerHTML='<div class="catLift"><svg viewBox="0 0 70 34" aria-hidden="true" focusable="false">'
+      +'<defs><radialGradient id="catSheen" cx="50%" cy="42%" r="55%">'
+      +'<stop offset="0%" stop-color="#d3d9e6" stop-opacity=".2"/>'
+      +'<stop offset="100%" stop-color="#d3d9e6" stop-opacity="0"/></radialGradient></defs>'
+      +'<g class="cTail"><path d="M19.37 17.37 L17.94 17.81 L16.72 18.06 L15.61 18.19 L14.58 18.20 L13.64 18.10 L12.78 17.91 L11.99 17.62 L11.27 17.25 L10.61 16.80 L10.01 16.26 L9.48 15.63 L9.01 14.93 L8.63 14.15 L8.32 13.31 L8.11 12.40 L8.00 11.45 L7.98 10.45 L8.07 9.43 L8.28 8.38 L8.60 7.33 L9.05 6.27 L9.62 5.23 L10.32 4.21 L11.15 3.22 L12.13 2.27 L13.26 1.37 L12.74 0.63 L11.47 1.42 L10.30 2.31 L9.25 3.27 L8.32 4.30 L7.52 5.39 L6.84 6.53 L6.28 7.71 L5.85 8.92 L5.54 10.15 L5.36 11.39 L5.32 12.64 L5.40 13.88 L5.62 15.10 L5.98 16.29 L6.48 17.43 L7.13 18.52 L7.92 19.54 L8.86 20.46 L9.94 21.27 L11.15 21.95 L12.49 22.49 L13.95 22.86 L15.52 23.07 L17.17 23.10 L18.92 22.94 L20.63 22.63 Z" fill="#111"/></g>'
+      +'<g class="catRig">'
+      +'<g class="cLegBR" transform="translate(22,23)"><rect x="-2.6" y="0" width="5.2" height="11" rx="2.6" fill="#0a0a0a"/></g>'
+      +'<g class="cLegFR" transform="translate(48,23)"><rect x="-2.6" y="0" width="5.2" height="11" rx="2.6" fill="#0a0a0a"/></g>'
+      +'<ellipse cx="36" cy="17" rx="20" ry="9.5" fill="#111"/>'
+      +'<ellipse cx="31" cy="11.5" rx="14" ry="4.5" fill="url(#catSheen)"/>'
+      +'<g class="cLegBL" transform="translate(26,24)"><rect x="-2.6" y="0" width="5.2" height="11" rx="2.6" fill="#0a0a0a"/></g>'
+      +'<g class="cLegFL" transform="translate(52,24)"><rect x="-2.6" y="0" width="5.2" height="11" rx="2.6" fill="#0a0a0a"/></g>'
+      +'<g class="cHead">'
+      +'<path d="M46 4 L50 -3 L53 5 Z" fill="#111"/><path d="M58 4 L61 -3 L63 6 Z" fill="#111"/>'
+      +'<path d="M48.3 3.4 L50 -0.6 L51.8 3.9 Z" fill="#3c2b31"/><path d="M59.3 3.6 L61 -0.6 L62.5 4.4 Z" fill="#3c2b31"/>'
+      +'<circle cx="55" cy="9" r="8.5" fill="#111"/>'
+      +'<circle cx="54.5" cy="7.5" r="1" fill="#f4c94a"/><circle cx="58" cy="7.2" r="1" fill="#f4c94a"/>'
+      +'<circle cx="54.2" cy="7.1" r=".34" fill="#fff"/><circle cx="57.7" cy="6.8" r=".34" fill="#fff"/>'
+      +'<path d="M62.3 9.7 L64.1 9.3 L63.2 11.1 Z" fill="#e69aa6"/>'
+      +'<g stroke="rgba(255,255,255,.4)" stroke-width=".5" stroke-linecap="round" fill="none">'
+      +'<path d="M62 10 L70 8.5"/><path d="M62.2 10.7 L70.5 10.6"/><path d="M62 11.3 L70 12.9"/></g>'
+      +'</g>'
+      +'</g></svg></div>';
+    document.body.appendChild(el);
+    const lift=el.querySelector(".catLift");
+    const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const restX=Math.round(vw*(0.12+Math.random()*0.56));
+    if(reduced){
+      // Version sans traversée ni poses : simple apparition/disparition en fondu, immobile.
+      el.style.transition="opacity .6s ease";
+      el.style.transform="translateX("+restX+"px)";
+      el.style.opacity="0";
+      requestAnimationFrame(()=>{el.style.opacity="1";});
+      setTimeout(()=>{el.style.opacity="0";setTimeout(()=>el.remove(),650);},3000);
+      return;
+    }
+    const rnd=(a,b)=>a+Math.random()*(b-a);
+    const ri=(a,b)=>Math.round(rnd(a,b));
+    const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+    // Sens de passage aléatoire : entre par la gauche (regarde à droite) ou par la droite (miroir).
+    const dir=Math.random()<0.5?1:-1;
+    if(dir<0)el.classList.add("faceLeft");
+    const startX=dir>0?(-CAT_W-10):(vw+CAT_W+10);
+    const endX  =dir>0?(vw+CAT_W+10):(-CAT_W-10);
+    // Déplacement horizontal porté par .easterCat ; saut/chute portés par .catLift (vraie
+    // trajectoire : montée freinée par la « gravité », chute accélérée). Le « sol » reste géré
+    // nativement par bottom:10px ; on ne calcule ici que l'offset vertical du perchoir.
+    const groundTop=vh-10-CAT_H;
+    const target=Math.random()<0.5?pickClimbTarget(vw,vh):null;
+    let walkX=restX,jumpDy=null;
+    if(target){
+      walkX=Math.max(20,Math.min(vw-CAT_W-20,Math.round(target.x-CAT_W/2)));
+      // Se love SUR le bouton : pattes sur son bord supérieur, corps au-dessus (bouton visible).
+      const perchTop=Math.max(2,Math.round(target.top-CAT_H+5));
+      jumpDy=perchTop-groundTop; // négatif = vers le haut
+    }
+    const climbs=jumpDy!=null;
+    // Deux temps de rAF avant chaque transition pour « committer » la position de départ.
+    function moveX(x){requestAnimationFrame(()=>{void el.offsetWidth;
+      requestAnimationFrame(()=>{el.style.transform="translateX("+x+"px)";});});}
+    function liftTo(y){requestAnimationFrame(()=>{void lift.offsetWidth;
+      requestAnimationFrame(()=>{lift.style.transform="translateY("+y+"px)";});});}
+    const POSES=["walking","crouch","leaping","land","dropping","curl","stretch","idle","loaf","look","groom","wiggle","flick"];
+    function pose(cls){for(const p of POSES)if(p!==cls)el.classList.remove(p);if(cls)el.classList.add(cls);}
+
+    // ---- Construction d'une séquence d'étapes {enter,dur}, tirée au hasard ----
+    const steps=[];
+    const walkInDur=ri(1900,2700), walkOutDur=ri(1900,2700);
+    // Parfois (au sol) le chat ne fait que traverser sans s'arrêter.
+    const justPassing=!climbs && Math.random()<0.26;
+
+    steps.push({enter:()=>{pose("walking");moveX(justPassing?endX:walkX);},dur:justPassing?walkOutDur:walkInDur});
+
+    if(!justPassing){
+      if(climbs){
+        // Frétillement mignon (guette) puis bond arqué sur le bouton.
+        steps.push({enter:()=>pose("wiggle"),dur:ri(650,1050)});
+        steps.push({enter:()=>pose("crouch"),dur:180});
+        steps.push({enter:()=>{pose("leaping");liftTo(jumpDy);},dur:480});
+        steps.push({enter:()=>pose("land"),dur:150});
+      }else{
+        steps.push({enter:()=>pose("idle"),dur:ri(350,900)});
+      }
+
+      // 1 à 3 activités aléatoires, sans répéter deux fois de suite la même.
+      const acts=["curl","loaf","stretch","look","groom"];
+      const n=1+Math.floor(Math.random()*3);
+      let last=null;
+      for(let i=0;i<n;i++){
+        let a=pick(acts),g=0;while(a===last&&g++<5)a=pick(acts);last=a;
+        if(a==="curl"){
+          steps.push({enter:()=>pose("curl"),dur:ri(2200,4200)});
+        }else if(a==="loaf"){
+          steps.push({enter:()=>pose("loaf"),dur:ri(1500,3000)});
+          if(Math.random()<0.5)steps.push({enter:()=>pose("flick"),dur:ri(700,1300)});
+        }else if(a==="stretch"){
+          steps.push({enter:()=>pose("stretch"),dur:ri(950,1400)});
+          steps.push({enter:()=>pose("idle"),dur:300});
+        }else if(a==="look"){
+          steps.push({enter:()=>pose("look"),dur:2400});
+          steps.push({enter:()=>pose("idle"),dur:ri(300,700)});
+        }else if(a==="groom"){
+          const licks=1+Math.floor(Math.random()*3);
+          steps.push({enter:()=>pose("groom"),dur:licks*520+300});
+          steps.push({enter:()=>pose("idle"),dur:300});
+        }
+      }
+
+      if(climbs){
+        steps.push({enter:()=>pose("crouch"),dur:170});
+        steps.push({enter:()=>{pose("dropping");liftTo(0);},dur:420});
+        steps.push({enter:()=>pose("land"),dur:150});
+      }
+      steps.push({enter:()=>{pose("walking");moveX(endX);},dur:walkOutDur});
+    }
+
+    // ---- Lecture séquentielle ----
+    el.style.transform="translateX("+startX+"px)";
+    let i=0;
+    (function nextStep(){
+      if(i>=steps.length){el.remove();return;}
+      const s=steps[i++];
+      try{s.enter();}catch(e){}
+      setTimeout(nextStep,s.dur);
+    })();
+  }
+  // Intervalle "assez fréquent, un peu moins que les poissons (15-30s)" : 25 à 55s.
+  const MIN_GAP=25000, MAX_GAP=55000;
+  let nextAt=Date.now()+6000+Math.random()*9000; // premier chat entre 6 et 15s après le chargement
+  function tick(){
+    if(Date.now()>=nextAt){
+      spawnEasterCat();
+      nextAt=Date.now()+MIN_GAP+Math.random()*(MAX_GAP-MIN_GAP);
+    }
+  }
+  setInterval(tick,3000);
+  document.addEventListener("visibilitychange",()=>{
+    if(!document.hidden&&Date.now()>=nextAt)tick();
+  });
+})();
 
 /* ---------- Raccourcis d'icône (manifest shortcuts, appui long sur l'icône Android) ----------
    L'icône installée propose des raccourcis vers index.html?action=XXX. Android relance parfois
@@ -5263,10 +6191,14 @@ function gdGetToken(interactive){
     catch(e){ gdResolve=gdReject=null; rej(e); }
   });
 }
-async function gdApi(url,opt,_retried){
+async function gdApi(url,opt,_retried,keepalive){
   const t=await gdGetToken(false);
   const o=Object.assign({},opt||{});
   o.headers=Object.assign({Authorization:"Bearer "+t},(opt&&opt.headers)||{});
+  // keepalive : utilisé uniquement pour l'envoi d'urgence à la fermeture de l'app (gdFlushPush),
+  // pour que la requête réseau survive au déchargement de la page au lieu d'être annulée en vol.
+  // Limite du navigateur : ~64 Ko cumulés pour toutes les requêtes keepalive en cours.
+  if(keepalive) o.keepalive=true;
   const r=await fetch(url,o);
   if(!r.ok){
     if(r.status===401){
@@ -5276,7 +6208,7 @@ async function gdApi(url,opt,_retried){
       if(!_retried){
         try{ await gdGetToken(false); }
         catch(e){ throw new Error("Drive 401"); }
-        return gdApi(url,opt,true);
+        return gdApi(url,opt,true,keepalive);
       }
     }
     throw new Error("Drive "+r.status);
@@ -5313,17 +6245,17 @@ function gdApply(d){
   if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths)
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
   folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
-async function gdFindFile(){
+async function gdFindFile(keepalive){
   if(gdMeta.fileId){
-    try{ await gdApi("https://www.googleapis.com/drive/v3/files/"+gdMeta.fileId+"?fields=id"); return gdMeta.fileId; }
+    try{ await gdApi("https://www.googleapis.com/drive/v3/files/"+gdMeta.fileId+"?fields=id",null,false,keepalive); return gdMeta.fileId; }
     catch(e){ gdMeta.fileId=null; }
   }
   const q=encodeURIComponent("name='"+GD_FILE+"' and trashed=false");
-  const r=await gdApi("https://www.googleapis.com/drive/v3/files?q="+q+"&spaces=drive&fields=files(id,modifiedTime)");
+  const r=await gdApi("https://www.googleapis.com/drive/v3/files?q="+q+"&spaces=drive&fields=files(id,modifiedTime)",null,false,keepalive);
   const j=await r.json();
   const f=(j.files||[])[0];
   gdMeta.fileId=f?f.id:null;gdSaveMeta();
@@ -5333,11 +6265,11 @@ async function gdReadFile(id){
   const r=await gdApi("https://www.googleapis.com/drive/v3/files/"+id+"?alt=media");
   return JSON.parse(await r.text());
 }
-async function gdWrite(text){
+async function gdWrite(text,keepalive){
   const id=gdMeta.fileId;
   if(id){
     await gdApi("https://www.googleapis.com/upload/drive/v3/files/"+id+"?uploadType=media",
-      {method:"PATCH",headers:{"Content-Type":"application/json"},body:text});
+      {method:"PATCH",headers:{"Content-Type":"application/json"},body:text},false,keepalive);
     return id;
   }
   const boundary="budgetbnd"+Date.now();
@@ -5345,7 +6277,7 @@ async function gdWrite(text){
   const body="--"+boundary+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+meta+
     "\r\n--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+text+"\r\n--"+boundary+"--";
   const r=await gdApi("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",
-    {method:"POST",headers:{"Content-Type":"multipart/related; boundary="+boundary},body});
+    {method:"POST",headers:{"Content-Type":"multipart/related; boundary="+boundary},body},false,keepalive);
   const j=await r.json();gdMeta.fileId=j.id;gdSaveMeta();return j.id;
 }
 
@@ -5456,7 +6388,7 @@ function gdContentEquals(remote){
 
 // --- Envoi / restauration ---
 let gdPushTimer=null,gdQueued=false;
-async function gdPush(){
+async function gdPush(keepalive){
   if(!gdMeta.enabled) return;
   if(gdBusy){gdQueued=true;gdSyncPending=true;gdBadgeUpdate();return;} // un envoi est déjà en cours : on retentera juste après (voir finally)
   if(!netOnline){gdSyncPending=true;gdBadgeUpdate();return;}
@@ -5467,8 +6399,8 @@ async function gdPush(){
     // si l'appli est rechargée pendant la synchro, les métadonnées locales restent cohérentes
     // avec ce qui a été tenté, ce qui évite une fausse alerte "restaurer depuis Drive" au redémarrage.
     gdMeta.updatedAt=dataUpdatedAt;gdSaveMeta();
-    await gdFindFile();
-    await gdWrite(text);
+    await gdFindFile(keepalive);
+    await gdWrite(text,keepalive);
     gdMeta.lastSync=Date.now();gdSaveMeta();
     gdSyncPending=false;gdLastError=null;
   }catch(e){gdSyncPending=false;gdLastError="Sauvegarde Drive impossible — réessaie plus tard";gdFail(gdLastError);console.warn(e);}
@@ -5482,6 +6414,17 @@ function gdSchedulePush(){
   gdSyncPending=true;gdBadgeUpdate();
   clearTimeout(gdPushTimer);
   gdPushTimer=setTimeout(gdPush,2500);
+}
+// Envoi d'urgence : appelé quand l'app se ferme/passe en arrière-plan alors qu'une synchro
+// Drive était encore en attente (dans les 2,5s de debounce). On court-circuite le délai et on
+// utilise fetch(..., {keepalive:true}) pour que la requête survive au déchargement de la page —
+// contrairement à un fetch normal, qui serait annulé net dès que la page se ferme.
+// gdBusy===true signifie qu'un envoi est déjà en vol (déjà "keepalive-friendly" ou non selon
+// l'origine de l'appel précédent) : dans ce cas gdQueued a déjà marqué la reprise, rien à faire ici.
+function gdFlushPush(){
+  clearTimeout(gdPushTimer);
+  if(!gdMeta.enabled || !gdSyncPending || gdBusy || !netOnline) return;
+  gdPush(true);
 }
 async function gdPull(force){
   try{
@@ -5597,8 +6540,20 @@ window.addEventListener("pageshow",()=>requestAnimationFrame(forceRepaint));
 // 1) Service worker : permet de lancer l'appli sans connexion.
 if("serviceWorker" in navigator){
   window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("sw.js").catch(err=>console.warn("SW non enregistré :",err));
+    navigator.serviceWorker.register("sw.js").then(reg=>{
+      // Vérifie s'il existe une version plus récente au lancement, puis une fois par heure.
+      reg.update();
+      setInterval(()=>reg.update(),60*60*1000);
+    }).catch(err=>console.warn("SW non enregistré :",err));
   });
+  // S'il y avait déjà un service worker actif, un changement de contrôleur signifie
+  // qu'une nouvelle version vient d'être installée : on recharge une seule fois pour l'afficher.
+  if(navigator.serviceWorker.controller){
+    let swReloaded=false;
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      if(swReloaded)return;swReloaded=true;location.reload();
+    });
+  }
 }
 
 // 2) Stockage persistant : demande au navigateur de NE PAS effacer
