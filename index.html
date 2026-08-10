@@ -1591,8 +1591,9 @@ html{scroll-behavior:smooth}
   <div class="modalCard">
     <h3 id="nmTitle">Nouveau mois</h3>
     <p class="modalSub" id="nmSub"></p>
-    <button class="modalOpt" type="button" id="nmAll">↻ Copier tout le mois précédent<span>Fixes, variables et revenus repris</span></button>
-    <button class="modalOpt" type="button" id="nmFixed">⬇ Fixes + récurrentes<span>Autres dépenses variables non reprises</span></button>
+    <button class="modalOpt" type="button" id="nmAll">↻ Copier tout le mois précédent<span>Fixes, variables, revenus et épargne repris</span></button>
+    <button class="modalOpt" type="button" id="nmAllUndeduct">↻ Tout, sans déduire l'épargne<span>Toute l'épargne est reprise, mais l'option « déduire des revenus » est décochée</span></button>
+    <button class="modalOpt" type="button" id="nmFixed">⬇ Fixes + récurrentes<span>Autres dépenses variables non reprises · épargne reprise</span></button>
     <button class="modalOpt" type="button" id="nmEmpty">🗎 Mois vide<span>Tout à zéro, rien n'est repris</span></button>
     <button class="modalCancel" type="button" id="nmCancel">Annuler</button>
   </div>
@@ -1811,7 +1812,7 @@ function sanitizeStatsOrder(arr){
   return out;
 }
 function sanitizeHeroMetric(x){return STAT_META[x]?x:"reste";}
-// Épargne et Épargne déduite reposent sur le plan d'épargne mensuel global : dans un budget
+// Épargne et Épargne déduite reposent sur l'épargne propre à chaque mois : dans un budget
 // personnalisé elles valent toujours 0, donc on les masque de l'en-tête. Si l'indicateur mis en
 // avant (le « héros ») est l'un des deux, on retombe sur « Reste réel » pour ce budget (sans
 // toucher au réglage, qui reste valable pour les mois).
@@ -1821,7 +1822,7 @@ function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id o
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpPoste:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2};
+let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,savingsPerMonth:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpPoste:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2};
 // Tris (configurables dans les Réglages). Deux tris indépendants : les budgets (postes) et les
 // dépenses. Par défaut « plus récent d'abord » (ordre décroissant d'ajout). « Manuel » = ordre
 // choisi au glisser-déposer (postes uniquement). Un « seq » d'ordre d'ajout est attribué à chaque
@@ -1845,7 +1846,7 @@ const expanded=new Set();
 let detailLineId=null,detailEntrySearch="";
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med")}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med")}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -1990,16 +1991,17 @@ function migrate(){
   if(typeof m.incomeDetailed!=="boolean")m.incomeDetailed=false;
   if(!Array.isArray(m.incomeLines))m.incomeLines=[];
   for(const il of m.incomeLines){if(typeof il.id!=="string")il.id=uid();if(typeof il.name!=="string")il.name="";il.amount=Number.isFinite(+il.amount)?(+il.amount):0;}
-  if(!m.savings||typeof m.savings!=="object")m.savings={detailed:false,total:0,lines:[]};
-  m.savings.detailed=!!m.savings.detailed;
-  m.savings.total=Number.isFinite(+m.savings.total)?(+m.savings.total):0;
-  if(!Array.isArray(m.savings.lines))m.savings.lines=[];
-  for(const sl of m.savings.lines){if(typeof sl.id!=="string")sl.id=uid();if(typeof sl.name!=="string")sl.name="";sl.amount=Number.isFinite(+sl.amount)?(+sl.amount):0;}
+  // L'épargne est désormais propre à chaque mois : on la remet en forme complète (avec le
+  // drapeau « déduire des revenus », au niveau global du mois et de chaque ligne).
+  m.savings=sanitizeGlobalSavings(m.savings);
 }
-  // Épargne globale (indépendante du mois)
+  // --- Épargne : ancien plan « global » conservé le temps de migrer ---
+  // On mémorise si les données proviennent de l'ère « épargne globale » AVANT de rebasculer les
+  // drapeaux : cela détermine la source de vérité de la migration par mois ci-dessous.
+  const savingsWasGlobalEra=!!state.savingsMigrated;
   state.savings=sanitizeGlobalSavings(state.savings);
   if(!state.savingsMigrated){
-    // Reprend l'épargne du mois le plus récent qui en contenait
+    // Ancienne bascule (par-mois → global) : reprend l'épargne du mois le plus récent qui en contenait.
     const keys=Object.keys(state.months).sort();
     let seed=null;
     for(let i=keys.length-1;i>=0;i--){const s=state.months[keys[i]]&&state.months[keys[i]].savings;
@@ -2008,6 +2010,21 @@ function migrate(){
       state.savings=sanitizeGlobalSavings(seed);
     }
     state.savingsMigrated=true;
+  }
+  // --- Nouvelle bascule : épargne globale → épargne indépendante par mois ---
+  // À l'ère « globale », la même épargne s'affichait sur chaque mois : on la recopie donc telle
+  // quelle dans chaque mois (aucun changement visible). Pour des données antérieures à l'ère
+  // globale (jamais migrées), chaque mois conservait déjà sa propre épargne : on la préserve.
+  if(!state.savingsPerMonth){
+    const g=sanitizeGlobalSavings(state.savings);
+    const gHas=g.detailed||g.lines.length>0||(+g.total||0)!==0;
+    for(const k in state.months){
+      const m=state.months[k];
+      const own=sanitizeGlobalSavings(m.savings);
+      const ownHas=own.detailed||own.lines.length>0||(+own.total||0)!==0;
+      m.savings=(!savingsWasGlobalEra&&ownHas)?own:(gHas?copySavings(g,false):emptySavings());
+    }
+    state.savingsPerMonth=true;
   }
   state.statsOrder=sanitizeStatsOrder(state.statsOrder);
   state.heroMetric=sanitizeHeroMetric(state.heroMetric);
@@ -2057,10 +2074,18 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
-function emptySavings(){return{detailed:false,total:0,lines:[]};}
+function emptySavings(){return{detailed:false,total:0,deduct:true,lines:[]};}
+// Copie profonde d'une épargne (nouveaux ids). Si undeduct, toute l'épargne est reprise mais
+// n'est plus déduite des revenus : la bascule « déduire » est décochée, au niveau global du mois
+// comme sur chaque ligne.
+function copySavings(sv,undeduct){
+  const s=sanitizeGlobalSavings(sv);
+  return{detailed:s.detailed,total:s.total,deduct:undeduct?false:s.deduct,
+    lines:s.lines.map(l=>({id:uid(),name:l.name,amount:l.amount,deduct:undeduct?false:l.deduct}))};
+}
 function buildMonth(k){
   const prev=Object.keys(state.months).filter(x=>x<k).sort().pop();
   if(!prev)return{income:0,incomeDetailed:false,incomeLines:[],lines:[],savings:emptySavings()};
@@ -2070,7 +2095,7 @@ function buildMonth(k){
     incomeDetailed:!!p.incomeDetailed,
     incomeLines:(p.incomeLines||[]).map(l=>({id:uid(),name:l.name,amount:+l.amount||0})),
     lines:p.lines.map(l=>({id:uid(),name:l.name,planned:l.planned,type:l.type,category:l.category||"",recurring:!!l.recurring,entries:[]})),
-    savings:emptySavings()
+    savings:copySavings(p.savings,false)
   };
 }
 function emptyCustomBudget(name){return{name:(typeof name==="string"&&name.trim())?name.trim():"Budget personnalisé",income:0,incomeDetailed:false,incomeLines:[],lines:[],savings:emptySavings()};}
@@ -2237,20 +2262,21 @@ function monthIncome(m){
   if(m.incomeDetailed)return round2((m.incomeLines||[]).reduce((s,l)=>s+(+l.amount||0),0));
   return (+m.income||0);
 }
-function savingsTotalG(){const sv=state.savings||{lines:[]};
+// Épargne propre à un mois (objet {detailed,total,deduct,lines}).
+function savingsTotal(sv){sv=sv||{lines:[]};
   if(sv.detailed)return round2((sv.lines||[]).reduce((s,l)=>s+(+l.amount||0),0));
   return (+sv.total||0);}
-function savingsDeductG(){const sv=state.savings||{lines:[]};
+function savingsDeduct(sv){sv=sv||{lines:[]};
   if(sv.detailed)return round2((sv.lines||[]).reduce((s,l)=>s+(l.deduct?(+l.amount||0):0),0));
   return sv.deduct?(+sv.total||0):0;}
-function monthSavings(){return savingsTotalG();}
 function totals(m,cust){let planned=0,sp=0,over=0,pFixed=0,pVar=0;
   for(const l of m.lines){const p=(+l.planned||0);planned+=p;if(l.type==="fixed")pFixed+=p;else pVar+=p;const s=spent(l);sp+=s;if(s>p)over+=s-p;}
   planned=round2(planned);sp=round2(sp);over=round2(over);pFixed=round2(pFixed);pVar=round2(pVar);
   const income=monthIncome(m);
-  // L'épargne est un plan global mensuel : elle ne s'applique pas à un budget personnalisé.
-  const deducted=cust?0:savingsDeductG();
-  const svTot=cust?0:savingsTotalG();
+  // L'épargne est propre à chaque mois ; elle ne s'applique pas à un budget personnalisé.
+  const sv=cust?null:(m.savings||emptySavings());
+  const deducted=cust?0:savingsDeduct(sv);
+  const svTot=cust?0:savingsTotal(sv);
   const solde=round2(income-planned-deducted);
   return{planned,plannedFixed:pFixed,plannedVar:pVar,spent:sp,over,income,deducted,
     soldeProvisoire:solde,
@@ -3284,7 +3310,7 @@ function renderIncomeBox(){
   }
 }
 function renderSavingsBox(){
-  const sv=state.savings;
+  const sv=ensure(state.current).savings;
   const inp=document.getElementById("savingsIn");
   const toggle=document.getElementById("savingsDetailToggle");
   const wrap=document.getElementById("savingsDetailWrap");
@@ -3300,7 +3326,7 @@ function renderSavingsBox(){
   foldBtn.classList.toggle("closed",collapsedSv);
   foldBtn.setAttribute("aria-expanded",collapsedSv?"false":"true");
   foldWrap.classList.toggle("hidden",collapsedSv);
-  const displayVal=sv.detailed?savingsTotalG():(+sv.total||0);
+  const displayVal=sv.detailed?savingsTotal(sv):(+sv.total||0);
   if(document.activeElement!==inp)inp.value=displayVal===0?"":displayVal;
   // Bascule "déduire des revenus" en mode simple
   const dedRow=document.getElementById("savingsDeductRow");
@@ -3309,9 +3335,9 @@ function renderSavingsBox(){
   if(dedSw){dedSw.classList.toggle("on",!!sv.deduct);dedSw.setAttribute("aria-checked",sv.deduct?"true":"false");}
   // Note dynamique : montant déduit des revenus
   const hint=document.getElementById("savingsHint");
-  if(hint){const d=savingsDeductG();
-    hint.textContent=d>0?("Dont "+eur(d)+" déduits de tes revenus disponibles chaque mois.")
-      :"Suivi de ce que tu mets de côté. Active « déduire des revenus » pour qu'un montant soit retiré du disponible.";}
+  if(hint){const d=savingsDeduct(sv);
+    hint.textContent=d>0?("Dont "+eur(d)+" déduits de tes revenus disponibles ce mois-ci.")
+      :"Suivi de ce que tu mets de côté ce mois-ci. Active « déduire des revenus » pour qu'un montant soit retiré du disponible.";}
   list.innerHTML="";
   if(sv.detailed){
     if(sv.lines.length===0){const e=document.createElement("div");e.className="empty";e.style.padding="6px 0 4px";e.textContent="Ajoute chaque ligne : livret, virement, cash…";list.append(e);}
@@ -3341,7 +3367,7 @@ document.getElementById("addIncomeLine").onclick=()=>{
   if(last)last.focus();
 };
 document.getElementById("savingsDetailToggle").onclick=()=>{
-  const sv=state.savings;
+  const sv=ensure(state.current).savings;
   sv.detailed=!sv.detailed;
   if(sv.detailed&&sv.lines.length===0&&(+sv.total||0)>0){
     sv.lines.push({id:uid(),name:"Épargne",amount:+sv.total||0,deduct:!!sv.deduct});
@@ -3349,12 +3375,12 @@ document.getElementById("savingsDetailToggle").onclick=()=>{
   commit();render();
 };
 document.getElementById("addSavingsLine").onclick=()=>{
-  state.savings.lines.push({id:uid(),name:"",amount:0,deduct:true});commit();render();
+  ensure(state.current).savings.lines.push({id:uid(),name:"",amount:0,deduct:true});commit();render();
   const inputs=document.querySelectorAll("#savingsLinesList .miniName");const last=inputs[inputs.length-1];
   if(last)last.focus();
 };
 document.getElementById("savingsDeductSwitch").onclick=()=>{
-  state.savings.deduct=!state.savings.deduct;commit();render();
+  const sv=ensure(state.current).savings;sv.deduct=!sv.deduct;commit();render();
 };
 document.getElementById("incomeFoldBtn").onclick=()=>{toggleFolded("income-detail");renderIncomeBox();};
 document.getElementById("savingsFoldBtn").onclick=()=>{toggleFolded("savings-detail");renderSavingsBox();};
@@ -3380,8 +3406,9 @@ function applySectionFolds(){
   });
 }
 document.getElementById("savingsIn").addEventListener("input",e=>{
-  if(state.savings.detailed)return;
-  const v=parseAmt(e.target.value);state.savings.total=v!=null?(v):0;
+  const sv=ensure(state.current).savings;
+  if(sv.detailed)return;
+  const v=parseAmt(e.target.value);sv.total=v!=null?(v):0;
   updateComputed();touch();
 });
 function renderRecap(){
@@ -3516,7 +3543,7 @@ function updateComputed(){
   const incIn=document.getElementById("incomeIn");
   if(incIn&&m.incomeDetailed&&document.activeElement!==incIn){const v=t.income;incIn.value=v===0?"":v;}
   const savInp=document.getElementById("savingsIn");
-  if(savInp&&state.savings.detailed&&document.activeElement!==savInp){const v=t.savings;savInp.value=v===0?"":v;}
+  if(savInp&&(m.savings&&m.savings.detailed)&&document.activeElement!==savInp){const v=t.savings;savInp.value=v===0?"":v;}
   document.getElementById("foot").innerHTML="Données enregistrées sur cet appareil.";
   // Map id->ligne construite une seule fois par appel plutôt qu'un .find() (O(n)) par ligne visible :
   // évite un coût O(n²) à chaque frappe clavier sur les budgets avec beaucoup de postes.
@@ -3871,17 +3898,17 @@ let wrapSlides=[],wrapIdx=0;
 function buildWrapSlides(year){
   const yKeys=Object.keys(state.months).filter(k=>k.slice(0,4)===year).sort();
   if(!yKeys.length)return[];
-  let totalIncome=0,totalSpent=0,totalSaved=0,bestMonth=null,worstMonth=null;
+  let totalIncome=0,totalSpent=0,totalSaved=0,totalManualSavings=0,totalDeducted=0,bestMonth=null,worstMonth=null;
   const catTotals=new Map();
   yKeys.forEach(k=>{
     const t=totals(ensure(k));
     totalIncome=round2(totalIncome+t.income);totalSpent=round2(totalSpent+t.spent);totalSaved=round2(totalSaved+t.remainReal);
+    totalManualSavings=round2(totalManualSavings+t.savings);totalDeducted=round2(totalDeducted+t.deducted);
     if(!bestMonth||t.remainReal>bestMonth.remainReal)bestMonth={k,remainReal:t.remainReal};
     if(!worstMonth||t.spent>worstMonth.spent)worstMonth={k,spent:t.spent};
     state.months[k].lines.forEach(l=>{const cat=catById(l.category||"");const s=spent(l);if(s<=0)return;
       catTotals.set(cat.id,round2((catTotals.get(cat.id)||0)+s));});
   });
-  const totalManualSavings=savingsTotalG(),totalDeducted=savingsDeductG();
   const topCats=[...catTotals.entries()].map(([id,v])=>({cat:catById(id),v})).sort((a,b)=>b.v-a.v).slice(0,3);
   const avgMonthly=totalSpent/yKeys.length;
   const slides=[];
@@ -3894,8 +3921,8 @@ function buildWrapSlides(year){
       sub:esc(topCats[0].cat.name)+(topCats.length>1?(" · puis "+topCats.slice(1).map(c=>c.cat.icon+" "+esc(c.cat.name)).join(", ")):"")});
   }
   if(totalManualSavings>0){
-    slides.push({icon:"🐷",eyebrow:"Épargne actuelle",big:eur0(totalManualSavings),
-      sub:totalDeducted>0?("Dont "+eur0(totalDeducted)+" déduits de tes revenus chaque mois."):"Le total que tu as mis de côté."});
+    slides.push({icon:"🐷",eyebrow:"Épargne de l'année",big:eur0(totalManualSavings),
+      sub:totalDeducted>0?("Dont "+eur0(totalDeducted)+" déduits de tes revenus."):"Le total mis de côté cette année."});
   }
   if(bestMonth)slides.push({icon:"🥇",eyebrow:"Ton meilleur mois",big:mLabel(bestMonth.k),sub:eur0(bestMonth.remainReal)+" mis de côté ce mois-là."});
   if(worstMonth&&worstMonth.spent>0)slides.push({icon:"🔥",eyebrow:"Ton mois le plus dépensier",big:mLabel(worstMonth.k),sub:eur0(worstMonth.spent)+" dépensés ce mois-là."});
@@ -4280,7 +4307,7 @@ function renderBudgets(){
   const m=ensure(state.current);
   const cust=isCustom(state.current);
   renderIncomeBox();renderSavingsBox();
-  // L'épargne est un plan global mensuel : on masque sa section dans un budget personnalisé.
+  // L'épargne est propre à chaque mois : on masque sa section dans un budget personnalisé.
   const secSav=document.getElementById("sectionSavings");if(secSav)secSav.classList.toggle("hidden",cust);
   const q=(state.showSearch?budgetSearch:"").trim().toLowerCase();
   const matches=l=>!q||(l.name||"").toLowerCase().includes(q);
@@ -4423,6 +4450,7 @@ function openNewMonthModal(){
     ?"Ce mois n'existe pas encore. Reprendre des éléments de "+mLabel(prevKey)+" ?"
     :"Ce mois n'existe pas encore et aucun mois précédent n'est disponible.";
   document.getElementById("nmAll").classList.toggle("hidden",!prevKey);
+  document.getElementById("nmAllUndeduct").classList.toggle("hidden",!prevKey);
   document.getElementById("nmFixed").classList.toggle("hidden",!prevKey);
   document.getElementById("newMonthModal").classList.remove("hidden");
 }
@@ -4430,12 +4458,14 @@ function closeNewMonthModal(){document.getElementById("newMonthModal").classList
 function finishNewMonth(mode){
   const key=pendingMonth;if(!key)return;
   if(mode==="empty")state.months[key]={income:0,incomeDetailed:false,incomeLines:[],lines:[],savings:emptySavings()};
+  else if(mode==="all_undeduct")buildFromPrevInto(key,"all",{savings:"undeduct"});
   else buildFromPrevInto(key,mode);
   state.current=key;pendingMonth=null;
   document.getElementById("newMonthModal").classList.add("hidden");
   commit();render();toast("Mois créé ✓");
 }
 document.getElementById("nmAll").onclick=()=>finishNewMonth("all");
+document.getElementById("nmAllUndeduct").onclick=()=>finishNewMonth("all_undeduct");
 document.getElementById("nmFixed").onclick=()=>finishNewMonth("fixed");
 document.getElementById("nmEmpty").onclick=()=>finishNewMonth("empty");
 document.getElementById("nmCancel").onclick=closeNewMonthModal;
@@ -4636,7 +4666,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;re
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
+const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -4663,6 +4693,7 @@ function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.custom
   state.categories=Array.isArray(d.categories)&&d.categories.length?d.categories:DEFAULT_CATEGORIES.map(c=>({...c}));
   state.budgetView=(d.budgetView==="cards"||d.budgetView==="flow")?d.budgetView:state.budgetView;
   if(d.savings&&typeof d.savings==="object")state.savings=sanitizeGlobalSavings(d.savings);
+  if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);
   state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
@@ -4859,7 +4890,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -4895,9 +4926,9 @@ function sanitizeBudgetBody(m){
   const svLines=svLinesIn.map(l=>{
     if(!l||typeof l!=="object")return null;
     const amount=Number.isFinite(+l.amount)?(+l.amount):0;
-    return{id:typeof l.id==="string"?l.id:uid(),name:typeof l.name==="string"?l.name:"",amount};
+    return{id:typeof l.id==="string"?l.id:uid(),name:typeof l.name==="string"?l.name:"",amount,deduct:!!l.deduct};
   }).filter(Boolean);
-  const savings={detailed:!!svRaw.detailed,total:Number.isFinite(+svRaw.total)?(+svRaw.total):0,lines:svLines};
+  const savings={detailed:!!svRaw.detailed,total:Number.isFinite(+svRaw.total)?(+svRaw.total):0,deduct:!!svRaw.deduct,lines:svLines};
   return{income,incomeDetailed,incomeLines,lines,savings};
 }
 function sanitizeMonths(raw){
@@ -4956,6 +4987,7 @@ function importData(file){
     if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
     if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
+    state.savingsPerMonth=(typeof d.savingsPerMonth==="boolean")?d.savingsPerMonth:false;
     state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
     state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
     state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
@@ -4972,7 +5004,8 @@ function importData(file){
 document.getElementById("exportBtn").onclick=exportData;
 document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
 document.getElementById("importFile").onchange=e=>{const f=e.target.files[0];if(f)importData(f);e.target.value="";};
-function buildFromPrevInto(key,mode){
+function buildFromPrevInto(key,mode,opts){
+  const savingsMode=(opts&&opts.savings)||"full"; // "full" | "undeduct" | "none" | "keep"
   const prevKey=Object.keys(state.months).filter(x=>x<key).sort().pop();
   const prev=prevKey?state.months[prevKey]:null;
   const income=prev?(prev.income||0):0;
@@ -4981,9 +5014,18 @@ function buildFromPrevInto(key,mode){
   let lines=[];
   if(prev){const src=mode==="fixed"?prev.lines.filter(l=>l.type==="fixed"||l.recurring):prev.lines;
     lines=src.map(l=>({id:uid(),name:l.name,planned:l.planned,type:l.type,category:l.category||"",recurring:!!l.recurring,entries:[]}));}
-  state.months[key]={income,incomeDetailed,incomeLines,lines,savings:emptySavings()};
+  let savings;
+  if(savingsMode==="keep"){
+    // Réimport des dépenses/revenus depuis un autre mois : on ne touche pas au plan d'épargne
+    // propre à ce mois (le vider serait une mauvaise surprise).
+    const cur=state.months[key];
+    savings=(cur&&cur.savings)?sanitizeGlobalSavings(cur.savings):emptySavings();
+  }else if(prev&&savingsMode!=="none"){
+    savings=copySavings(prev.savings,savingsMode==="undeduct");
+  }else savings=emptySavings();
+  state.months[key]={income,incomeDetailed,incomeLines,lines,savings};
 }
-function rebuildFromPrev(mode){buildFromPrevInto(state.current,mode);}
+function rebuildFromPrev(mode){buildFromPrevInto(state.current,mode,{savings:"keep"});}
 // Même logique que buildFromPrevInto, mais la « source » est un autre budget personnalisé
 // choisi dans la liste (pas de notion chronologique pour ces budgets-là).
 function buildCustomFromSourceInto(key,srcKey,mode){
@@ -5251,7 +5293,7 @@ function gdSerialize(){
   dataUpdatedAt = Date.now();
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,customBudgets:state.customBudgets,current:state.current,
     theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
-    savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
+    savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
     confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,
     cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,
     cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount});
@@ -5267,6 +5309,7 @@ function gdApply(d){
   if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
   if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
+  state.savingsPerMonth=(typeof d.savingsPerMonth==="boolean")?d.savingsPerMonth:false;
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
   state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
@@ -5401,7 +5444,7 @@ function gdStableStringify(o){
 }
 function gdSnapshotOf(d){
   return{months:d.months||{},customBudgets:d.customBudgets||{},current:d.current||null,theme:d.theme||null,categories:d.categories||[],
-    budgetView:d.budgetView||null,savings:d.savings||null,savingsMigrated:!!d.savingsMigrated,
+    budgetView:d.budgetView||null,savings:d.savings||null,savingsMigrated:!!d.savingsMigrated,savingsPerMonth:!!d.savingsPerMonth,
     statsOrder:sanitizeStatsOrder(d.statsOrder),heroMetric:sanitizeHeroMetric(d.heroMetric),labels:sanitizeLabels(d.labels),
     expanded:Array.isArray(d.expanded)?[...d.expanded].sort():[],
     folded:Array.isArray(d.folded)?[...d.folded].sort():[]};
@@ -5411,7 +5454,7 @@ function gdContentEquals(remote){
   // (dont categories) — sinon la comparaison est toujours « différente » et le raccourci
   // « déjà à jour » ne se déclenche jamais (fausses invites de restauration).
   const local={months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,
-    budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,expanded:[...expanded],folded:[...folded]};
+    budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,expanded:[...expanded],folded:[...folded]};
   return gdStableStringify(gdSnapshotOf(local))===gdStableStringify(gdSnapshotOf(remote));
 }
 
