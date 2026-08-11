@@ -1494,6 +1494,9 @@ html{scroll-behavior:smooth}
 </style>
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<!-- Bibliothèque Google Identity Services : requise pour la connexion Google Drive
+     (fournit google.accounts.oauth2). Sans elle, la connexion Drive affiche « ID client manquant ». -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
 /* ===================== Calculette flottante ===================== */
