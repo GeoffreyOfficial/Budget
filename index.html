@@ -4870,11 +4870,23 @@ function renderComparer(){
   });
   document.querySelectorAll(".blistDel").forEach(b=>b.onclick=e=>{e.stopPropagation();deleteMonth(b.dataset.mkey);});
   fitListScroll("monthsListScroll",state.cmpListCount);
-  const keys=Object.keys(state.months).sort();
+  // Comparer ne montre que les mois ÉCHUS (calendairement terminés). Un mois non échu — le mois
+  // EN COURS comme un mois À VENIR — est forcément incomplet (moins de dépenses, plus de reste) et
+  // fausserait chaque comparaison, moyenne, « meilleur reste », etc. Règle : on garde uniquement
+  // les mois strictement antérieurs au mois calendaire courant. Ainsi, au 11 août 2026, on exclut
+  // août 2026 (en cours) et septembre 2026 (à venir), mais on garde juillet 2026, …, août 2025.
+  // La liste de navigation des mois ci-dessus, elle, reste complète.
+  const currentMonthKey=mKey(new Date());
+  const allKeys=Object.keys(state.months).sort();
+  const keys=allKeys.filter(k=>k<currentMonthKey); // uniquement les mois échus
+  const excludedUnfinished=allKeys.length>keys.length;
   const multiYear=spansMultipleYears(keys);
   const rows=keys.map(k=>{const t=totals(ensure(k));return{k,label:mShortY(k,multiYear),cur:k===state.current,
     rev:t.income,dep:t.spent,reste:t.remainReal,over:t.over};});
-  if(rows.length===0)return;
+  if(rows.length===0){
+    if(allKeys.length)c.insertAdjacentHTML("beforeend",'<div class="panel"><p class="empty" style="padding:4px 0">Aucun mois échu à comparer pour l\'instant : le mois en cours et les mois à venir sont exclus. Reviens dès qu\'un mois sera terminé.</p></div>');
+    return;
+  }
 
   const avgDep=rows.reduce((s,r)=>s+r.dep,0)/rows.length;
   const medDep=median(rows.map(r=>r.dep));
@@ -4889,6 +4901,7 @@ function renderComparer(){
     +'<div class="dsum"><div class="k">Épargne</div><div class="v">'+eur0(curT.savings)+'</div></div>'
     +'<div class="dsum"><div class="k">Épargne déduite</div><div class="v">'+eur0(curT.deducted)+'</div></div>'
     +'</div>');
+  if(excludedUnfinished)c.insertAdjacentHTML("beforeend",'<p class="psub" style="margin:-4px 2px 12px;opacity:.85">Seuls les mois échus sont comparés — le mois en cours et les mois à venir sont exclus.</p>');
 
   // grouped bars revenus vs dépensé — tous les mois, défile horizontalement au-delà de cmpMonths
   const shown=rows;
