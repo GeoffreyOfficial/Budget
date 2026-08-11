@@ -1743,6 +1743,11 @@ html{scroll-behavior:smooth}
       <button class="bkbtn danger-solid" id="deleteMonthBtn">🗑️ Supprimer définitivement ce budget</button>
       <p class="bkhint" id="deleteHint"></p>
     </div>
+    <div class="hr"></div>
+    <div class="slabel">À propos</div>
+    <p class="bkhint" id="appVersion" style="opacity:.85">Version chargée : …</p>
+    <button class="bkbtn" id="forceUpdateBtn">🔄 Forcer la mise à jour</button>
+    <p class="bkhint">Récupère la dernière version en ligne et vide le cache de l'appli. Tes données (locales et Google Drive) restent intactes.</p>
     </div>
   </div>
 
@@ -6550,17 +6555,23 @@ document.addEventListener("visibilitychange",()=>{
 window.addEventListener("pageshow",()=>requestAnimationFrame(forceRepaint));
 
 /* ---------- PWA : hors-ligne, installation, stockage protégé ---------- */
-// 1) Service worker : permet de lancer l'appli sans connexion.
+// 1) Service worker : permet de lancer l'appli sans connexion, tout en gardant la page à jour.
 if("serviceWorker" in navigator){
   window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("sw.js").then(reg=>{
-      // Vérifie s'il existe une version plus récente au lancement, puis une fois par heure.
+    // updateViaCache:'none' -> le navigateur revérifie sw.js sans passer par son cache HTTP.
+    navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(reg=>{
       reg.update();
-      setInterval(()=>reg.update(),60*60*1000);
+      setInterval(()=>reg.update(),60*60*1000);           // et une fois par heure si l'appli reste ouverte
     }).catch(err=>console.warn("SW non enregistré :",err));
   });
-  // S'il y avait déjà un service worker actif, un changement de contrôleur signifie
-  // qu'une nouvelle version vient d'être installée : on recharge une seule fois pour l'afficher.
+  // Revérifie une nouvelle version chaque fois que l'appli revient au premier plan.
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"&&navigator.serviceWorker.controller){
+      navigator.serviceWorker.getRegistration().then(r=>{if(r)r.update();}).catch(()=>{});
+    }
+  });
+  // S'il y avait déjà un worker actif, un changement de contrôleur = nouvelle version installée :
+  // on recharge une seule fois pour l'afficher (pas de boucle grâce au drapeau).
   if(navigator.serviceWorker.controller){
     let swReloaded=false;
     navigator.serviceWorker.addEventListener("controllerchange",()=>{
@@ -6568,6 +6579,30 @@ if("serviceWorker" in navigator){
     });
   }
 }
+
+// 1bis) « À propos » : version chargée (date du fichier) + bouton de secours « Forcer la mise à jour ».
+(function(){
+  const v=document.getElementById("appVersion");
+  if(v){
+    let stamp="";
+    try{const d=new Date(document.lastModified);
+      if(!isNaN(d))stamp=d.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"})+" "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+    }catch(e){}
+    v.textContent="Version chargée : "+(stamp||"inconnue");
+  }
+  const btn=document.getElementById("forceUpdateBtn");
+  if(btn)btn.onclick=async()=>{
+    btn.disabled=true;const old=btn.textContent;btn.textContent="⏳ Mise à jour…";
+    try{
+      // 1) On vide le cache de l'appli (les données locales/Drive ne sont PAS touchées).
+      if(window.caches){const names=await caches.keys();await Promise.all(names.map(n=>caches.delete(n)));}
+      // 2) On désenregistre le(s) service worker(s) pour repartir propre.
+      if(navigator.serviceWorker){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}
+    }catch(e){/* on recharge quand même */}
+    // 3) Rechargement : la dernière version en ligne sera récupérée.
+    location.reload();
+  };
+})();
 
 // 2) Stockage persistant : demande au navigateur de NE PAS effacer
 //    automatiquement les données locales quand la mémoire se remplit.
