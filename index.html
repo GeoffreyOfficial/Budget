@@ -637,6 +637,23 @@ body{margin:0;background:var(--paper);color:var(--ink);transition:background .3s
 .cmptable{margin-top:4px;margin-inline:-2px;padding-inline:2px}
 .ctr{display:grid;grid-template-columns:1.15fr 1fr 1fr 1fr;gap:5px;align-items:center;padding:8px;border-radius:10px;font-size:11.5px}
 .ctr.head{color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.03em;padding:5px 8px}
+/* Variante 5 colonnes (Détail par mois : Mois / Revenus / Dépensé / Mis de côté / Reste).
+   Avec 5 colonnes il faut faire tenir jusqu'à 9 caractères de montant (« 117 027 € », des totaux
+   cumulés sur plusieurs années) dans chaque colonne, sans défilement horizontal. On resserre donc
+   gouttières et rembourrages, on rétrécit la colonne « Mois » (« Total » / « déc » suffisent), et
+   la taille de police descend par paliers sur les petits écrans (Z Fold plié, vieux Android 320px).
+   Les paliers 400px / 340px sont ceux déjà utilisés par .app pour son propre rembourrage. */
+.cmptable.c5 .ctr{grid-template-columns:.8fr 1fr 1fr 1fr 1fr;gap:4px;padding:8px 5px;font-size:11px}
+.cmptable.c5 .ctr.head{font-size:9px;letter-spacing:.02em;padding:5px 5px}
+.cmptable.c5 .ctr .cval{font-variant-numeric:tabular-nums}
+@media (max-width:400px){
+  .cmptable.c5 .ctr{grid-template-columns:.75fr 1fr 1fr 1fr 1fr;gap:3px;padding:8px 4px;font-size:10.5px}
+  .cmptable.c5 .ctr.head{font-size:8.5px;padding:5px 4px}
+}
+@media (max-width:340px){
+  .cmptable.c5 .ctr{gap:2px;padding:8px 3px;font-size:9px}
+  .cmptable.c5 .ctr.head{font-size:8px;padding:5px 3px}
+}
 .ctr:nth-child(even){background:var(--soft)}
 .ctr>span{min-width:0}
 .ctr .cm{font-weight:700;color:var(--ink);text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1481,6 +1498,102 @@ html{scroll-behavior:smooth}
 @keyframes tailFlick{0%,100%{transform:rotate(8deg)}30%{transform:rotate(-30deg)}62%{transform:rotate(2deg)}}
 /* Orientation : chat tourné vers la gauche (entrée par la droite). */
 .easterCat.faceLeft svg{transform:scaleX(-1);transform-origin:center}
+/* Zone tactile du chat : le chat lui-même reste pointer-events:none (il ne doit jamais bloquer
+   un bouton de l'appli en passant devant), seul ce calque invisible capte le tap. Il déborde de
+   12/16px autour du chat pour rester attrapable au doigt malgré ses 58×28px. */
+.easterCat .catHit{position:absolute;inset:-16px -12px;pointer-events:auto;cursor:pointer;
+  background:none;border:none;padding:0;-webkit-tap-highlight-color:transparent;z-index:2}
+/* Petit cœur/patte qui s'envole quand on touche le chat. */
+.catPurr{position:fixed;z-index:400;pointer-events:none;font-size:22px;line-height:1;
+  animation:catPurrUp 1s cubic-bezier(.2,.8,.3,1) both}
+@keyframes catPurrUp{0%{opacity:0;transform:translate(-50%,0) scale(.5)}
+  25%{opacity:1;transform:translate(-50%,-14px) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-54px) scale(1)}}
+
+/* ---------- Modale photos du chat (easter egg) ----------
+   Style « polaroid » : cadre blanc légèrement penché, bande de légende manuscrite en bas.
+   Les photos sont piochées au hasard dans le dossier photos/ à côté de index.html.
+
+   Transition d'ouverture/fermeture : tout part (et repart) du point EXACT où le chat a été
+   touché — coordonnées passées en --ox/--oy par le JS.
+     · le voile noir se dévoile en cercle qui s'agrandit depuis ce point (--r = distance jusqu'au
+       coin d'écran le plus éloigné, recalculée à chaque ouverture : marche donc aussi bien sur un
+       320px plié que sur un 27" en paysage) ;
+     · la carte se déplie depuis ce même point grâce à transform-origin: var(--gx) var(--gy),
+       exprimé en px RELATIFS à la carte (le point peut tomber hors de la carte, c'est permis) —
+       elle semble donc jaillir de la patte du chat, quelle que soit la taille d'écran ;
+     · deux ondes concentriques partent du point de contact.
+   La fermeture rejoue exactement l'inverse. */
+.photoModal{align-items:center;z-index:400;animation:none;background:rgba(0,0,0,.45)}
+.photoModal.opening{animation:photoWipeIn .52s cubic-bezier(.22,.8,.3,1) both}
+.photoModal.closing{animation:photoWipeOut .34s cubic-bezier(.55,0,.75,.2) both;pointer-events:none}
+@keyframes photoWipeIn{
+  from{-webkit-clip-path:circle(0px at var(--ox,50%) var(--oy,100%));clip-path:circle(0px at var(--ox,50%) var(--oy,100%))}
+  to{-webkit-clip-path:circle(var(--r,150vmax) at var(--ox,50%) var(--oy,100%));clip-path:circle(var(--r,150vmax) at var(--ox,50%) var(--oy,100%))}
+}
+@keyframes photoWipeOut{
+  from{-webkit-clip-path:circle(var(--r,150vmax) at var(--ox,50%) var(--oy,100%));clip-path:circle(var(--r,150vmax) at var(--ox,50%) var(--oy,100%))}
+  to{-webkit-clip-path:circle(0px at var(--ox,50%) var(--oy,100%));clip-path:circle(0px at var(--ox,50%) var(--oy,100%))}
+}
+/* Ondes de contact : deux anneaux qui s'écartent du point touché (position posée en inline par
+   le JS). Taille de départ proportionnelle au plus petit côté de l'écran, plafonnée, pour rester
+   juste du 320px plié au grand écran de bureau. */
+.photoRing{position:fixed;width:min(14vmin,86px);aspect-ratio:1;border-radius:50%;
+  border:2px solid rgba(255,255,255,.85);pointer-events:none;z-index:401;
+  animation:photoRing .62s cubic-bezier(.2,.7,.3,1) both}
+.photoRing.r2{border-color:rgba(255,255,255,.45);animation-delay:.1s;animation-duration:.74s}
+@keyframes photoRing{
+  from{opacity:.9;transform:translate(-50%,-50%) scale(.18)}
+  to{opacity:0;transform:translate(-50%,-50%) scale(6)}
+}
+.photoCard{position:relative;width:min(93vw,430px);max-height:92vh;display:flex;flex-direction:column;
+  background:var(--card);border-radius:22px;padding:16px 14px calc(16px + env(safe-area-inset-bottom));
+  box-shadow:0 22px 55px -18px rgba(0,0,0,.62);will-change:transform,opacity}
+.photoModal.opening .photoCard{animation:photoCardBurst .56s cubic-bezier(.2,.9,.28,1.08) both .04s}
+.photoModal.closing .photoCard{animation:photoCardCollapse .32s cubic-bezier(.6,0,.78,.2) both}
+/* --dx/--dy = écart entre le point touché et le centre de l'écran (= centre de la carte, qui est
+   centrée). Comme le translate précède le scale, il n'est PAS mis à l'échelle : la carte réduite
+   atterrit donc pile sur la patte du chat, sans jamais dépendre de la TAILLE de la carte — elle
+   peut grandir en cours d'animation (chargement de la photo) sans décaler l'effet. */
+@keyframes photoCardBurst{
+  0%{opacity:0;transform:translate(var(--dx,0px),var(--dy,0px)) scale(.04) rotate(-16deg)}
+  30%{opacity:1}
+  70%{transform:translate(0px,0px) scale(1.05) rotate(1.6deg)}
+  100%{opacity:1;transform:translate(0px,0px) scale(1) rotate(0deg)}
+}
+@keyframes photoCardCollapse{
+  0%{opacity:1;transform:translate(0px,0px) scale(1) rotate(0deg)}
+  25%{transform:translate(0px,0px) scale(1.04) rotate(-1.6deg)}
+  100%{opacity:0;transform:translate(var(--dx,0px),var(--dy,0px)) scale(.04) rotate(12deg)}
+}
+.photoHead{font-size:14.5px;font-weight:800;color:var(--ink);text-align:center;margin:0 30px 12px}
+.photoHeadSub{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-top:3px}
+.photoFrame{position:relative;align-self:center;max-width:100%;background:#fdfdfb;border-radius:6px;
+  padding:10px 10px 0;box-shadow:0 12px 26px -14px rgba(0,0,0,.65),0 1px 0 rgba(0,0,0,.06);
+  transform:rotate(var(--tilt,-1.4deg));transition:transform .4s cubic-bezier(.16,1,.3,1);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+.photoFrame:active{transform:rotate(var(--tilt,-1.4deg)) scale(.985)}
+.photoFrame img{display:block;width:100%;max-height:56vh;object-fit:contain;background:#efeeea;border-radius:2px;
+  animation:photoIn .45s cubic-bezier(.16,1,.3,1) both}
+@keyframes photoIn{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+.photoCap{font-family:"Segoe Script","Bradley Hand","Snell Roundhand",cursive;color:#3b3a36;
+  font-size:13px;text-align:center;padding:9px 4px 11px;min-height:16px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.photoState{display:flex;align-items:center;justify-content:center;text-align:center;min-height:170px;
+  padding:22px 16px;color:var(--muted);font-size:13px;line-height:1.5}
+.photoBtns{display:flex;gap:8px;margin-top:14px}
+.photoBtn{flex:1;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:12px;
+  padding:11px 8px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform .12s}
+.photoBtn:active{transform:scale(.97)}
+.photoBtn.primary{border-color:var(--accent);color:var(--accent)}
+.photoHint{margin:9px 2px 0;text-align:center;font-size:11px;color:var(--faint)}
+@media (prefers-reduced-motion: reduce){
+  .photoCard,.photoFrame img{animation:none!important}
+  .photoModal.opening,.photoModal.closing{animation:none!important;-webkit-clip-path:none!important;clip-path:none!important}
+  .photoRing{display:none}
+  .catPurr{animation-duration:.01s!important}
+}
 @media (prefers-reduced-motion: reduce){
   .easterCat{transition:opacity .6s ease!important}
   .easterCat,.easterCat *{animation:none!important}
@@ -2035,6 +2148,20 @@ html{scroll-behavior:smooth}
   </div>
 </div>
 
+<!-- Modale « photos du chat » : s'ouvre en touchant le petit chat noir (easter egg). -->
+<div class="modalWrap hidden photoModal" id="photoModal" role="dialog" aria-modal="true" aria-label="Photos du chat">
+  <div class="photoCard">
+    <button class="wrapClose" id="photoClose" type="button" aria-label="Fermer">×</button>
+    <div class="photoHead">🐈‍⬛ Le chat t'a rapporté une photo<span class="photoHeadSub" id="photoCount"></span></div>
+    <div id="photoStage"></div>
+    <div class="photoBtns">
+      <button type="button" class="photoBtn primary" id="photoNext">🔀 Une autre</button>
+      <button type="button" class="photoBtn" id="photoDone">Merci minou</button>
+    </div>
+    <p class="photoHint">Touche la photo (ou glisse) pour en voir une autre</p>
+  </div>
+</div>
+
 <script>
 const KEY="carnet-budget-v1";
 const uid=()=>Math.random().toString(36).slice(2,10);
@@ -2179,7 +2306,7 @@ function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id o
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,savingsPerMonth:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpPoste:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2};
+let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,savingsPerMonth:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpCat:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2};
 // Tris (configurables dans les Réglages). Deux tris indépendants : les budgets (postes) et les
 // dépenses. Par défaut « plus récent d'abord » (ordre décroissant d'ajout). « Manuel » = ordre
 // choisi au glisser-déposer (postes uniquement). Un « seq » d'ordre d'ajout est attribué à chaque
@@ -2203,7 +2330,7 @@ const expanded=new Set();
 let detailLineId=null,detailEntrySearch="";
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med")}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpCat==="string")state.cmpCat=d.cmpCat;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med")}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -2453,7 +2580,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,deduct:true,lines:[]};}
@@ -4495,7 +4622,7 @@ function median(arr){
   const s=arr.slice().sort((a,b)=>a-b),n=s.length,mid=Math.floor(n/2);
   return n%2?s[mid]:(s[mid-1]+s[mid])/2;
 }
-// Les choix de sélection (state.cmpPoste, state.cmpYear, state.cmpA, state.cmpB, state.cmpSpan, state.cmpCbA, state.cmpCbB) sont
+// Les choix de sélection (state.cmpCat, state.cmpYear, state.cmpA, state.cmpB, state.cmpSpan, state.cmpCbA, state.cmpCbB) sont
 // désormais stockés dans state (voir plus haut) pour être sauvegardés entre les sessions.
 // Arrondit vers le haut à une valeur « ronde » pour l'échelle (1, 2, 2.5, 5, 10 × 10^n).
 function niceCeil(v){
@@ -4810,36 +4937,47 @@ function renderComparerCustom(){
   withChartSkeleton(c);
   refreshGbarsLayout();
 }
-// Panel "Une dépense dans le temps" isolé pour pouvoir le rafraîchir seul (sans recharger
-// tout l'onglet Comparer) quand on change la dépense sélectionnée.
-function buildPostePanelHTML(rows,posteNames){
-  if(!state.cmpPoste||!posteNames.includes(state.cmpPoste))state.cmpPoste=posteNames[0];
-  let opts=posteNames.map(n=>'<option'+(n===state.cmpPoste?' selected':'')+'>'+esc(n)+'</option>').join("");
-  const pdata=rows.map(r=>{const lines=state.months[r.k].lines.filter(l=>(l.name||"").trim()===state.cmpPoste);
+// Panel "Une catégorie dans le temps" isolé pour pouvoir le rafraîchir seul (sans recharger
+// tout l'onglet Comparer) quand on change la catégorie sélectionnée. On compare une CATÉGORIE
+// (et non une dépense nommée) : budget prévu et dépensé de toutes les lignes de cette catégorie,
+// mois après mois. La sélection est mémorisée dans state.cmpCat (id de catégorie, "" = sans catégorie).
+// Liste des catégories réellement utilisées sur les mois comparés, dans l'ordre des réglages
+// (les catégories de state.categories d'abord, « Sans catégorie » en dernier).
+function cmpCatsUsed(keys){
+  const used=new Set();
+  keys.forEach(k=>{const m=state.months[k];if(!m)return;m.lines.forEach(l=>used.add(catById(l.category||"").id));});
+  return [...state.categories,NOCAT].filter(c=>used.has(c.id));
+}
+function buildCatPanelHTML(rows,cats){
+  if(!cats.length)return "";
+  if(state.cmpCat==null||!cats.some(c=>c.id===state.cmpCat))state.cmpCat=cats[0].id;
+  const opts=cats.map(c=>'<option value="'+esc(c.id)+'"'+(c.id===state.cmpCat?' selected':'')+'>'+c.icon+' '+esc(c.name)+'</option>').join("");
+  const pdata=rows.map(r=>{const lines=state.months[r.k].lines.filter(l=>catById(l.category||"").id===state.cmpCat);
     const rev=lines.reduce((s,l)=>s+(+l.planned||0),0),dep=lines.reduce((s,l)=>s+spent(l),0);
     return{label:r.label,cur:r.cur,rev,dep,revLabel:"Budget",depLabel:"Dépensé"};});
-  return '<div class="panel" id="postePanel"><h3>Une dépense dans le temps</h3>'
-    +'<div class="selrow"><label>Dépense</label><select id="posteSel">'+opts+'</select></div>'
+  return '<div class="panel" id="catPanel"><h3>Une catégorie dans le temps</h3>'
+    +'<p class="psub">Budget prévu et dépensé de la catégorie, mois après mois</p>'
+    +'<div class="selrow"><label>Catégorie</label><select id="catCmpSel">'+opts+'</select></div>'
     +groupedBars(pdata,state.cmpDensity)
     +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Budget</span>'
     +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
     +'<span><span style="background:'+gv("--red")+'"></span>Dépassé budget</span></div></div>';
 }
-function attachPosteSelHandler(rows,posteNames){
-  const sel=document.getElementById("posteSel");
+function attachCatSelHandler(rows,cats){
+  const sel=document.getElementById("catCmpSel");
   if(!sel)return;
   sel.onchange=()=>{
-    state.cmpPoste=sel.value;save();
-    const panel=document.getElementById("postePanel");
+    state.cmpCat=sel.value;save();
+    const panel=document.getElementById("catPanel");
     if(!panel)return;
-    panel.outerHTML=buildPostePanelHTML(rows,posteNames);
-    attachPosteSelHandler(rows,posteNames);
+    panel.outerHTML=buildCatPanelHTML(rows,cats);
+    attachCatSelHandler(rows,cats);
     layoutGbars();
   };
 }
 // Variante budgets personnalisés : la MÊME dépense (par nom) comparée d'un budget perso à l'autre
 // (au lieu d'un mois à l'autre). Sélection isolée dans state.cmpCbPoste pour ne pas mélanger avec
-// la sélection mensuelle (state.cmpPoste).
+// la sélection mensuelle par catégorie (state.cmpCat).
 function buildCbPostePanelHTML(cbRows,posteNames){
   if(!state.cmpCbPoste||!posteNames.includes(state.cmpCbPoste))state.cmpCbPoste=posteNames[0];
   const opts=posteNames.map(n=>'<option'+(n===state.cmpCbPoste?' selected':'')+'>'+esc(n)+'</option>').join("");
@@ -4890,7 +5028,7 @@ function renderComparer(){
   const excludedUnfinished=allKeys.length>keys.length;
   const multiYear=spansMultipleYears(keys);
   const rows=keys.map(k=>{const t=totals(ensure(k));return{k,label:mShortY(k,multiYear),cur:k===state.current,
-    rev:t.income,dep:t.spent,reste:t.remainReal,over:t.over};});
+    rev:t.income,dep:t.spent,ded:t.deducted,reste:t.remainReal,over:t.over};});
   if(rows.length===0){
     if(allKeys.length)c.insertAdjacentHTML("beforeend",'<div class="panel"><p class="empty" style="padding:4px 0">Aucun mois échu à comparer pour l\'instant : le mois en cours et les mois à venir sont exclus. Reviens dès qu\'un mois sera terminé.</p></div>');
     return;
@@ -4920,11 +5058,11 @@ function renderComparer(){
     +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
     +'<span><span style="background:'+gv("--red")+'"></span>Dépassé revenus</span></div></div>');
 
-  // comparaison d'une dépense dans le temps
-  const posteNames=[...new Set(keys.flatMap(k=>state.months[k].lines.map(l=>(l.name||"").trim()).filter(Boolean)))].sort((a,b)=>a.localeCompare(b));
-  if(posteNames.length){
-    c.insertAdjacentHTML("beforeend",buildPostePanelHTML(rows,posteNames));
-    attachPosteSelHandler(rows,posteNames);
+  // comparaison d'une catégorie dans le temps
+  const cmpCats=cmpCatsUsed(keys);
+  if(cmpCats.length){
+    c.insertAdjacentHTML("beforeend",buildCatPanelHTML(rows,cmpCats));
+    attachCatSelHandler(rows,cmpCats);
   }
 
   // vue annuelle : répartition des dépenses par catégorie sur l'année choisie
@@ -5035,8 +5173,10 @@ function renderComparer(){
   }
 
   // tableau mois par mois (récent -> ancien), avec variation vs mois précédent
-  let tbl='<div class="panel"><h3>Détail par mois</h3><p class="psub">Variation de dépense vs mois précédent</p><div class="cmptable">';
-  tbl+='<div class="ctr head"><span>Mois</span><span class="cval">Revenus</span><span class="cval">Dépensé</span><span class="cval">Reste</span></div>';
+  // « Mis de côté » = uniquement l'épargne DÉDUITE des revenus (t.deducted) : la colonne reste
+  // cohérente avec le reste de la ligne, Revenus − Dépensé − Mis de côté = Reste.
+  let tbl='<div class="panel"><h3>Détail par mois</h3><p class="psub">Variation de dépense vs mois précédent · mis de côté = épargne déduite des revenus</p><div class="cmptable c5">';
+  tbl+='<div class="ctr head"><span>Mois</span><span class="cval">Revenus</span><span class="cval">Dépensé</span><span class="cval">Mis de côté</span><span class="cval">Reste</span></div>';
   rows.slice().reverse().forEach(r=>{
     const i=rows.indexOf(r),prev=rows[i-1];
     let varLine="";
@@ -5049,8 +5189,18 @@ function renderComparer(){
     tbl+='<div class="ctr"><span class="cm">'+esc(r.label)+'</span>'
       +'<span class="cval mut">'+eurT(r.rev)+'</span>'
       +'<span class="cval">'+eurT(r.dep)+varLine+'</span>'
+      +'<span class="cval mut">'+eurT(r.ded)+'</span>'
       +'<span class="cval '+(r.reste>=0?"pos":"neg")+'">'+eurT(r.reste)+'</span></div>';
   });
+  // Ligne Total : somme de tous les mois échus affichés au-dessus.
+  const totRev=round2(rows.reduce((s,r)=>s+r.rev,0)),totDep=round2(rows.reduce((s,r)=>s+r.dep,0)),
+        totDed=round2(rows.reduce((s,r)=>s+r.ded,0)),totRes=round2(rows.reduce((s,r)=>s+r.reste,0));
+  tbl+='<div class="ctr" style="border-top:1px solid var(--line);margin-top:2px;padding-top:11px">'
+    +'<span class="cm" style="font-weight:800">Total</span>'
+    +'<span class="cval mut" style="font-weight:800">'+eurT(totRev)+'</span>'
+    +'<span class="cval" style="font-weight:800">'+eurT(totDep)+'</span>'
+    +'<span class="cval mut" style="font-weight:800">'+eurT(totDed)+'</span>'
+    +'<span class="cval '+(totRes>=0?"pos":"neg")+'" style="font-weight:800">'+eurT(totRes)+'</span></div>';
   tbl+='</div></div>';
   c.insertAdjacentHTML("beforeend",tbl);
   withChartSkeleton(c);
@@ -5659,7 +5809,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -5760,7 +5910,7 @@ function importData(file){
     state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
     state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
     state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
-    if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
+    if(typeof d.cmpCat==="string")state.cmpCat=d.cmpCat;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
     if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths)
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
@@ -5950,6 +6100,209 @@ window.addEventListener("blur",flushAll);
 applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
+/* ---------- Photos du chat (easter egg) ----------
+   En touchant le petit chat noir, une modale « polaroid » affiche une photo tirée AU HASARD du
+   dossier photos/ situé à côté de index.html.
+
+   Découverte des fichiers — GitHub Pages ne sait pas lister un dossier, donc trois sources,
+   dans cet ordre, la première qui répond gagne :
+     1. photos/photos.json  — manifeste optionnel : ["a.jpg","b.jpg"] ou {"photos":[…]}.
+        Utile si tu veux choisir l'ordre, exclure des images, ou légender ({file,caption}).
+     2. l'API GitHub (api.github.com/repos/OWNER/REPO/contents/photos) — zéro entretien :
+        tu déposes des images dans le dossier, elles apparaissent. OWNER/REPO sont déduits de
+        l'URL github.io, rien n'est codé en dur.
+     3. le dernier inventaire connu, mémorisé dans localStorage — c'est lui qui fait marcher la
+        modale hors ligne (les images elles-mêmes sont mises en cache par le service worker
+        dès la première consultation).
+   L'inventaire est mémorisé sous SA PROPRE clé localStorage : il ne rejoint jamais state, donc
+   il ne part pas dans l'export JSON ni sur Google Drive. */
+const PHOTO_DIR="photos/";
+const PHOTO_LIST_KEY="carnet-budget-photos-v1";
+const PHOTO_TTL=6*3600*1000;                       // au-delà, on retente une découverte fraîche
+const PHOTO_RE=/\.(jpe?g|png|webp|gif|avif|bmp)$/i;
+function photoCacheRead(){
+  try{const r=JSON.parse(localStorage.getItem(PHOTO_LIST_KEY));
+    if(r&&Array.isArray(r.files))return{t:+r.t||0,files:r.files.filter(f=>typeof f==="string")};}catch(e){}
+  return null;
+}
+function photoCacheWrite(files){try{localStorage.setItem(PHOTO_LIST_KEY,JSON.stringify({t:Date.now(),files}));}catch(e){}}
+// OWNER/REPO + chemin du dossier photos DANS le dépôt, déduits de l'URL courante.
+// geoffreyofficial.github.io/Budget/index.html -> {owner:"geoffreyofficial",repo:"Budget",path:"photos"}
+function photoRepoInfo(){
+  const h=location.hostname.toLowerCase();
+  if(!/\.github\.io$/.test(h))return null;
+  const owner=h.replace(/\.github\.io$/,"");
+  const segs=location.pathname.split("/").filter(Boolean);
+  const first=segs[0]||"";
+  // Site utilisateur (racine, ou 1er segment qui est un fichier) vs page projet (/Repo/…).
+  const isProject=first&&first.indexOf(".")<0;
+  const repo=isProject?first:(owner+".github.io");
+  let dir=location.pathname.replace(/[^/]*$/,"").replace(/^\/+/,"");   // "Budget/"
+  if(isProject)dir=dir.replace(new RegExp("^"+first.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"/?"),"");
+  return{owner,repo,path:(dir+"photos").replace(/^\/+/,"")};
+}
+async function photoFetchManifest(){
+  const res=await fetch(PHOTO_DIR+"photos.json",{cache:"no-store"});
+  if(!res.ok)throw new Error("pas de manifeste");
+  const d=await res.json();
+  const arr=Array.isArray(d)?d:(d&&Array.isArray(d.photos)?d.photos:[]);
+  return arr.map(x=>typeof x==="string"?x:(x&&typeof x.file==="string"?x.file:null))
+            .filter(n=>n&&PHOTO_RE.test(n));
+}
+async function photoFetchFromGitHub(){
+  const info=photoRepoInfo();
+  if(!info)throw new Error("hors GitHub Pages");
+  const res=await fetch("https://api.github.com/repos/"+info.owner+"/"+info.repo+"/contents/"+encodeURI(info.path),
+    {headers:{Accept:"application/vnd.github+json"}});
+  if(!res.ok)throw new Error("API GitHub "+res.status);
+  const d=await res.json();
+  if(!Array.isArray(d))throw new Error("réponse inattendue");
+  return d.filter(x=>x&&x.type==="file"&&PHOTO_RE.test(x.name)).map(x=>x.name);
+}
+async function loadPhotoList(force){
+  const cached=photoCacheRead();
+  if(cached&&cached.files.length&&!force&&Date.now()-cached.t<PHOTO_TTL)return cached.files;
+  let files=null;
+  try{files=await photoFetchManifest();}catch(e){}
+  if(!files||!files.length){try{files=await photoFetchFromGitHub();}catch(e){}}
+  if(files&&files.length){photoCacheWrite(files);return files;}
+  return cached?cached.files:[];   // hors ligne / échec : on se rabat sur le dernier inventaire
+}
+// Ordre de lecture : un mélange (Fisher-Yates) rejoué à chaque tour, en évitant que la première
+// photo du nouveau tour soit celle qu'on vient de voir — « au hasard » sans doublon rapproché.
+let photoFiles=[],photoBag=[],photoLast=null,photoBusy=false;
+function photoShuffle(){
+  photoBag=photoFiles.slice();
+  for(let i=photoBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=photoBag[i];photoBag[i]=photoBag[j];photoBag[j]=t;}
+  if(photoBag.length>1&&photoBag[photoBag.length-1]===photoLast){
+    const t=photoBag[photoBag.length-1];photoBag[photoBag.length-1]=photoBag[0];photoBag[0]=t;
+  }
+}
+function photoDrawNext(){
+  if(!photoFiles.length)return null;
+  if(!photoBag.length)photoShuffle();
+  const f=photoBag.pop();photoLast=f;return f;
+}
+function photoStageHTML(inner){document.getElementById("photoStage").innerHTML=inner;}
+function photoShowState(msg){photoStageHTML('<div class="photoState">'+msg+'</div>');}
+function photoCaptionOf(file){
+  return esc(file.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").trim()||"photo");
+}
+function photoShow(file){
+  if(!file){photoShowState("Aucune photo trouvée.<br>Dépose des images dans le dossier <b>photos/</b> à côté de index.html — le chat te les rapportera.");return;}
+  const tilt=(Math.random()*4-2).toFixed(2)+"deg";
+  photoStageHTML('<div class="photoFrame" id="photoFrame" style="--tilt:'+tilt+'">'
+    +'<img id="photoImg" alt="'+photoCaptionOf(file)+'" src="'+esc(PHOTO_DIR+encodeURIComponent(file))+'">'
+    +'<div class="photoCap">'+photoCaptionOf(file)+'</div></div>');
+  const frame=document.getElementById("photoFrame");
+  const img=document.getElementById("photoImg");
+  img.onerror=()=>{
+    // Fichier disparu (renommé/supprimé depuis le dernier inventaire) : on l'oublie et on enchaîne.
+    photoFiles=photoFiles.filter(f=>f!==file);photoBag=photoBag.filter(f=>f!==file);
+    photoCacheWrite(photoFiles);
+    photoFiles.length?photoShow(photoDrawNext()):photoShowState("Les photos mémorisées ne sont plus là. Rouvre la modale pour relancer la recherche.");
+  };
+  frame.onclick=()=>photoShow(photoDrawNext());
+  // Glissement latéral = photo suivante (même geste que dans une galerie).
+  let sx=null,sy=null;
+  frame.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  frame.addEventListener("touchend",e=>{
+    if(sx==null)return;
+    const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+    sx=null;
+    if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.4)photoShow(photoDrawNext());
+  },{passive:true});
+  const cnt=document.getElementById("photoCount");
+  if(cnt)cnt.textContent=photoFiles.length+" photo"+(photoFiles.length>1?"s":"")+" dans son panier";
+}
+// Point d'origine de la transition : là où le chat a été touché. Sert à l'ouverture ET à la
+// fermeture (la modale se replie vers le même point). Repli au bas-centre de l'écran si la
+// modale est ouverte autrement (le chat est parti, écran redimensionné entre-temps…).
+let photoOrigin=null;
+function photoSetOrigin(x,y){photoOrigin={x,y};}
+function photoOriginPoint(){
+  const vw=window.innerWidth||360,vh=window.innerHeight||640;
+  let x=photoOrigin?photoOrigin.x:vw/2, y=photoOrigin?photoOrigin.y:vh-46;
+  // Un point hors écran (chat sorti, rotation de l'écran) ramènerait l'animation dans le vide.
+  x=Math.max(8,Math.min(vw-8,x));y=Math.max(8,Math.min(vh-8,y));
+  return{x,y,vw,vh};
+}
+// Prépare les variables de l'animation : centre du cercle de dévoilement (--ox/--oy), rayon
+// couvrant le coin le plus éloigné (--r), et écart carte→point du chat (--dx/--dy), qui donne
+// l'impression que la carte jaillit de la patte. Aucune mesure de la carte n'est nécessaire :
+// elle est centrée, donc son centre est celui de l'écran, quelle que soit sa taille.
+function photoPrepTransform(){
+  const modal=document.getElementById("photoModal");
+  const card=modal&&modal.querySelector(".photoCard");
+  if(!modal||!card)return null;
+  const p=photoOriginPoint();
+  const r=Math.ceil(Math.max(
+    Math.hypot(p.x,p.y),Math.hypot(p.vw-p.x,p.y),
+    Math.hypot(p.x,p.vh-p.y),Math.hypot(p.vw-p.x,p.vh-p.y)))+8;
+  modal.style.setProperty("--ox",p.x+"px");
+  modal.style.setProperty("--oy",p.y+"px");
+  modal.style.setProperty("--r",r+"px");
+  card.style.setProperty("--dx",(p.x-p.vw/2).toFixed(1)+"px");
+  card.style.setProperty("--dy",(p.y-p.vh/2).toFixed(1)+"px");
+  return p;
+}
+function photoRings(p){
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  [1,2].forEach(i=>{
+    const r=document.createElement("div");
+    r.className="photoRing"+(i===2?" r2":"");
+    r.style.left=p.x+"px";r.style.top=p.y+"px";
+    document.body.appendChild(r);
+    setTimeout(()=>r.remove(),1000);
+  });
+}
+async function openPhotoModal(){
+  const modal=document.getElementById("photoModal");
+  if(!modal||photoBusy)return;
+  photoBusy=true;
+  modal.classList.remove("hidden","closing");
+  const cnt=document.getElementById("photoCount");if(cnt)cnt.textContent="";
+  photoShowState("🐾 Le chat fouille dans ses photos…");
+  // La carte doit être posée (donc mesurable) avant de calculer l'origine de son dépliage.
+  const p=photoPrepTransform();
+  if(p){
+    modal.classList.add("opening");
+    photoRings(p);
+    setTimeout(()=>modal.classList.remove("opening"),640);
+  }
+  try{
+    photoFiles=await loadPhotoList(false);
+  }catch(e){photoFiles=[];}
+  photoBag=[];
+  photoShow(photoDrawNext());
+  photoBusy=false;
+}
+let photoCloseTimer=null;
+function closePhotoModal(){
+  const m=document.getElementById("photoModal");
+  if(!m||m.classList.contains("hidden")||m.classList.contains("closing"))return;
+  const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduced){m.classList.add("hidden");return;}
+  m.classList.remove("opening");              // mesure la carte non transformée, même si l'ouverture
+  photoPrepTransform();                       // est encore en cours (écran tourné/redimensionné aussi)
+  m.classList.add("closing");
+  clearTimeout(photoCloseTimer);
+  photoCloseTimer=setTimeout(()=>{m.classList.add("hidden");m.classList.remove("closing");},350);
+}
+(function(){
+  const modal=document.getElementById("photoModal");
+  if(!modal)return;
+  document.getElementById("photoClose").onclick=closePhotoModal;
+  document.getElementById("photoDone").onclick=closePhotoModal;
+  document.getElementById("photoNext").onclick=()=>photoShow(photoDrawNext());
+  modal.addEventListener("click",e=>{if(e.target===modal)closePhotoModal();});
+  document.addEventListener("keydown",e=>{
+    if(modal.classList.contains("hidden"))return;
+    if(e.key==="Escape")closePhotoModal();
+    else if(e.key==="ArrowRight"||e.key==="ArrowLeft"||e.key===" ")photoShow(photoDrawNext());
+  });
+})();
+
 /* ---------- Petit chat noir surprise ----------
    Un clin d'œil discret : de temps en temps, un petit chat noir traverse le bas de l'écran
    en marchant sur ses 4 pattes, s'arrête — parfois pour grimper se lover sur un bouton de la
@@ -5974,6 +6327,8 @@ if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ
   function spawnEasterCat(){
     if(document.querySelector(".easterCat"))return;
     if(document.hidden)return;
+    const pm=document.getElementById("photoModal");
+    if(pm&&!pm.classList.contains("hidden"))return;  // pas de chat pendant qu'on regarde ses photos
     const CAT_W=58,CAT_H=28;
     const vw=Math.max(200,window.innerWidth||360);
     const vh=Math.max(300,window.innerHeight||640);
@@ -6002,9 +6357,22 @@ if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ
       +'<path d="M62 10 L70 8.5"/><path d="M62.2 10.7 L70.5 10.6"/><path d="M62 11.3 L70 12.9"/></g>'
       +'</g>'
       +'</g></svg></div>';
+    // Zone tactile : touchée, elle ouvre la modale des photos du chat.
+    const hit=document.createElement("button");
+    hit.type="button";hit.className="catHit";hit.setAttribute("aria-label","Voir les photos du chat");
+    el.appendChild(hit);
     document.body.appendChild(el);
     const lift=el.querySelector(".catLift");
     const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Petite patte qui s'envole à l'endroit du tap, avant l'ouverture de la modale.
+    function catPurr(){
+      const r=el.getBoundingClientRect();
+      const p=document.createElement("div");
+      p.className="catPurr";p.textContent=Math.random()<0.5?"🐾":"💛";
+      p.style.left=(r.left+r.width/2)+"px";p.style.top=(r.top-6)+"px";
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(),1100);
+    }
     const restX=Math.round(vw*(0.12+Math.random()*0.56));
     if(reduced){
       // Version sans traversée ni poses : simple apparition/disparition en fondu, immobile.
@@ -6012,6 +6380,9 @@ if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ
       el.style.transform="translateX("+restX+"px)";
       el.style.opacity="0";
       requestAnimationFrame(()=>{el.style.opacity="1";});
+      hit.onclick=()=>{hit.remove();catPurr();
+        const r=el.getBoundingClientRect();photoSetOrigin(r.left+r.width/2,r.top+r.height/2);
+        openPhotoModal();};
       setTimeout(()=>{el.style.opacity="0";setTimeout(()=>el.remove(),650);},3000);
       return;
     }
@@ -6036,6 +6407,7 @@ if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ
       jumpDy=perchTop-groundTop; // négatif = vers le haut
     }
     const climbs=jumpDy!=null;
+    let stepTimer=null,perched=false,tapped=false;
     // Deux temps de rAF avant chaque transition pour « committer » la position de départ.
     function moveX(x){requestAnimationFrame(()=>{void el.offsetWidth;
       requestAnimationFrame(()=>{el.style.transform="translateX("+x+"px)";});});}
@@ -6057,7 +6429,7 @@ if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ
         // Frétillement mignon (guette) puis bond arqué sur le bouton.
         steps.push({enter:()=>pose("wiggle"),dur:ri(650,1050)});
         steps.push({enter:()=>pose("crouch"),dur:180});
-        steps.push({enter:()=>{pose("leaping");liftTo(jumpDy);},dur:480});
+        steps.push({enter:()=>{pose("leaping");liftTo(jumpDy);perched=true;},dur:480});
         steps.push({enter:()=>pose("land"),dur:150});
       }else{
         steps.push({enter:()=>pose("idle"),dur:ri(350,900)});
@@ -6089,21 +6461,44 @@ if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ
 
       if(climbs){
         steps.push({enter:()=>pose("crouch"),dur:170});
-        steps.push({enter:()=>{pose("dropping");liftTo(0);},dur:420});
+        steps.push({enter:()=>{pose("dropping");liftTo(0);perched=false;},dur:420});
         steps.push({enter:()=>pose("land"),dur:150});
       }
       steps.push({enter:()=>{pose("walking");moveX(endX);},dur:walkOutDur});
     }
 
-    // ---- Lecture séquentielle ----
+    // ---- Lecture séquentielle (interruptible : un tap sur le chat coupe la séquence en cours
+    //      et enchaîne sur une sortie propre — s'il est perché, il redescend d'abord). ----
     el.style.transform="translateX("+startX+"px)";
-    let i=0;
-    (function nextStep(){
-      if(i>=steps.length){el.remove();return;}
-      const s=steps[i++];
-      try{s.enter();}catch(e){}
-      setTimeout(nextStep,s.dur);
-    })();
+    function runSteps(list){
+      let i=0;
+      (function nextStep(){
+        if(i>=list.length){el.remove();return;}
+        const s=list[i++];
+        try{s.enter();}catch(e){}
+        stepTimer=setTimeout(nextStep,s.dur);
+      })();
+    }
+    hit.onclick=()=>{
+      if(tapped)return;
+      tapped=true;
+      const r=el.getBoundingClientRect();
+      photoSetOrigin(r.left+r.width/2,r.top+r.height/2);  // la modale jaillira d'ici
+      hit.remove();                     // un seul tap par passage
+      clearTimeout(stepTimer);
+      catPurr();
+      const out=[];
+      if(perched){
+        out.push({enter:()=>pose("crouch"),dur:170});
+        out.push({enter:()=>{pose("dropping");liftTo(0);perched=false;},dur:420});
+        out.push({enter:()=>pose("land"),dur:150});
+      }
+      out.push({enter:()=>pose("look"),dur:520});
+      out.push({enter:()=>{pose("walking");moveX(endX);},dur:walkOutDur});
+      runSteps(out);
+      setTimeout(openPhotoModal,300);   // laisse voir la réaction du chat avant la modale
+    };
+    runSteps(steps);
   }
   // Intervalle "assez fréquent, un peu moins que les poissons (15-30s)" : 25 à 55s.
   const MIN_GAP=25000, MAX_GAP=55000;
@@ -6244,7 +6639,7 @@ function gdSerialize(){
     theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
     confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,
-    cmpPoste:state.cmpPoste,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,
+    cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,
     cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount});
 }
 function gdApply(d){
@@ -6262,7 +6657,7 @@ function gdApply(d){
   state.statsOrder=sanitizeStatsOrder(d.statsOrder);state.heroMetric=sanitizeHeroMetric(d.heroMetric);state.labels=sanitizeLabels(d.labels);
   state.confirmDelete=sanitizeConfirmDelete(d.confirmDelete);state.compact=!!d.compact;state.moveMode=!!d.moveMode;
   state.sortBudgets=BUDGET_SORT_KEYS.includes(d.sortBudgets)?d.sortBudgets:"recent";state.sortExpenses=EXPENSE_SORT_KEYS.includes(d.sortExpenses)?d.sortExpenses:"recent";if(Number.isFinite(+d.seq))state.seq=+d.seq;state.showSearch=!!d.showSearch;state.showEntryPct=!!d.showEntryPct;
-  if(typeof d.cmpPoste==="string")state.cmpPoste=d.cmpPoste;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
+  if(typeof d.cmpCat==="string")state.cmpCat=d.cmpCat;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;
   if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths)
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
   folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
