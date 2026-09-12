@@ -119,7 +119,15 @@ html{transition:--paper .45s ease,--card .45s ease,--line .45s ease,--ink .45s e
   --faint .45s ease,--accent .45s ease,--accent-2 .45s ease,--soft .45s ease,--hero-a .45s ease,
   --hero-b .45s ease,--hero-ink .45s ease,--red .45s ease,--red-soft .45s ease,--green .45s ease,
   --money-in .45s ease,--money-out .45s ease}
-[data-theme="midnight"],[data-theme="carbon"],[data-theme="nocturne"],[data-theme="ember"],[data-theme="slate"]{color-scheme:dark}
+/* Thème « Perso » : aucune couleur n'est déclarée en CSS — applyTheme() pose les variables
+   en inline sur <html> depuis state.customTheme (les valeurs de :root servent de repli si
+   une variable manque). data-dark="1" est ajouté quand le fond choisi est sombre, pour que
+   color-scheme (champs natifs, sélecteur de couleur, barres de défilement) et le ripple
+   suivent, exactement comme pour les thèmes sombres livrés. */
+[data-theme="midnight"],[data-theme="carbon"],[data-theme="nocturne"],[data-theme="ember"],[data-theme="slate"],[data-dark="1"]{color-scheme:dark}
+/* Pendant l'édition en direct du thème perso, on coupe le fondu .45s des variables : sinon
+   chaque mouvement du sélecteur de couleur traîne d'une demi-seconde et l'aperçu semble mou. */
+html.theme-live{transition:none!important}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 :focus-visible{outline:2px solid var(--accent-2);outline-offset:2px;border-radius:6px}
@@ -1288,7 +1296,7 @@ html{scroll-behavior:smooth}
 /* Effet "ripple" au tap/clic (ajouté dynamiquement en JS) */
 .ripple{position:absolute;border-radius:50%;transform:scale(0);animation:rippleAnim .6s ease-out;
   background:rgba(255,255,255,.55);pointer-events:none;mix-blend-mode:overlay;z-index:1}
-[data-theme="midnight"] .ripple,[data-theme="carbon"] .ripple,[data-theme="nocturne"] .ripple,[data-theme="ember"] .ripple,[data-theme="slate"] .ripple{
+[data-theme="midnight"] .ripple,[data-theme="carbon"] .ripple,[data-theme="nocturne"] .ripple,[data-theme="ember"] .ripple,[data-theme="slate"] .ripple,[data-dark="1"] .ripple{
   background:rgba(255,255,255,.28)}
 @keyframes rippleAnim{to{transform:scale(2.8);opacity:0}}
 
@@ -1401,106 +1409,215 @@ html{scroll-behavior:smooth}
 .sbHit{cursor:pointer}
 .sbDot{cursor:pointer}
 /* ---------- Zéphyr, le petit chat noir surprise (easter egg discret, occasionnel) ----------
-   Séquence "comme un vrai chat" : il marche sur ses 4 pattes (démarche diagonale, comme un
-   vrai quadrupède), s'arrête, parfois grimpe se lover sur un bouton de la barre du haut
-   (Réglages, calculette, ↶/↷, mois), s'étire (dos arqué, pattes avant tendues, arrière-train
-   relevé), puis repart marcher hors de l'écran.
-   Positionnement : "bottom:10px" natif (comme avant) pour le sol — robuste aux variations de
-   hauteur de viewport sur mobile (barre d'adresse qui apparaît/disparaît au scroll). Seul le
-   décalage horizontal ET, pendant le "grimper" sur un bouton, un décalage vertical RELATIF à
-   ce sol sont pilotés en JS via translate(x,y) — jamais une position absolue recalculée sur
-   un vh capturé une seule fois, ce qui provoquait des sauts/téléportations si le viewport
-   changeait pendant l'animation. Chaque partie du chat (corps+pattes, tête, queue) est un
-   groupe SVG animé indépendamment. */
+   Anatomie : chaque patte est articulée en deux segments (hanche + genou + coussinet), la queue
+   en trois segments qui se propagent avec un léger retard (effet fouet), la tête porte museau,
+   oreilles, yeux en amande à pupille fendue et moustaches. Résultat : les poses restent crédibles
+   parce qu'elles plient les articulations au lieu de déformer un bloc.
+   Positionnement : « bottom:10px » natif pour le sol — robuste aux variations de hauteur de
+   viewport sur mobile (barre d'adresse au scroll). Seul le décalage horizontal ET, pendant un
+   saut ou un perchage, un décalage vertical RELATIF à ce sol sont pilotés en JS via
+   translate(x,y) — jamais une position absolue recalculée sur un vh capturé une seule fois.
+   Règle de transformation : une règle n'associe jamais translate() à rotate()/scale() sur un
+   élément animé autour d'un transform-origin fixe (la translation déplacerait la forme avant la
+   rotation, qui tournerait alors autour d'un point vide). Les groupes animés ne portent donc
+   jamais d'attribut transform : les décalages d'articulation sont portés par des groupes
+   intermédiaires statiques. */
 .easterCat{position:fixed;left:0;bottom:10px;width:58px;height:28px;z-index:300;
   pointer-events:none;user-select:none;
   transform:translateX(-70px);transition:transform 2.2s cubic-bezier(.4,0,.2,1);will-change:transform}
-/* Couche verticale : le saut/la chute sont portés ici, séparément du déplacement horizontal, pour
-   dessiner une vraie trajectoire (montée décélérée par la "gravité", chute accélérée). */
+/* Ombre de contact : elle reste au sol (hors de .catLift), rétrécit et pâlit quand le chat
+   s'élève — c'est ce qui vend la hauteur du saut. */
+.easterCat .catShadow{position:absolute;left:3px;right:3px;bottom:-5px;height:7px;pointer-events:none;
+  background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.34),rgba(0,0,0,0) 70%);
+  transition:opacity .4s ease,transform .45s cubic-bezier(.4,0,.2,1);will-change:transform,opacity}
+.easterCat.leaping .catShadow,.easterCat.falling .catShadow{opacity:.2;transform:scale(.6,.5)}
+.easterCat.perched .catShadow{opacity:0}
+.easterCat.dropping .catShadow{opacity:.3;transform:scale(.8,.7)}
+.easterCat.land .catShadow{transform:scale(1.18,1.1)}
+.easterCat.dashing .catShadow{transform:scale(1.3,.6);opacity:.24}
+/* Couche verticale : saut/chute portés ici, séparément du déplacement horizontal, pour dessiner
+   une vraie trajectoire (montée décélérée par la « gravité », chute accélérée). */
 .easterCat .catLift{display:block;width:100%;height:100%;transform:translateY(0);
   transition:transform .5s cubic-bezier(.4,0,.2,1);will-change:transform;
-  filter:drop-shadow(0 3px 4px rgba(0,0,0,.32))}
-/* Bond vers le haut : départ vif puis décélération (arrivée en douceur sur le perchoir). */
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.22))}
 .easterCat.leaping .catLift{transition:transform .52s cubic-bezier(.12,.62,.24,1)}
-/* Retombée : accélération façon gravité. */
 .easterCat.dropping .catLift{transition:transform .46s cubic-bezier(.5,.02,.86,.4)}
+.easterCat.falling .catLift{transition:transform .72s cubic-bezier(.55,.02,.9,.44)}
+.easterCat.rising .catLift{transition:transform .55s cubic-bezier(.2,.7,.3,1)}
 .easterCat svg{display:block;width:100%;height:100%;overflow:visible}
 .easterCat .catRig{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:50px 32px}
-.easterCat .cTail{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:19px 20px}
-.easterCat .cHead{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:52px 16px}
-.easterCat [class^="cLeg"] rect{transform-box:fill-box;transform-origin:50% 0%;transition:transform .35s ease}
-/* démarche : pattes diagonales en opposition de phase (avant-gauche+arrière-droite vs avant-droit+arrière-gauche) */
-.easterCat.walking .cLegFL rect,.easterCat.walking .cLegBR rect{animation:legSwingA .36s ease-in-out infinite}
-.easterCat.walking .cLegFR rect,.easterCat.walking .cLegBL rect{animation:legSwingB .36s ease-in-out infinite}
-.easterCat.walking .catRig{animation:bodyBob .36s ease-in-out infinite}
-.easterCat.walking .cTail{animation:tailSway .72s ease-in-out infinite}
-@keyframes legSwingA{0%,100%{transform:rotate(-24deg)}50%{transform:rotate(24deg)}}
-@keyframes legSwingB{0%,100%{transform:rotate(24deg)}50%{transform:rotate(-24deg)}}
-@keyframes bodyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.4px)}}
-@keyframes tailSway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
-/* Anticipation avant le bond : le chat se tasse sur ses pattes (squash), tête un peu baissée.
-   Uniquement des scale/rotate autour des ancrages existants — jamais de translate combiné. */
+.easterCat .cHead{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:52px 14px}
+/* Articulations : hanche (haut de la cuisse) et genou (haut du tibia). */
+.easterCat .cUp,.easterCat .cLo{transform-box:fill-box;transform-origin:50% 0%;
+  transition:transform .35s ease}
+/* Queue : 3 segments articulés, chacun pivotant sur son extrémité côté corps. */
+.easterCat .cT1,.easterCat .cT2,.easterCat .cT3{transform-box:fill-box;transform-origin:100% 50%;
+  transition:transform .5s cubic-bezier(.4,0,.2,1)}
+/* Clignement : les yeux se ferment une fraction de seconde, à intervalles irréguliers. */
+.easterCat .cEyes{transform-box:fill-box;transform-origin:50% 50%;animation:catBlink 5.4s ease-in-out infinite}
+@keyframes catBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}97.5%{transform:scaleY(1)}}
+/* Oreille qui tressaille : un chat n'est jamais complètement immobile. */
+.easterCat .cEarL{transform-box:fill-box;transform-origin:50% 100%;animation:earTwitch 6.2s ease-in-out infinite}
+.easterCat .cEarR{transform-box:fill-box;transform-origin:50% 100%;animation:earTwitch 8.6s ease-in-out infinite .9s}
+@keyframes earTwitch{0%,88%,100%{transform:rotate(0)}91%{transform:rotate(-13deg)}94%{transform:rotate(6deg)}}
+
+/* ---- Démarche : pattes diagonales en opposition de phase, genou en retard sur la hanche ---- */
+.easterCat.walking .cLegFL .cUp,.easterCat.walking .cLegBR .cUp{animation:hipA .42s ease-in-out infinite}
+.easterCat.walking .cLegFR .cUp,.easterCat.walking .cLegBL .cUp{animation:hipB .42s ease-in-out infinite}
+.easterCat.walking .cLegFL .cLo,.easterCat.walking .cLegBR .cLo{animation:kneeA .42s ease-in-out infinite}
+.easterCat.walking .cLegFR .cLo,.easterCat.walking .cLegBL .cLo{animation:kneeB .42s ease-in-out infinite}
+.easterCat.walking .catRig{animation:bodyBob .42s ease-in-out infinite}
+.easterCat.walking .cHead{animation:headBob .42s ease-in-out infinite}
+.easterCat.walking .cT1{animation:tailSway1 .96s ease-in-out infinite}
+.easterCat.walking .cT2{animation:tailSway2 .96s ease-in-out infinite .08s}
+.easterCat.walking .cT3{animation:tailSway3 .96s ease-in-out infinite .16s}
+@keyframes hipA{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(22deg)}}
+@keyframes hipB{0%,100%{transform:rotate(22deg)}50%{transform:rotate(-22deg)}}
+@keyframes kneeA{0%,100%{transform:rotate(26deg)}32%{transform:rotate(4deg)}62%{transform:rotate(-16deg)}}
+@keyframes kneeB{0%,100%{transform:rotate(-16deg)}32%{transform:rotate(26deg)}62%{transform:rotate(8deg)}}
+@keyframes bodyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2px)}}
+@keyframes headBob{0%,100%{transform:rotate(0) translateY(0)}50%{transform:rotate(-2deg)}}
+@keyframes tailSway1{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(6deg)}}
+@keyframes tailSway2{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(11deg)}}
+@keyframes tailSway3{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(17deg)}}
+
+/* ---- Course : foulée ample, corps allongé, oreilles en arrière, queue tendue ---- */
+.easterCat.dashing .cLegFL .cUp,.easterCat.dashing .cLegBR .cUp{animation:hipA .17s linear infinite}
+.easterCat.dashing .cLegFR .cUp,.easterCat.dashing .cLegBL .cUp{animation:hipB .17s linear infinite}
+.easterCat.dashing .cLegFL .cLo,.easterCat.dashing .cLegBR .cLo{animation:kneeA .17s linear infinite}
+.easterCat.dashing .cLegFR .cLo,.easterCat.dashing .cLegBL .cLo{animation:kneeB .17s linear infinite}
+.easterCat.dashing .catRig{transform:scaleX(1.07) scaleY(.94)}
+.easterCat.dashing .cHead{transform:rotate(-6deg)}
+.easterCat.dashing .cT1{transform:rotate(-16deg)}
+.easterCat.dashing .cT2{transform:rotate(-10deg)}
+.easterCat.dashing .cT3{transform:rotate(14deg);animation:tailSway3 .22s ease-in-out infinite}
+.easterCat.dashing .cEarL{transform:rotate(-26deg)}
+.easterCat.dashing .cEarR{transform:rotate(-20deg)}
+/* Freinage : il plante les pattes avant et glisse, arrière-train qui chasse. */
+.easterCat.brake .catRig{transition:transform .22s cubic-bezier(.2,.8,.3,1);transform:rotate(5deg) scaleX(1.04)}
+.easterCat.brake .cLegFL .cUp,.easterCat.brake .cLegFR .cUp{transform:rotate(-34deg)}
+.easterCat.brake .cLegFL .cLo,.easterCat.brake .cLegFR .cLo{transform:rotate(30deg)}
+.easterCat.brake .cLegBL .cUp,.easterCat.brake .cLegBR .cUp{transform:rotate(38deg)}
+.easterCat.brake .cLegBL .cLo,.easterCat.brake .cLegBR .cLo{transform:rotate(-42deg)}
+.easterCat.brake .cT1{transform:rotate(-38deg)}
+.easterCat.brake .cT2{transform:rotate(-22deg)}
+.easterCat.brake .cHead{transform:rotate(-12deg)}
+
+/* ---- Approche furtive : ventre au sol, pattes très fléchies, tête tendue en avant ---- */
+.easterCat.creep .catRig{transform:translateY(3px) scaleY(.78)}
+.easterCat.creep .cUp{transform:rotate(-12deg)}
+.easterCat.creep .cLo{transform:rotate(46deg)}
+.easterCat.creep .cHead{transform:rotate(4deg)}
+.easterCat.creep .cT1{transform:rotate(26deg)}
+.easterCat.creep .cT2{transform:rotate(18deg)}
+.easterCat.creep .cT3{animation:tailSway3 2.2s ease-in-out infinite}
+.easterCat.creep .cLegFL .cUp,.easterCat.creep .cLegBR .cUp{animation:hipCreepA 1.5s ease-in-out infinite}
+.easterCat.creep .cLegFR .cUp,.easterCat.creep .cLegBL .cUp{animation:hipCreepB 1.5s ease-in-out infinite}
+@keyframes hipCreepA{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(6deg)}}
+@keyframes hipCreepB{0%,100%{transform:rotate(6deg)}50%{transform:rotate(-16deg)}}
+
+/* ---- Anticipation / détente / réception ---- */
 .easterCat.crouch .catRig{transition:transform .18s ease-out;transform:translateY(2px) scaleY(.8) scaleX(1.07)}
-.easterCat.crouch [class^="cLeg"] rect{transition:transform .18s ease-out;transform:scaleY(.66)}
+.easterCat.crouch .cUp{transition:transform .18s ease-out;transform:rotate(-14deg)}
+.easterCat.crouch .cLo{transition:transform .18s ease-out;transform:rotate(52deg)}
 .easterCat.crouch .cHead{transform:rotate(8deg)}
-.easterCat.crouch .cTail{transform:rotate(-24deg)}
-/* Détente / vol : corps étiré vers l'avant (stretch), pattes tendues, queue qui file derrière. */
-.easterCat.leaping .catRig{transition:transform .22s cubic-bezier(.2,.7,.3,1);transform:scaleY(1.12) scaleX(.93) rotate(-9deg)}
-.easterCat.leaping .cLegFL rect,.easterCat.leaping .cLegFR rect{transform:rotate(26deg) scaleY(1.18)}
-.easterCat.leaping .cLegBL rect,.easterCat.leaping .cLegBR rect{transform:rotate(-20deg) scaleY(1.22)}
-.easterCat.leaping .cTail{transform:rotate(-52deg)}
-.easterCat.leaping .cHead{transform:rotate(-8deg)}
-/* Réception : léger écrasement à l'atterrissage (squash), puis retour au calme. */
-.easterCat.land .catRig{transition:transform .13s ease-out;transform:scaleY(.86) scaleX(1.08)}
-.easterCat.land [class^="cLeg"] rect{transition:transform .13s ease-out;transform:scaleY(.8)}
-/* étirement : dos arqué (bascule autour des pattes avant), pattes avant tendues, arrière-train relevé.
-   Important : chaque règle ne combine JAMAIS translate() avec rotate()/scale() sur un même élément
-   animé autour d'un transform-origin fixe — sinon la translation déplace la forme AVANT la rotation,
-   qui tourne alors autour d'un point où la forme n'est plus (effet "détaché du corps"). On ne fait
-   donc tourner/grossir qu'autour du point d'ancrage déjà défini par transform-origin. */
-.easterCat.stretch .catRig{transform:rotate(-15deg) scaleY(1.06)}
-.easterCat.stretch .cLegFL rect,.easterCat.stretch .cLegFR rect{transform:rotate(42deg) scaleY(1.2)}
-.easterCat.stretch .cLegBL rect,.easterCat.stretch .cLegBR rect{transform:rotate(-8deg) scaleY(1.28)}
-.easterCat.stretch .cTail{transform:rotate(-46deg)}
-.easterCat.stretch .cHead{transform:rotate(-10deg)}
-/* pelotonné : pattes repliées sous le corps, tête baissée, queue enroulée */
-.easterCat.curl .catRig{transform-origin:36px 22px;transform:scale(.68)}
-.easterCat.curl [class^="cLeg"] rect{transform:rotate(72deg) scaleY(.45);opacity:.9}
-.easterCat.curl .cTail{transform:rotate(96deg) scale(.72)}
-.easterCat.curl .cHead{transform:rotate(20deg)}
-/* respiration lente quand il est pelotonné (poitrine qui se soulève) */
-.easterCat.curl .catRig{animation:catBreathe 3.4s ease-in-out infinite}
+.easterCat.crouch .cT1{transform:rotate(-24deg)}
+.easterCat.crouch .cT2{transform:rotate(-16deg)}
+.easterCat.leaping .catRig{transition:transform .22s cubic-bezier(.2,.7,.3,1);transform:scaleY(1.1) scaleX(.94) rotate(-11deg)}
+.easterCat.leaping .cLegFL .cUp,.easterCat.leaping .cLegFR .cUp{transform:rotate(-36deg)}
+.easterCat.leaping .cLegFL .cLo,.easterCat.leaping .cLegFR .cLo{transform:rotate(-14deg)}
+.easterCat.leaping .cLegBL .cUp,.easterCat.leaping .cLegBR .cUp{transform:rotate(34deg)}
+.easterCat.leaping .cLegBL .cLo,.easterCat.leaping .cLegBR .cLo{transform:rotate(-28deg)}
+.easterCat.leaping .cT1{transform:rotate(-46deg)}
+.easterCat.leaping .cT2{transform:rotate(-26deg)}
+.easterCat.leaping .cT3{transform:rotate(-12deg)}
+.easterCat.leaping .cHead{transform:rotate(-10deg)}
+/* Chute libre : pattes en parachute, queue qui sert de balancier. */
+.easterCat.falling .catRig{transform:scaleY(1.04) rotate(6deg)}
+.easterCat.falling .cLegFL .cUp,.easterCat.falling .cLegFR .cUp{transform:rotate(-30deg)}
+.easterCat.falling .cLegBL .cUp,.easterCat.falling .cLegBR .cUp{transform:rotate(26deg)}
+.easterCat.falling .cLo{transform:rotate(34deg)}
+.easterCat.falling .cT1{transform:rotate(-30deg)}
+.easterCat.falling .cT2{transform:rotate(-34deg)}
+.easterCat.falling .cT3{transform:rotate(-26deg)}
+.easterCat.falling .cEyes{animation:none}
+.easterCat.land .catRig{transition:transform .13s ease-out;transform:scaleY(.84) scaleX(1.09)}
+.easterCat.land .cUp{transition:transform .13s ease-out;transform:rotate(-8deg)}
+.easterCat.land .cLo{transition:transform .13s ease-out;transform:rotate(40deg)}
+.easterCat.land .cT1{transform:rotate(-18deg)}
+
+/* ---- Poses de repos et petites activités ---- */
+/* Étirement : la « révérence » du chat — pattes avant tendues loin devant, poitrail et tête
+   au ras du sol, croupe haute, queue dressée. L'ancrage du corps étant aux pattes avant
+   (50,32), une rotation positive relève l'arrière-train. */
+.easterCat.stretch .catRig{transform:rotate(10deg) scaleY(1.04)}
+.easterCat.stretch .cLegFL .cUp,.easterCat.stretch .cLegFR .cUp{transform:rotate(-42deg)}
+.easterCat.stretch .cLegFL .cLo,.easterCat.stretch .cLegFR .cLo{transform:rotate(12deg)}
+.easterCat.stretch .cLegBL .cUp,.easterCat.stretch .cLegBR .cUp{transform:rotate(20deg)}
+.easterCat.stretch .cLegBL .cLo,.easterCat.stretch .cLegBR .cLo{transform:rotate(-12deg)}
+.easterCat.stretch .cT1{transform:rotate(-40deg)}
+.easterCat.stretch .cT2{transform:rotate(-24deg)}
+.easterCat.stretch .cT3{transform:rotate(-14deg)}
+.easterCat.stretch .cHead{transform:rotate(7deg)}
+.easterCat.curl .catRig{transform-origin:36px 22px;animation:catBreathe 3.4s ease-in-out infinite}
+.easterCat.curl .cUp{transform:rotate(82deg)}
+.easterCat.curl .cLo{transform:rotate(98deg)}
+.easterCat.curl .cT1{transform:rotate(148deg)}
+.easterCat.curl .cT2{transform:rotate(26deg)}
+.easterCat.curl .cT3{transform:rotate(26deg)}
+.easterCat.curl .cHead{transform:rotate(22deg)}
 @keyframes catBreathe{0%,100%{transform:scale(.68)}50%{transform:scale(.665) translateY(.5px)}}
-/* ---- Poses supplémentaires : variété aléatoire de comportement ---- */
-/* Debout, mais vivant : respiration lente + queue qui balance doucement. */
 .easterCat.idle .catRig{animation:idleBreathe 3.8s ease-in-out infinite}
-.easterCat.idle .cTail{animation:tailSway 2.6s ease-in-out infinite}
+.easterCat.idle .cT1{animation:tailSway1 2.8s ease-in-out infinite}
+.easterCat.idle .cT2{animation:tailSway2 2.8s ease-in-out infinite .1s}
+.easterCat.idle .cT3{animation:tailSway3 2.8s ease-in-out infinite .2s}
 @keyframes idleBreathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.03)}}
-/* "Pain de mie" : pattes repliées sous le corps, éveillé, queue ramenée le long du flanc. */
-.easterCat.loaf .catRig{transform:scaleY(.9)}
-.easterCat.loaf [class^="cLeg"] rect{transform:scaleY(.2);opacity:.85}
-.easterCat.loaf .cTail{transform:rotate(30deg) scale(.94)}
-/* Regarde autour de lui : la tête pivote d'un côté puis de l'autre. */
+/* « Pain de mie » : pattes repliées sous le corps, éveillé, queue ramenée le long du flanc. */
+.easterCat.loaf .catRig{transform:translateY(2px) scaleY(.88)}
+.easterCat.loaf .cUp{transform:rotate(70deg)}
+.easterCat.loaf .cLo{transform:rotate(92deg)}
+.easterCat.loaf .cT1{transform:rotate(30deg)}
+.easterCat.loaf .cT2{transform:rotate(26deg)}
+.easterCat.loaf .cT3{transform:rotate(34deg)}
+/* Assis : l'arrière-train descend au sol (rotation négative autour des pattes avant), les
+   postérieurs se replient, les antérieurs restent tendus et le dos se redresse. */
+.easterCat.sit .catRig{transform:rotate(-16deg)}
+.easterCat.sit .cLegBL .cUp,.easterCat.sit .cLegBR .cUp{transform:rotate(84deg)}
+.easterCat.sit .cLegBL .cLo,.easterCat.sit .cLegBR .cLo{transform:rotate(-92deg)}
+.easterCat.sit .cLegFL .cUp,.easterCat.sit .cLegFR .cUp{transform:rotate(10deg)}
+.easterCat.sit .cLegFL .cLo,.easterCat.sit .cLegFR .cLo{transform:rotate(-6deg)}
+.easterCat.sit .cHead{transform:rotate(-6deg)}
+.easterCat.sit .cT1{transform:rotate(34deg)}
+.easterCat.sit .cT2{transform:rotate(48deg)}
+.easterCat.sit .cT3{transform:rotate(40deg)}
 .easterCat.look .cHead{animation:headLook 2.4s ease-in-out}
 @keyframes headLook{0%{transform:rotate(0)}18%{transform:rotate(-20deg)}42%{transform:rotate(-20deg)}64%{transform:rotate(16deg)}86%{transform:rotate(16deg)}100%{transform:rotate(0)}}
-.easterCat.look .cTail{animation:tailSway 2.6s ease-in-out infinite}
-/* Toilette : la tête plonge vers le flanc par petits coups de langue répétés. */
+.easterCat.look .cT1{animation:tailSway1 2.6s ease-in-out infinite}
+.easterCat.look .cT3{animation:tailSway3 2.6s ease-in-out infinite .18s}
+/* Toilette : la tête plonge vers le flanc, la langue sort à chaque coup. */
 .easterCat.groom .cHead{animation:groomLick .52s ease-in-out infinite}
-@keyframes groomLick{0%,100%{transform:rotate(32deg)}50%{transform:rotate(50deg)}}
+@keyframes groomLick{0%,100%{transform:rotate(34deg)}50%{transform:rotate(52deg)}}
 .easterCat.groom .catRig{transform:scaleY(.97)}
-/* Frétillement d'avant-bond : l'arrière-train se dandine, queue dressée, tête basse (guette). */
+.easterCat.groom .cTongue{animation:tongueOut .52s ease-in-out infinite}
+@keyframes tongueOut{0%,100%{opacity:0;transform:scaleY(.2)}55%{opacity:1;transform:scaleY(1)}}
+.easterCat .cTongue{opacity:0;transform-box:fill-box;transform-origin:50% 0%}
+/* Frétillement d'avant-bond : l'arrière-train se dandine, queue dressée, tête basse (il guette). */
 .easterCat.wiggle .catRig{transform-origin:52px 24px;animation:wiggle .26s ease-in-out infinite}
-.easterCat.wiggle .cTail{transform:rotate(-56deg)}
+.easterCat.wiggle .cT1{transform:rotate(-50deg)}
+.easterCat.wiggle .cT2{transform:rotate(-30deg)}
+.easterCat.wiggle .cT3{animation:tailSway3 .3s ease-in-out infinite}
 .easterCat.wiggle .cHead{transform:rotate(6deg)}
 @keyframes wiggle{0%,100%{transform:rotate(-2.6deg)}50%{transform:rotate(2.6deg)}}
 /* Coup de queue vif de contentement. */
-.easterCat.flick .cTail{animation:tailFlick .62s ease-in-out infinite}
-@keyframes tailFlick{0%,100%{transform:rotate(8deg)}30%{transform:rotate(-30deg)}62%{transform:rotate(2deg)}}
+.easterCat.flick .cT1{animation:tailFlick .62s ease-in-out infinite}
+.easterCat.flick .cT2{animation:tailFlick .62s ease-in-out infinite .06s}
+.easterCat.flick .cT3{animation:tailFlick .62s ease-in-out infinite .12s}
+@keyframes tailFlick{0%,100%{transform:rotate(8deg)}30%{transform:rotate(-28deg)}62%{transform:rotate(2deg)}}
 /* Orientation : chat tourné vers la gauche (entrée par la droite). */
 .easterCat.faceLeft svg{transform:scaleX(-1);transform-origin:center}
-/* Zone tactile du chat : le chat lui-même reste pointer-events:none (il ne doit jamais bloquer
-   un bouton de l'appli en passant devant), seul ce calque invisible capte le tap. Il déborde de
-   12/16px autour du chat pour rester attrapable au doigt malgré ses 58×28px. */
+/* Zone tactile : le chat lui-même reste pointer-events:none (il ne doit jamais bloquer un bouton
+   de l'appli en passant devant), seul ce calque invisible capte le tap. Il déborde de 12/16px
+   autour du chat pour rester attrapable au doigt malgré ses 58×28px. */
 .easterCat .catHit{position:absolute;inset:-16px -12px;pointer-events:auto;cursor:pointer;
   background:none;border:none;padding:0;-webkit-tap-highlight-color:transparent;z-index:2}
 /* Petit cœur/patte qui s'envole quand on touche Zéphyr. */
@@ -1509,6 +1626,17 @@ html{scroll-behavior:smooth}
 @keyframes catPurrUp{0%{opacity:0;transform:translate(-50%,0) scale(.5)}
   25%{opacity:1;transform:translate(-50%,-14px) scale(1.15)}
   100%{opacity:0;transform:translate(-50%,-54px) scale(1)}}
+/* Souffle de poussière : à l'appui d'un départ en courant et à chaque réception de saut. */
+.catDust{position:fixed;z-index:299;pointer-events:none;width:16px;height:16px;border-radius:50%;
+  background:radial-gradient(circle at 50% 60%,rgba(255,255,255,.5),rgba(150,150,150,.16) 60%,transparent 72%);
+  animation:catDustOut .62s ease-out both}
+@keyframes catDustOut{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+  25%{opacity:.85}
+  100%{opacity:0;transform:translate(-50%,-140%) scale(1.9)}}
+@media (prefers-reduced-motion:reduce){
+  .catDust{display:none}
+  .easterCat .cEyes,.easterCat .cEarL,.easterCat .cEarR{animation:none}
+}
 
 /* ---------- Section repliable (« Liste des budgets » dans Comparer) ----------
    L'en-tête doit se lire comme un bouton, pas comme un titre : fond, bordure, chevron qui pivote
@@ -1821,6 +1949,153 @@ html{scroll-behavior:smooth}
 .szSeg button{flex:1;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:10px;
   padding:9px 0;font-size:12.5px;font-weight:700;cursor:pointer}
 .szSeg button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ---------- THÈME PERSO : pastille + éditeur flottant ----------
+   L'éditeur n'est pas une modale bloquante : le calque est en pointer-events:none et seule
+   la carte capte les clics, ce qui laisse l'app entièrement utilisable derrière (fermer les
+   Réglages, changer d'onglet, de mois...) pendant qu'on règle les couleurs en direct. */
+.sw .dot.dotPerso{background:conic-gradient(from 210deg,#E9573F,#F0B23D,#5FAE6E,#3D9EC6,#8E5CE0,#E9573F);position:relative}
+.sw .dot.dotPerso::after{content:"🎨";position:absolute;inset:0;display:grid;place-items:center;font-size:14px;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.themeEditRow{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 2px 0}
+.themeEditRow .ssTxt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.themeEditRow .ssTitle{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.themeEditRow .ssSub{display:block;font-size:11.5px;color:var(--faint);line-height:1.35}
+.themeEditBtn{flex:0 0 auto;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:11px;
+  padding:10px 13px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit}
+.themeEditBtn:active{filter:brightness(.94);transform:scale(.98)}
+
+.teWrap{position:fixed;inset:0;z-index:310;pointer-events:none;display:flex;align-items:flex-end;justify-content:center}
+.teWrap.hidden{display:none}
+.teWrap.alt{align-items:flex-start}
+.teCard{pointer-events:auto;width:100%;max-width:540px;display:flex;flex-direction:column;min-height:0;
+  max-height:min(58vh,560px);background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-bottom:none;border-radius:20px 20px 0 0;
+  box-shadow:0 -14px 40px -14px rgba(0,0,0,.45);
+  animation:modalCardIn .3s cubic-bezier(.16,1,.3,1) both;
+  transition:background .2s ease,box-shadow .2s ease,border-color .2s ease}
+/* Léger verre dépoli : on devine l'app derrière le panneau, ce qui rappelle en permanence
+   que l'aperçu est réel. Le fond opaque au-dessus reste le repli si color-mix manque. */
+@supports (backdrop-filter:blur(1px)) and (background:color-mix(in srgb,red 50%,transparent)){
+  .teCard{background:color-mix(in srgb,var(--card) 90%,transparent);
+    backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%)}
+}
+.teWrap.alt .teCard{border-radius:0 0 20px 20px;border-bottom:1px solid var(--line);border-top:none;
+  box-shadow:0 14px 40px -14px rgba(0,0,0,.45)}
+.teHead{position:relative;flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:14px 11px 10px;
+  border-bottom:1px solid var(--line);transition:opacity .2s ease;touch-action:none}
+/* Filet dégradé sous l'en-tête : marque la couleur d'accent en cours, sans bloc de couleur. */
+.teHead::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-2),transparent);opacity:.55}
+/* Poignée : l'en-tête se tire vers le bas pour réduire le panneau, vers le haut pour le rouvrir. */
+.teGrip{position:absolute;top:5px;left:50%;transform:translateX(-50%);width:38px;height:4px;
+  border-radius:99px;background:var(--line);opacity:.55}
+/* Vignette vivante du thème : fond, accent, bandeau, texte. */
+.tePrev{flex:0 0 auto;width:26px;height:26px;border-radius:9px;overflow:hidden;display:grid;
+  grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.tePrev i{display:block}
+.teWrap.alt .teHead{padding-top:calc(10px + env(safe-area-inset-top))}
+.teTitle{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.teTitle b{font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teTitle span{font-size:10.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teIco{flex:0 0 auto;width:34px;height:34px;border-radius:11px;border:1px solid var(--line);background:var(--soft);
+  color:var(--ink);font-size:14px;line-height:1;display:grid;place-items:center;cursor:pointer;font-family:inherit}
+.teIco:active{transform:scale(.94)}
+.teIco.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.teIco:disabled{opacity:.38;cursor:default}
+.teIco:disabled:active{transform:none}
+.teBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:11px}
+.teFoot{flex:0 0 auto;display:flex;gap:9px;padding:10px 11px calc(10px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);transition:opacity .2s ease}
+.teWrap.alt .teFoot{padding-bottom:10px}
+.teFoot .cfBtn{flex:1;padding:12px 8px}
+/* Réduit : ne reste que l'en-tête et les deux boutons — l'IHM est visible presque en entier. */
+.teCard.mini .teBody{display:none}
+/* Transparent : la carte s'effface ET laisse passer les clics ; seul l'en-tête reste actif
+   pour pouvoir revenir. */
+.teCard.ghost{background:transparent;border-color:transparent;box-shadow:none;pointer-events:none}
+.teCard.ghost .teBody,.teCard.ghost .teFoot{opacity:.13;pointer-events:none}
+.teCard.ghost .teHead{opacity:.58;pointer-events:auto;border-bottom-color:transparent}
+.teCard.ghost .teIco{background:var(--card)}
+
+.teTools{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:9px}
+.teBase{flex:1 1 148px;min-width:0;display:flex;align-items:center;gap:8px;border:1px solid var(--line);
+  background:var(--soft);border-radius:12px;padding:6px 9px 6px 7px}
+.teBase .teName{font-size:11.5px}
+.teSeg{display:flex;gap:3px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:3px}
+.teSeg button{border:none;background:none;color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:700;
+  padding:7px 9px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.teSeg button.on{background:var(--accent);color:#fff}
+.teSel{flex:1 1 130px;min-width:0;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:12px;
+  padding:9px;font-size:11.5px;font-weight:700;font-family:inherit;cursor:pointer}
+.teChecks{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 9px}
+.teChk{font-size:10.5px;font-weight:700;border-radius:99px;padding:5px 9px;background:var(--soft);
+  border:1px solid var(--line);color:var(--muted);font-family:inherit}
+.teChk.ok{color:var(--green)}
+.teChk.mid{color:var(--money-out);border-color:var(--money-out);cursor:pointer}
+.teChk.warn{color:var(--red);border-color:var(--red);background:var(--red-soft);cursor:pointer}
+.teChk.mid:active,.teChk.warn:active{transform:scale(.96)}
+/* Palettes proposées : bandes de couleur réelles, on choisit à l'œil. */
+.teSugs{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin:0 -11px 10px;padding:2px 11px}
+.teSugs::-webkit-scrollbar{display:none}
+.teSug{flex:0 0 auto;width:66px;border:1px solid var(--line);background:var(--soft);border-radius:13px;
+  padding:5px;cursor:pointer;font-family:inherit;transition:transform .12s,border-color .15s}
+.teSug:active{transform:scale(.95)}
+.teSug.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.teSug .teBands{display:flex;height:26px;border-radius:8px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.16)}
+.teSug .teBands i{flex:1;display:block}
+.teSug b{display:block;font-size:9.5px;font-weight:700;color:var(--muted);margin-top:4px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teSug.on b{color:var(--ink)}
+/* Code du thème : à copier / coller pour partager la palette entre deux appareils. */
+.teCode{display:flex;gap:7px;align-items:center;margin-top:11px}
+.teCode input{flex:1;min-width:0;border:1px solid var(--line);background:var(--soft);color:var(--muted);
+  border-radius:11px;padding:9px;font-family:var(--mono);font-size:10.5px;font-weight:700}
+.teCode input.inv{border-color:var(--red);color:var(--red)}
+.teCodeBtn{flex:0 0 auto;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:11px;
+  padding:9px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.teCodeBtn:active{transform:scale(.96)}
+.teGroups{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -11px 9px;padding:0 11px}
+.teGroups::-webkit-scrollbar{display:none}
+.teGrp{flex:0 0 auto;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:99px;
+  padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.teGrp.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.teGrid{display:grid;grid-template-columns:1fr;gap:7px}
+.teRow{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--soft);
+  border-radius:13px;padding:7px 9px;min-width:0}
+.teSw{position:relative;flex:0 0 auto;width:36px;height:36px;border-radius:11px;overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.22)}
+.teSw input{position:absolute;top:-25%;left:-25%;width:150%;height:150%;border:none;padding:0;margin:0;
+  background:none;opacity:0;cursor:pointer}
+.teTxt{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:1px}
+.teName{display:block;font-size:11.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teHex{display:block;width:100%;max-width:86px;border:none;background:none;color:var(--muted);padding:0;
+  font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase}
+.teHex:focus{outline:none;color:var(--ink)}
+.teHint{margin:10px 2px 2px;font-size:10.5px;color:var(--faint);line-height:1.45}
+/* Petit téléphone : on gagne de la place partout plutôt que de tronquer les libellés. */
+@media (max-width:359px){
+  .teCard{max-height:min(62vh,520px)}
+  .teBody{padding:9px}
+  .teSw{width:32px;height:32px}
+  .teIco{width:31px;height:31px;border-radius:10px}
+}
+/* Téléphone large / tablette : deux colonnes de couleurs. */
+@media (min-width:412px){.teGrid{grid-template-columns:1fr 1fr}}
+@media (min-width:700px){.teCard{max-height:min(52vh,600px)}.teGrid{grid-template-columns:1fr 1fr 1fr}}
+/* PC : colonne flottante sur le côté, l'app reste entièrement visible à côté. */
+@media (min-width:1000px){
+  .teGrip{display:none}
+  .teHead{padding-top:10px}
+  .teWrap{align-items:center;justify-content:flex-end;padding:16px}
+  .teWrap.alt{justify-content:flex-start}
+  .teCard,.teWrap.alt .teCard{width:380px;max-width:380px;max-height:min(88vh,760px);
+    border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 60px -22px rgba(0,0,0,.5)}
+  .teWrap.alt .teHead{padding-top:10px}
+  .teFoot{padding-bottom:10px}
+  .teGrid{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){.teCard{animation:none}}
 </style>
 </head>
 <body>
@@ -1853,6 +2128,11 @@ html{scroll-behavior:smooth}
     <div class="settingsBody">
     <div class="slabel">Thème</div>
     <div class="themebar" id="themebar"></div>
+    <div class="themeEditRow">
+      <span class="ssTxt"><span class="ssTitle">Thème perso</span>
+        <span class="ssSub" id="themeEditSub">Choisis la couleur de chaque partie de l'app. L'aperçu est en direct : le panneau se réduit, se rend transparent ou passe en haut pour voir tout l'écran.</span></span>
+      <button type="button" class="themeEditBtn" id="themeEditBtn">🎨 Personnaliser</button>
+    </div>
     <div class="hr"></div>
     <div class="slabel">Affichage des budgets</div>
     <div class="seg" id="viewSeg" role="tablist" aria-label="Affichage des budgets">
@@ -1877,6 +2157,20 @@ html{scroll-behavior:smooth}
       <span class="ssTxt"><span class="ssTitle">% par dépense</span><span class="ssSub">Affiche le pourcentage cumulé du budget à côté de chaque dépense enregistrée.</span></span>
       <button type="button" class="switch" id="showEntryPctSwitch" role="switch" aria-checked="false" aria-label="Afficher le pourcentage par dépense"></button>
     </label>
+    <div class="hr"></div>
+    <div class="slabel">Zéphyr, le chat</div>
+    <div class="settingSelRow">
+      <span class="ssTxt"><span class="ssTitle">Fréquence de passage</span>
+        <span class="ssSub" id="catFreqSub">Zéphyr traverse l'écran de temps en temps. Touche-le pour voir une de ses photos.</span></span>
+      <select class="setSel" id="catFreqSel" aria-label="Fréquence de passage de Zéphyr">
+        <option value="off">Jamais</option>
+        <option value="rare">Rare</option>
+        <option value="normal">Normale</option>
+        <option value="often">Souvent</option>
+        <option value="max">Très souvent</option>
+      </select>
+    </div>
+    <button type="button" class="bkbtn" id="catCallBtn" style="width:100%;margin-top:4px">🐾 Le faire venir maintenant</button>
     <div class="hr"></div>
     <div class="slabel">Tri</div>
     <div class="settingSelRow">
@@ -2281,11 +2575,177 @@ html{scroll-behavior:smooth}
   </div>
 </div>
 
+<!-- Éditeur de thème perso : calque non bloquant (voir .teWrap), utilisable en même temps que l'app. -->
+<div class="teWrap hidden" id="teWrap" role="dialog" aria-modal="false" aria-label="Thème personnalisé">
+  <div class="teCard" id="teCard">
+    <div class="teHead" id="teHead">
+      <span class="teGrip" aria-hidden="true"></span>
+      <span class="tePrev" id="tePrev" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <div class="teTitle"><b>Thème perso</b><span id="teState">Aperçu en direct</span></div>
+      <button type="button" class="teIco" id="teMove" aria-label="Déplacer le panneau">⇅</button>
+      <button type="button" class="teIco" id="teGhost" aria-label="Rendre le panneau transparent" aria-pressed="false">👁</button>
+      <button type="button" class="teIco" id="teMini" aria-label="Réduire le panneau" aria-pressed="false">▾</button>
+    </div>
+    <div class="teBody" id="teBody">
+      <div class="teTools">
+        <label class="teBase">
+          <span class="teSw" id="teBaseSw"><input type="color" id="teBaseIn" aria-label="Couleur de base" /></span>
+          <span class="teName">Couleur de base</span>
+        </label>
+        <div class="teSeg" id="teModeSeg" role="group" aria-label="Ambiance">
+          <button type="button" data-mode="light">☀️ Clair</button>
+          <button type="button" data-mode="dark">🌙 Sombre</button>
+        </div>
+        <button type="button" class="teIco" id="teDice" aria-label="Couleur de base au hasard" title="Au hasard">🎲</button>
+        <button type="button" class="teIco" id="teUndo" aria-label="Annuler la dernière modification de couleur" title="Annuler" disabled>↶</button>
+        <select class="teSel" id="teFrom" aria-label="Partir d'un thème existant"></select>
+      </div>
+      <div class="teSugs" id="teSugs" role="group" aria-label="Palettes proposées"></div>
+      <div class="teChecks" id="teChecks"></div>
+      <div class="teGroups" id="teGroups"></div>
+      <div class="teGrid" id="teGrid"></div>
+      <div class="teCode">
+        <input id="teCodeIn" type="text" spellcheck="false" autocomplete="off" aria-label="Code du thème — copier ou coller" placeholder="CB1:…" />
+        <button type="button" class="teCodeBtn" id="teCodeCopy">⧉ Copier</button>
+      </div>
+      <p class="teHint">Les palettes proposées et « Partir de » remplacent toute la palette d'un coup — ↶ revient en arrière. Un badge de contraste en rouge se corrige en le touchant. Le code se copie et se colle pour partager le thème. Rien n'est enregistré avant « Appliquer ».</p>
+    </div>
+    <div class="teFoot">
+      <button type="button" class="cfBtn secondary" id="teCancel">Annuler</button>
+      <button type="button" class="cfBtn primary" id="teApply">Appliquer</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const KEY="carnet-budget-v1";
 const uid=()=>Math.random().toString(36).slice(2,10);
 const SUGG=["Loyer","Internet","Assurance","Électricité","Téléphone","Abonnements","Transport","Crédit"];
 const THEMES=[["forest","Forêt","#1E4D3B"],["ocean","Océan","#0E4C6B"],["plum","Prune","#5B2A6B"],["sand","Sable","#9A5B33"],["plage","Plage","#0B6E77"],["midnight","Nuit","#3DD6A0"],["carbon","Carbone","#5AA9FF"],["nocturne","Nocturne","#B98BFF"],["ember","Braise","#F5A65B"],["slate","Ardoise","#4FD1C5"]];
+/* ---------- THÈME PERSO ----------
+   Le thème "custom" n'est pas déclaré en CSS : ses couleurs vivent dans state.customTheme
+   ({"--paper":"#...",...}) et sont posées en variables inline sur <html> par applyTheme().
+   Toute variable absente retombe sur la valeur de :root, donc un thème partiel reste lisible. */
+const CUSTOM_THEME="custom";
+/* Fréquence de passage de Zéphyr (easter egg) : intervalle mini/maxi entre deux passages, et
+   délai du tout premier passage après ouverture de l'app. "off" = il ne vient pas du tout. */
+const CAT_FREQ_DEF={
+  off:   {min:0,        max:0,        first:0,     label:"Jamais"},
+  rare:  {min:150000,   max:320000,   first:60000, label:"Rare"},
+  normal:{min:25000,    max:55000,    first:9000,  label:"Normale"},
+  often: {min:11000,    max:24000,    first:5000,  label:"Souvent"},
+  max:   {min:4500,     max:11000,    first:2500,  label:"Très souvent"}
+};
+const CAT_FREQS=Object.keys(CAT_FREQ_DEF);
+const TE_GROUPS=[
+  {id:"fond",name:"Fonds",vars:[["--paper","Fond de l'app"],["--card","Cartes"],["--soft","Fonds discrets"],["--line","Bordures"]]},
+  {id:"texte",name:"Textes",vars:[["--ink","Texte principal"],["--muted","Texte secondaire"],["--faint","Texte discret"]]},
+  {id:"accent",name:"Accents",vars:[["--accent","Accent"],["--accent-2","Accent clair"]]},
+  {id:"hero",name:"Bandeau",vars:[["--hero-a","Dégradé début"],["--hero-b","Dégradé fin"],["--hero-ink","Texte du bandeau"]]},
+  {id:"montants",name:"Montants",vars:[["--green","Positif"],["--red","Alerte"],["--red-soft","Fond d'alerte"],["--money-in","Revenus"],["--money-out","Dépenses"]]},
+  {id:"graph",name:"Graphiques",vars:[["--c1","Série 1"],["--c2","Série 2"],["--c3","Série 3"],["--c4","Série 4"],["--c5","Série 5"],["--c6","Série 6"]]}
+];
+const THEME_VARS=TE_GROUPS.reduce((a,g)=>a.concat(g.vars.map(v=>v[0])),[]);
+const THEME_VAR_SET=new Set(THEME_VARS);
+const isThemeId=id=>typeof id==="string"&&(id===CUSTOM_THEME||THEMES.some(t=>t[0]===id));
+const themeLabel=id=>id===CUSTOM_THEME?"Perso":((THEMES.find(t=>t[0]===id)||[])[1]||id);
+
+/* Couleurs : on accepte du #abc, #aabbcc ou du rgb()/rgba() (getComputedStyle renvoie l'un ou
+   l'autre selon que la variable est enregistrée via @property ou non) et on normalise en #RRGGBB,
+   seule forme acceptée par <input type="color"> et donc stockée. */
+function normHex(v){
+  if(typeof v!=="string")return null;
+  const s=v.trim();
+  let m=/^#([0-9a-f]{3})$/i.exec(s);
+  if(m)return("#"+m[1][0]+m[1][0]+m[1][1]+m[1][1]+m[1][2]+m[1][2]).toUpperCase();
+  m=/^#([0-9a-f]{6})$/i.exec(s);
+  if(m)return("#"+m[1]).toUpperCase();
+  m=/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i.exec(s);
+  if(m)return rgbToHex(+m[1],+m[2],+m[3]);
+  return null;
+}
+const clamp255=n=>Math.max(0,Math.min(255,Math.round(n)));
+const hx2=n=>clamp255(n).toString(16).padStart(2,"0").toUpperCase();
+const rgbToHex=(r,g,b)=>"#"+hx2(r)+hx2(g)+hx2(b);
+function hexToRgb(hex){const h=normHex(hex)||"#000000";
+  return{r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)};}
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
+  let h=0;const l=(mx+mn)/2,s=d===0?0:d/(1-Math.abs(2*l-1));
+  if(d!==0){
+    if(mx===r)h=((g-b)/d)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;
+    h*=60;if(h<0)h+=360;
+  }
+  return{h,s:s*100,l:l*100};
+}
+function hslToHex(h,s,l){
+  h=((h%360)+360)%360;s=Math.max(0,Math.min(100,s))/100;l=Math.max(0,Math.min(100,l))/100;
+  const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;
+  let r=0,g=0,b=0;
+  if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}
+  else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}
+  return rgbToHex((r+m)*255,(g+m)*255,(b+m)*255);
+}
+const hexToHsl=hex=>{const{r,g,b}=hexToRgb(hex);return rgbToHsl(r,g,b);};
+function relLum(hex){const{r,g,b}=hexToRgb(hex);
+  const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);};
+  return .2126*f(r)+.7152*f(g)+.0722*f(b);}
+function contrastRatio(a,b){const la=relLum(a),lb=relLum(b);
+  return(Math.max(la,lb)+.05)/(Math.min(la,lb)+.05);}
+const isDarkHex=hex=>relLum(hex)<.34;
+
+/* Palette complète dérivée d'une seule couleur : un tap et le thème est cohérent, on affine
+   ensuite couleur par couleur. Les teintes sémantiques (rouge d'alerte, vert, revenus/dépenses)
+   gardent leur famille de teinte — un rouge d'alerte vert ne veut rien dire — mais suivent
+   l'ambiance claire ou sombre. */
+function derivePalette(baseHex,dark){
+  const b=hexToHsl(normHex(baseHex)||"#1E4D3B");
+  const h=b.h,s=Math.max(18,Math.min(92,b.s||45));
+  const hue=(d,ss,ll)=>hslToHex(h+d,ss,ll);
+  if(dark)return{
+    "--paper":hslToHex(h,Math.min(16,s*.3),8),
+    "--card":hslToHex(h,Math.min(15,s*.28),12.5),
+    "--soft":hslToHex(h,Math.min(16,s*.3),20),
+    "--line":hslToHex(h,Math.min(22,s*.34),42),
+    "--ink":hslToHex(h,Math.min(14,s*.2),92),
+    "--muted":hslToHex(h,Math.min(12,s*.2),66),
+    "--faint":hslToHex(h,Math.min(11,s*.18),61),
+    "--accent":hslToHex(h,Math.max(45,Math.min(88,s)),66),
+    "--accent-2":hslToHex(h,Math.max(42,Math.min(80,s*.92)),54),
+    "--hero-a":hslToHex(h,Math.min(24,s*.4),11),
+    "--hero-b":hslToHex(h+10,Math.min(34,s*.5),18),
+    "--hero-ink":hslToHex(h,Math.min(14,s*.2),93),
+    "--red":"#FF6B5E","--red-soft":hslToHex(6,28,14),"--green":hslToHex(152,52,60),
+    "--money-in":hslToHex(208,88,66),"--money-out":hslToHex(40,88,66),
+    "--c1":hue(0,Math.max(48,Math.min(85,s)),66),"--c2":hue(38,62,64),"--c3":hue(168,58,62),
+    "--c4":hue(90,72,66),"--c5":hue(-52,66,66),"--c6":hue(210,58,66)
+  };
+  return{
+    "--paper":hslToHex(h,Math.min(17,s*.3),95),
+    "--card":hslToHex(h,Math.min(30,s*.5),99.4),
+    "--soft":hslToHex(h,Math.min(20,s*.34),94),
+    "--line":hslToHex(h,Math.min(28,s*.42),56),
+    "--ink":hslToHex(h,Math.min(22,s*.34),13),
+    "--muted":hslToHex(h,Math.min(14,s*.26),37),
+    "--faint":hslToHex(h,Math.min(13,s*.24),43),
+    "--accent":hslToHex(h,Math.max(34,Math.min(78,s)),27),
+    "--accent-2":hslToHex(h,Math.max(32,Math.min(66,s*.9)),40),
+    "--hero-a":hslToHex(h,Math.max(34,Math.min(78,s)),25),
+    "--hero-b":hslToHex(h+12,Math.max(30,Math.min(70,s*.9)),34),
+    "--hero-ink":hslToHex(h,Math.min(26,s*.4),95),
+    "--red":"#B23A2E","--red-soft":hslToHex(8,62,95),"--green":hslToHex(152,46,34),
+    "--money-in":hslToHex(206,71,41),"--money-out":hslToHex(36,67,35),
+    "--c1":hue(0,Math.max(34,Math.min(78,s)),29),"--c2":hue(36,52,40),"--c3":hue(168,46,42),
+    "--c4":hue(90,58,44),"--c5":hue(-52,54,45),"--c6":hue(210,44,46)
+  };
+}
+function sanitizeCustomTheme(o){
+  if(!o||typeof o!=="object")return null;
+  const out={};let n=0;
+  for(const k in o){if(!THEME_VAR_SET.has(k))continue;const v=normHex(o[k]);if(v){out[k]=v;n++;}}
+  return n?out:null;
+}
 const NOCAT={id:"",name:"Sans catégorie",icon:"🏷️"};
 const DEFAULT_CATEGORIES=[
   {id:"logement",name:"Logement",icon:"🏠"},{id:"courses",name:"Courses",icon:"🛒"},
@@ -2425,7 +2885,7 @@ function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id o
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,savingsPerMonth:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpCat:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2,cmpListOpen:false};
+let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",customTheme:null,catFreq:"normal",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,savingsPerMonth:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpCat:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2,cmpListOpen:false};
 // Tris (configurables dans les Réglages). Deux tris indépendants : les budgets (postes) et les
 // dépenses. Par défaut « plus récent d'abord » (ordre décroissant d'ajout). « Manuel » = ordre
 // choisi au glisser-déposer (postes uniquement). Un « seq » d'ordre d'ajout est attribué à chaque
@@ -2449,7 +2909,7 @@ const expanded=new Set();
 let detailLineId=null,detailEntrySearch="";
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpCat==="string")state.cmpCat=d.cmpCat;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med");if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;state.customTheme=sanitizeCustomTheme(d.customTheme);if(isThemeId(d.theme))state.theme=d.theme;if(CAT_FREQS.includes(d.catFreq))state.catFreq=d.catFreq;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpCat==="string")state.cmpCat=d.cmpCat;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med");if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -2492,6 +2952,27 @@ function applyShowEntryPct(){
   const btn=document.getElementById("showEntryPctSwitch");
   if(btn){btn.classList.toggle("on",!!state.showEntryPct);btn.setAttribute("aria-checked",state.showEntryPct?"true":"false");}
 }
+/* Points d'entrée de l'easter egg utilisés par les réglages. Déclarés ici (donc avant le premier
+   applyCatFreq() de l'initialisation) et remplacés plus bas par le bloc de Zéphyr. */
+let catSpawnNow=()=>false, catRescheduleCat=()=>{};
+/* Réglage de la fréquence : le sélecteur reflète l'état, et la minuterie de Zéphyr est
+   reprogrammée aussitôt (pas besoin d'attendre le passage suivant ni de recharger). */
+function applyCatFreq(){
+  const sel=document.getElementById("catFreqSel");
+  if(sel)sel.value=CAT_FREQS.includes(state.catFreq)?state.catFreq:"normal";
+  const btn=document.getElementById("catCallBtn");
+  if(btn)btn.disabled=state.catFreq==="off";
+  catRescheduleCat();
+}
+document.getElementById("catFreqSel").onchange=e=>{
+  state.catFreq=CAT_FREQS.includes(e.target.value)?e.target.value:"normal";
+  applyCatFreq();commit();
+  toast(state.catFreq==="off"?"Zéphyr ne passera plus":"Zéphyr : passage "+CAT_FREQ_DEF[state.catFreq].label.toLowerCase());
+};
+document.getElementById("catCallBtn").onclick=()=>{
+  if(state.catFreq==="off"){toast("Choisis d'abord une fréquence");return;}
+  if(!catSpawnNow())toast("Zéphyr est déjà là");
+};
 document.getElementById("showEntryPctSwitch").onclick=()=>{
   state.showEntryPct=!state.showEntryPct;
   applyShowEntryPct();commit();
@@ -2699,7 +3180,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,deduct:true,lines:[]};}
@@ -2907,18 +3388,298 @@ function totals(m,cust){let planned=0,sp=0,over=0,pFixed=0,pVar=0;
     savings:svTot};}
 
 /* ---------- THEME ---------- */
-function applyTheme(){document.documentElement.setAttribute("data-theme",state.theme);
-  const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute("content",gv("--hero-a"));}
-function renderThemebar(){const bar=document.getElementById("themebar");bar.innerHTML="";
+const hasCustomTheme=()=>!!(state.customTheme&&Object.keys(state.customTheme).length);
+/* Pose (ou retire) les variables du thème perso en inline sur <html>. L'inline gagne sur
+   toutes les règles [data-theme=...], donc c'est aussi ce qui permet l'aperçu en direct. */
+function applyCustomVars(map){
+  const root=document.documentElement;
+  THEME_VARS.forEach(v=>{const c=map&&map[v];if(c)root.style.setProperty(v,c);else root.style.removeProperty(v);});
+  if(map&&isDarkHex(map["--paper"]||"#EEF0EA"))root.setAttribute("data-dark","1");
+  else root.removeAttribute("data-dark");
+}
+function applyTheme(){
+  // Thème perso sélectionné mais aucune couleur enregistrée (import ancien, données partielles) :
+  // on retombe sur Forêt plutôt que d'afficher un thème vide.
+  if(state.theme===CUSTOM_THEME&&!hasCustomTheme())state.theme="forest";
+  document.documentElement.setAttribute("data-theme",state.theme);
+  applyCustomVars(state.theme===CUSTOM_THEME?state.customTheme:null);
+  const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute("content",gv("--hero-a"));
+}
+function switchTheme(id){
+  // Éditeur ouvert : cliquer une pastille de thème livré ne change pas de thème, il recopie
+  // ses couleurs dans le thème perso en cours d'édition (sinon les deux se contrediraient).
+  if(TE.open){if(id!==CUSTOM_THEME){teSeed(readThemeVars(id));toast("Couleurs de « "+themeLabel(id)+" » reprises");}return;}
+  const go=()=>{state.theme=id;applyTheme();commit();renderThemebar();render();};
+  if(document.startViewTransition){document.startViewTransition(go);}
+  else{document.documentElement.classList.add("theme-transition");go();setTimeout(()=>document.documentElement.classList.remove("theme-transition"),520);}
+}
+function renderThemebar(){const bar=document.getElementById("themebar");if(!bar)return;bar.innerHTML="";
   THEMES.forEach(([id,name,color])=>{const b=document.createElement("button");b.className="sw"+(state.theme===id?" on":"");
+    b.type="button";
     b.innerHTML='<span class="dot" style="background:'+color+'"></span>'+name;
-    b.onclick=()=>{
-      const go=()=>{state.theme=id;applyTheme();commit();renderThemebar();render();};
-      if(document.startViewTransition){document.startViewTransition(go);}
-      else{document.documentElement.classList.add("theme-transition");go();setTimeout(()=>document.documentElement.classList.remove("theme-transition"),520);}
-    };bar.append(b);});
+    b.onclick=()=>switchTheme(id);bar.append(b);});
+  // Pastille « Perso » : présente en dernier, elle applique le thème perso enregistré, ou ouvre
+  // directement l'éditeur s'il n'y en a pas encore (un clic, pas de cul-de-sac).
+  const p=document.createElement("button");p.type="button";
+  p.className="sw"+(state.theme===CUSTOM_THEME?" on":"");
+  p.innerHTML='<span class="dot dotPerso"></span>Perso';
+  p.setAttribute("aria-label",hasCustomTheme()?"Appliquer le thème perso":"Créer un thème perso");
+  p.onclick=()=>{if(hasCustomTheme())switchTheme(CUSTOM_THEME);else openThemeEditor();};
+  bar.append(p);
+  const sub=document.getElementById("themeEditSub");
+  if(sub&&hasCustomTheme())sub.textContent="Couleurs enregistrées. L'aperçu est en direct : le panneau se réduit, se rend transparent ou passe en haut pour voir tout l'écran.";
+  const btn=document.getElementById("themeEditBtn");
+  if(btn)btn.textContent=hasCustomTheme()?"🎨 Modifier":"🎨 Personnaliser";
   const cur=bar.querySelector(".sw.on");
   if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});}
+
+/* ---------- ÉDITEUR DE THÈME PERSO ----------
+   Le panneau est volontairement non bloquant : on peut fermer les Réglages, changer d'onglet
+   ou de mois pendant l'édition et voir l'effet réel des couleurs. « Annuler » restaure très
+   exactement l'état d'avant ouverture (thème sélectionné + couleurs), « Appliquer » enregistre. */
+const TE={open:false,group:"fond",base:"#1E4D3B",mode:"light",snapTheme:null,snapCustom:null,liveT:null,
+  undo:[],lastPush:0};
+/* Palettes proposées : la même génération que « Couleur de base », mais autour de la teinte
+   choisie (voisine, opposée, triade). On les montre en bandes de couleur réelles : on choisit
+   à l'œil au lieu de deviner. */
+const TE_HARMONIES=[[0,"Base"],[32,"Voisine"],[-32,"Voisine 2"],[180,"Opposée"],[120,"Triade"],[-120,"Triade 2"]];
+// Lit les couleurs effectives d'un thème livré sans y basculer : les règles [data-theme="x"]
+// s'appliquent à n'importe quel élément, il suffit donc d'un élément porteur hors écran.
+// Repli = valeurs de :root (thème Forêt). Un thème livré ne redéfinit pas forcément toutes les
+// variables : celles qu'il omet retombent de toute façon sur :root, donc partir de ce repli et
+// écraser avec ce qui est réellement calculé donne toujours une palette complète et exacte.
+const TE_FALLBACK={
+  "--paper":"#EEF0EA","--card":"#FFFFFF","--soft":"#EEF0E8","--line":"#828D6B",
+  "--ink":"#20261E","--muted":"#5C6355","--faint":"#696F5F",
+  "--accent":"#1E4D3B","--accent-2":"#2E7D5B",
+  "--hero-a":"#1E4D3B","--hero-b":"#296E50","--hero-ink":"#EDF3EA",
+  "--green":"#2E7D5B","--red":"#B23A2E","--red-soft":"#FBEDEB","--money-in":"#1F6FB2","--money-out":"#95671D",
+  "--c1":"#1E4D3B","--c2":"#2E7D5B","--c3":"#8FB05B","--c4":"#C9A227","--c5":"#B2673A","--c6":"#4F7C82"
+};
+function readVarsFrom(el){
+  const cs=getComputedStyle(el),out=Object.assign({},TE_FALLBACK);
+  THEME_VARS.forEach(v=>{const c=normHex(cs.getPropertyValue(v));if(c)out[v]=c;});
+  return out;
+}
+function readThemeVars(id){
+  if(id===CUSTOM_THEME)return Object.assign({},TE_FALLBACK,state.customTheme||{});
+  const probe=document.createElement("div");
+  probe.setAttribute("data-theme",id);
+  probe.style.cssText="position:absolute;left:-9999px;top:0;width:0;height:0;pointer-events:none";
+  document.body.appendChild(probe);
+  const out=readVarsFrom(probe);
+  probe.remove();
+  return out;
+}
+const teCurrentVars=()=>readVarsFrom(document.documentElement);
+function teLivePreview(){
+  applyCustomVars(state.customTheme);
+  const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute("content",gv("--hero-a"));
+  teRenderChecks();teRenderPrev();teRenderCode();teMarkSugs();
+  // Les graphiques sont dessinés en JS avec les couleurs résolues (gv) : on les redessine,
+  // mais en différé pour ne pas relancer un render() complet à chaque pixel du sélecteur.
+  clearTimeout(TE.liveT);TE.liveT=setTimeout(()=>{try{render();}catch(e){}},140);
+}
+function teSeed(map,keepBase){
+  state.customTheme=Object.assign({},map);
+  if(!keepBase){const acc=state.customTheme["--accent"];if(acc)TE.base=acc;}
+  TE.mode=isDarkHex(state.customTheme["--paper"]||"#EEF0EA")?"dark":"light";
+  teRenderTools();teRenderSugs();teRenderGrid();teLivePreview();
+}
+/* Historique interne à l'éditeur : une palette entière par entrée. Les remplacements en bloc
+   (palette proposée, thème de départ, dé, code collé) empilent toujours ; les retouches à la
+   main sont regroupées par salve de 700 ms pour ne pas faire 40 pas d'annulation par couleur. */
+function tePush(force){
+  const now=Date.now();
+  if(!force&&now-TE.lastPush<700)return;
+  TE.lastPush=now;
+  TE.undo.push(JSON.stringify(state.customTheme||{}));
+  if(TE.undo.length>40)TE.undo.shift();
+  teSyncUndo();
+}
+function teSyncUndo(){const b=document.getElementById("teUndo");if(b)b.disabled=!TE.undo.length;}
+function teUndoStep(){
+  if(!TE.undo.length){toast("Rien à annuler ici");return;}
+  const prev=JSON.parse(TE.undo.pop());TE.lastPush=0;
+  teSeed(prev);teSyncUndo();
+}
+function openThemeEditor(){
+  const w=document.getElementById("teWrap");if(!w)return;
+  TE.snapTheme=state.theme;
+  TE.snapCustom=state.customTheme?JSON.parse(JSON.stringify(state.customTheme)):null;
+  // Point de départ : les couleurs perso déjà enregistrées, sinon celles du thème affiché —
+  // on part donc toujours de quelque chose de cohérent, jamais d'une palette vide.
+  const start=hasCustomTheme()?Object.assign({},state.customTheme):teCurrentVars();
+  state.theme=CUSTOM_THEME;state.customTheme=start;
+  TE.base=start["--accent"]||"#1E4D3B";
+  TE.mode=isDarkHex(start["--paper"]||"#EEF0EA")?"dark":"light";
+  TE.open=true;
+  document.documentElement.classList.add("theme-live");
+  document.documentElement.setAttribute("data-theme",CUSTOM_THEME);
+  teSetMini(false);teSetGhost(false);teSyncMoveIcon();
+  w.classList.remove("hidden");
+  TE.undo=[];TE.lastPush=0;teSyncUndo();
+  teRenderTools();teRenderGroups();teRenderSugs();teRenderGrid();teLivePreview();renderThemebar();
+}
+function closeThemeEditor(){
+  const w=document.getElementById("teWrap");if(w)w.classList.add("hidden");
+  TE.open=false;clearTimeout(TE.liveT);
+  document.documentElement.classList.remove("theme-live");
+}
+function teCancel(){
+  state.theme=TE.snapTheme;state.customTheme=TE.snapCustom;
+  closeThemeEditor();applyTheme();renderThemebar();render();
+  toast("Thème perso annulé");
+}
+function teApply(){
+  state.customTheme=sanitizeCustomTheme(state.customTheme);
+  if(!state.customTheme){state.theme=TE.snapTheme;closeThemeEditor();applyTheme();renderThemebar();render();toast("Aucune couleur valide — thème inchangé");return;}
+  state.theme=CUSTOM_THEME;
+  closeThemeEditor();applyTheme();commit();renderThemebar();render();
+  toast("Thème perso enregistré");
+}
+function teSyncMoveIcon(){
+  const b=document.getElementById("teMove");if(!b)return;
+  const side=window.matchMedia&&window.matchMedia("(min-width:1000px)").matches;
+  b.textContent=side?"⇄":"⇅";
+  b.setAttribute("aria-label",side?"Basculer le panneau à gauche / à droite":"Basculer le panneau en haut / en bas");
+}
+function teRenderTools(){
+  const sw=document.getElementById("teBaseSw"),inp=document.getElementById("teBaseIn");
+  if(sw)sw.style.background=TE.base;
+  if(inp)inp.value=TE.base;
+  document.querySelectorAll("#teModeSeg button").forEach(b=>b.classList.toggle("on",b.dataset.mode===TE.mode));
+  const sel=document.getElementById("teFrom");
+  if(sel&&!sel.dataset.filled){
+    sel.innerHTML='<option value="">Partir d\'un thème…</option>'+THEMES.map(t=>'<option value="'+t[0]+'">'+esc(t[1])+'</option>').join("");
+    sel.dataset.filled="1";
+  }
+  if(sel)sel.value="";
+}
+function teRenderGroups(){
+  const box=document.getElementById("teGroups");if(!box)return;box.innerHTML="";
+  TE_GROUPS.forEach(g=>{const b=document.createElement("button");b.type="button";
+    b.className="teGrp"+(TE.group===g.id?" on":"");b.textContent=g.name;
+    b.onclick=()=>{TE.group=g.id;teRenderGroups();teRenderGrid();};box.append(b);});
+}
+function teRenderGrid(){
+  const box=document.getElementById("teGrid");if(!box)return;box.innerHTML="";
+  const grp=TE_GROUPS.find(g=>g.id===TE.group)||TE_GROUPS[0];
+  grp.vars.forEach(([v,label])=>{
+    const cur=(state.customTheme&&state.customTheme[v])||normHex(gv(v))||"#888888";
+    const row=document.createElement("label");row.className="teRow";
+    row.innerHTML='<span class="teSw" style="background:'+cur+'"><input type="color" value="'+cur+'" aria-label="'+esc(label)+'" /></span>'
+      +'<span class="teTxt"><span class="teName">'+esc(label)+'</span>'
+      +'<input class="teHex" type="text" spellcheck="false" maxlength="7" value="'+cur+'" aria-label="Code hexadécimal — '+esc(label)+'" /></span>';
+    const pick=row.querySelector('input[type=color]'),hex=row.querySelector(".teHex"),chip=row.querySelector(".teSw");
+    const set=(val,fromHexField)=>{
+      const c=normHex(val);if(!c)return;
+      if(state.customTheme&&state.customTheme[v]===c)return;
+      tePush(false);
+      state.customTheme=state.customTheme||{};state.customTheme[v]=c;
+      // On garde les commandes du haut cohérentes avec ce qui est réellement réglé à la main :
+      // l'accent redevient la couleur de base, et le fond décide de l'ambiance claire/sombre.
+      if(v==="--accent"){TE.base=c;teRenderTools();teRenderSugs();}
+      if(v==="--paper"){const md=isDarkHex(c)?"dark":"light";if(md!==TE.mode){TE.mode=md;teRenderTools();teRenderSugs();}}
+      chip.style.background=c;pick.value=c;
+      if(!fromHexField)hex.value=c;
+      teLivePreview();
+    };
+    pick.oninput=()=>set(pick.value,false);
+    hex.oninput=()=>{if(/^#?[0-9a-fA-F]{6}$/.test(hex.value.trim())||/^#?[0-9a-fA-F]{3}$/.test(hex.value.trim()))set(hex.value.trim().startsWith("#")?hex.value.trim():"#"+hex.value.trim(),true);};
+    hex.onblur=()=>{hex.value=(state.customTheme&&state.customTheme[v])||cur;};
+    box.append(row);
+  });
+}
+function teRenderChecks(){
+  const box=document.getElementById("teChecks");if(!box)return;
+  const m=state.customTheme||{};
+  const pairs=[
+    ["Texte / fond","--ink","--paper"],
+    ["Texte / carte","--ink","--card"],
+    ["Bandeau","--hero-ink","--hero-a"]
+  ];
+  box.innerHTML=pairs.map(([label,fgVar,bgVar])=>{
+    const fg=m[fgVar],bg=m[bgVar];
+    if(!fg||!bg)return"";
+    const r=contrastRatio(fg,bg);
+    const cls=r>=4.5?"ok":(r>=3?"":"warn");
+    const act=r<4.5;
+    return'<'+(act?'button type="button" ':'span ')+'class="teChk '+cls+'"'
+      +(act?' data-fg="'+fgVar+'" data-bg="'+bgVar+'" data-label="'+esc(label)+'"':'')+'>'
+      +esc(label)+' '+r.toFixed(1)+':1'+(r>=4.5?" ✓":" · corriger")
+      +'</'+(act?"button":"span")+'>';
+  }).join("");
+  box.querySelectorAll("button.teChk").forEach(b=>b.onclick=()=>teFixContrast(b.dataset.fg,b.dataset.bg,b.dataset.label));
+}
+/* Un badge rouge ou orange se corrige en le touchant : on n'éclaircit/assombrit que le texte,
+   par pas de 2 % de luminosité, jusqu'à repasser au-dessus du seuil WCAG de 4,5:1. La teinte
+   et la saturation choisies sont conservées — le thème garde son caractère. */
+function teFixContrast(fgVar,bgVar,label){
+  const m=state.customTheme;if(!m||!m[fgVar]||!m[bgVar])return;
+  const bg=m[bgVar],up=relLum(bg)<.5,c=hexToHsl(m[fgVar]);
+  let best=m[fgVar],bestR=contrastRatio(best,bg);
+  if(bestR>=4.5)return; // déjà conforme : rien à faire
+  for(let i=1;i<=50&&bestR<4.6;i++){
+    const l=Math.max(0,Math.min(100,c.l+(up?i*2:-i*2)));
+    const cand=hslToHex(c.h,c.s,l),r=contrastRatio(cand,bg);
+    if(r>bestR){best=cand;bestR=r;}
+  }
+  if(bestR<=contrastRatio(m[fgVar],bg)+.01){toast("Contraste déjà au maximum pour cette couleur");return;}
+  tePush(true);
+  m[fgVar]=best;
+  teRenderGrid();teLivePreview();
+  toast((label||"Contraste")+" corrigé — "+bestR.toFixed(1)+":1");
+}
+// Vignette de l'en-tête : fond, accent, bandeau, texte — elle suit chaque réglage.
+function teRenderPrev(){
+  const box=document.getElementById("tePrev");if(!box)return;
+  const m=state.customTheme||{},cells=[m["--paper"],m["--accent"],m["--hero-a"],m["--ink"]];
+  [...box.children].forEach((el,i)=>{el.style.background=cells[i]||"transparent";});
+}
+function tePalettesFor(){
+  const b=hexToHsl(TE.base),dark=TE.mode==="dark";
+  return TE_HARMONIES.map(([off,name])=>({name,off,
+    palette:derivePalette(hslToHex(b.h+off,b.s,b.l),dark)}));
+}
+function teRenderSugs(){
+  const box=document.getElementById("teSugs");if(!box)return;box.innerHTML="";
+  tePalettesFor().forEach(sug=>{
+    const b=document.createElement("button");b.type="button";b.className="teSug";
+    b.dataset.sig=JSON.stringify(sug.palette);
+    b.setAttribute("aria-label","Palette "+sug.name);
+    b.innerHTML='<span class="teBands">'
+      +["--hero-a","--accent","--accent-2","--c3","--paper"].map(v=>'<i style="background:'+sug.palette[v]+'"></i>').join("")
+      +'</span><b>'+esc(sug.name)+'</b>';
+    b.onclick=()=>{tePush(true);
+      if(sug.off)TE.base=hslToHex(hexToHsl(TE.base).h+sug.off,hexToHsl(TE.base).s,hexToHsl(TE.base).l);
+      teSeed(sug.palette,true);};
+    box.append(b);
+  });
+  teMarkSugs();
+}
+// Signale la palette proposée qui correspond exactement à l'état courant (repère utile après
+// une retouche à la main : le repère disparaît dès que la palette n'est plus « pure »).
+function teMarkSugs(){
+  const box=document.getElementById("teSugs");if(!box)return;
+  const cur=teEncode(state.customTheme);
+  box.querySelectorAll(".teSug").forEach(b=>{
+    b.classList.toggle("on",teEncode(JSON.parse(b.dataset.sig))===cur);
+  });
+}
+/* Code du thème : les 23 couleurs à la suite, préfixées CB1. Une chaîne suffit donc à recopier
+   un thème d'un téléphone à l'autre (copier ici, coller là-bas) sans passer par une sauvegarde. */
+function teEncode(m){return"CB1:"+THEME_VARS.map(v=>((m&&m[v])||"#000000").slice(1)).join("");}
+function teDecode(str){
+  const t=String(str||"").trim().replace(/\s+/g,"").toUpperCase();
+  const m=/^(?:CB1:)?([0-9A-F]{138})$/.exec(t);if(!m)return null;
+  const out={};THEME_VARS.forEach((v,i)=>{out[v]="#"+m[1].slice(i*6,i*6+6);});return out;
+}
+function teRenderCode(){
+  const inp=document.getElementById("teCodeIn");if(!inp)return;
+  if(inp===document.activeElement)return; // ne pas écraser une saisie en cours
+  inp.value=teEncode(state.customTheme);inp.classList.remove("inv");
+}
 
 /* ---------- CATÉGORIES (réglages) ---------- */
 let openIconPickerId=null;
@@ -4257,7 +5018,10 @@ document.getElementById("heroSpark").addEventListener("keydown",e=>{
 });
 document.getElementById("sbClose").addEventListener("click",closeSparkBurst);
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"&&!document.getElementById("sparkBurst").classList.contains("hidden"))closeSparkBurst();
+  if(e.key!=="Escape")return;
+  // L'éditeur de thème est le calque le plus haut : Échap y équivaut à « Annuler ».
+  if(TE.open){teCancel();return;}
+  if(!document.getElementById("sparkBurst").classList.contains("hidden"))closeSparkBurst();
 });
 let heroCurrentValue=null,heroRAF=null,heroSparkDrawnFor=null;
 let prefersReducedMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -5733,11 +6497,91 @@ document.getElementById("paletteBtn").onclick=()=>{document.getElementById("sett
   renderResetSection();renderSortSettings();
   const cur=document.querySelector("#themebar .sw.on");if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});};
 document.getElementById("settingsCloseBtn").onclick=()=>document.getElementById("settings").classList.add("hidden");
+
+/* --- Éditeur de thème perso : commandes --- */
+document.getElementById("themeEditBtn").onclick=()=>openThemeEditor();
+document.getElementById("teCancel").onclick=()=>teCancel();
+document.getElementById("teApply").onclick=()=>teApply();
+document.getElementById("teMove").onclick=()=>{
+  const w=document.getElementById("teWrap");w.classList.toggle("alt");
+  document.getElementById("teMove").classList.toggle("on",w.classList.contains("alt"));
+};
+function teSetGhost(on){
+  const c=document.getElementById("teCard"),b=document.getElementById("teGhost");
+  c.classList.toggle("ghost",on);b.classList.toggle("on",on);b.setAttribute("aria-pressed",on?"true":"false");
+  b.setAttribute("aria-label",on?"Rendre le panneau opaque":"Rendre le panneau transparent");
+  document.getElementById("teState").textContent=on?"Transparent — touche 👁 pour revenir":"Aperçu en direct";
+}
+function teSetMini(on){
+  const c=document.getElementById("teCard"),b=document.getElementById("teMini");
+  c.classList.toggle("mini",on);b.classList.toggle("on",on);b.setAttribute("aria-pressed",on?"true":"false");
+  b.textContent=on?"▴":"▾";
+  b.setAttribute("aria-label",on?"Agrandir le panneau":"Réduire le panneau");
+}
+document.getElementById("teGhost").onclick=()=>teSetGhost(!document.getElementById("teCard").classList.contains("ghost"));
+document.getElementById("teMini").onclick=()=>teSetMini(!document.getElementById("teCard").classList.contains("mini"));
+document.getElementById("teBaseIn").oninput=e=>{
+  const c=normHex(e.target.value);if(!c)return;
+  tePush(false);TE.base=c;teSeed(derivePalette(c,TE.mode==="dark"),true);
+};
+document.querySelectorAll("#teModeSeg button").forEach(b=>b.onclick=()=>{
+  if(TE.mode===b.dataset.mode)return;
+  tePush(true);TE.mode=b.dataset.mode;teSeed(derivePalette(TE.base,TE.mode==="dark"),true);
+});
+document.getElementById("teDice").onclick=()=>{
+  tePush(true);
+  const h=Math.floor(Math.random()*360),s=42+Math.floor(Math.random()*40),l=TE.mode==="dark"?60:30;
+  TE.base=hslToHex(h,s,l);teSeed(derivePalette(TE.base,TE.mode==="dark"),true);
+};
+document.getElementById("teUndo").onclick=()=>teUndoStep();
+document.getElementById("teFrom").onchange=e=>{
+  const id=e.target.value;if(!id)return;
+  tePush(true);teSeed(readThemeVars(id));
+};
+document.getElementById("teCodeIn").oninput=e=>{
+  const inp=e.target,raw=inp.value.trim();
+  if(!raw){inp.classList.remove("inv");return;}
+  const p=teDecode(raw);
+  inp.classList.toggle("inv",!p);
+  if(!p)return;
+  if(teEncode(p)===teEncode(state.customTheme))return;
+  tePush(true);teSeed(p);toast("Thème repris depuis le code ✓");
+};
+document.getElementById("teCodeIn").onblur=()=>teRenderCode();
+document.getElementById("teCodeCopy").onclick=()=>{
+  const inp=document.getElementById("teCodeIn");
+  inp.value=teEncode(state.customTheme);inp.classList.remove("inv");
+  const done=()=>toast("Code du thème copié — colle-le sur l'autre appareil");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(inp.value).then(done).catch(()=>{inp.select();toast("Copie refusée — le code est sélectionné");});
+  }else{inp.select();
+    let ok=false;try{ok=document.execCommand("copy");}catch(e){}
+    if(ok)done();else toast("Copie impossible — le code est sélectionné");}
+};
+/* Geste : on tire l'en-tête vers le bas pour réduire le panneau, vers le haut pour le rouvrir
+   (inversé quand le panneau est en haut de l'écran). Les boutons de l'en-tête gardent la main. */
+(()=>{
+  const head=document.getElementById("teHead");if(!head)return;
+  let y0=null;
+  head.addEventListener("pointerdown",e=>{
+    if(e.target.closest("button,input,select"))return;
+    y0=e.clientY;
+  });
+  head.addEventListener("pointerup",e=>{
+    if(y0===null)return;
+    const dy=e.clientY-y0;y0=null;
+    if(Math.abs(dy)<26)return;
+    const up=document.getElementById("teWrap").classList.contains("alt")?-1:1;
+    teSetMini(dy*up>0);
+  });
+  head.addEventListener("pointercancel",()=>{y0=null;});
+})();
+window.addEventListener("resize",teSyncMoveIcon);
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
+const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -5760,7 +6604,7 @@ function gdMarkDataChanged(){
 }
 function updateUndoUI(){document.getElementById("undoBtn").disabled=hIndex<=0;
   document.getElementById("redoBtn").disabled=hIndex>=history.length-1;}
-function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.customBudgets=(d.customBudgets&&typeof d.customBudgets==="object")?d.customBudgets:{};state.current=d.current;state.theme=d.theme;
+function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.customBudgets=(d.customBudgets&&typeof d.customBudgets==="object")?d.customBudgets:{};state.current=d.current;state.customTheme=sanitizeCustomTheme(d.customTheme);state.theme=isThemeId(d.theme)?d.theme:state.theme;state.catFreq=CAT_FREQS.includes(d.catFreq)?d.catFreq:state.catFreq;
   state.categories=Array.isArray(d.categories)&&d.categories.length?d.categories:DEFAULT_CATEGORIES.map(c=>({...c}));
   state.budgetView=(d.budgetView==="cards"||d.budgetView==="flow")?d.budgetView:state.budgetView;
   if(d.savings&&typeof d.savings==="object")state.savings=sanitizeGlobalSavings(d.savings);
@@ -5776,7 +6620,7 @@ function undo(){
   clearTimeout(recTimer);
   const before=history[hIndex];hIndex--;const after=history[hIndex];
   restoreSnap(after);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
   queueHistoryChange("undo",diffSnapshots(before,after));
 }
 function redo(){
@@ -5784,7 +6628,7 @@ function redo(){
   clearTimeout(recTimer);
   const before=history[hIndex];hIndex++;const after=history[hIndex];
   restoreSnap(after);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
   queueHistoryChange("redo",diffSnapshots(before,after));
 }
 
@@ -5863,7 +6707,7 @@ function diffSnapshots(oldStr,newStr){
   try{
     const a=JSON.parse(oldStr),b=JSON.parse(newStr);
     const msgs=[];
-    if(a.theme!==b.theme){const t=THEMES.find(t=>t[0]===b.theme);msgs.push({type:"theme",text:"Thème changé pour « "+(t?t[1]:b.theme)+" »"});}
+    if(a.theme!==b.theme||JSON.stringify(a.customTheme||null)!==JSON.stringify(b.customTheme||null)){msgs.push({type:"theme",text:"Thème changé pour « "+themeLabel(b.theme)+" »"});}
     diffCategories(a.categories,b.categories,msgs);
     diffBudgetsMap(a.months,b.months,msgs);
     diffBudgetsMap(a.customBudgets,b.customBudgets,msgs);
@@ -5961,7 +6805,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -6054,7 +6898,9 @@ function importData(file){
     state.customBudgets=cleanCustom;
     state.categories=sanitizeCategories(d.categories)||DEFAULT_CATEGORIES.map(c=>({...c}));
     if(typeof d.current==="string"&&(/^\d{4}-\d{2}$/.test(d.current)||(isCustom(d.current)&&state.customBudgets[d.current])))state.current=d.current;
-    if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;
+    state.customTheme=sanitizeCustomTheme(d.customTheme);
+    if(isThemeId(d.theme))state.theme=d.theme;
+    state.catFreq=CAT_FREQS.includes(d.catFreq)?d.catFreq:"normal";
     if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
     if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
@@ -6066,7 +6912,7 @@ function importData(file){
     if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths);if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -6249,7 +7095,7 @@ window.addEventListener("pagehide",flushAll);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushAll();});
 window.addEventListener("blur",flushAll);
 
-applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ---------- Photos de Zéphyr (easter egg) ----------
@@ -6573,6 +7419,20 @@ function closePhotoModal(){
 (function(){
   // Boutons "grimpables" de la barre du haut : sticky en haut, donc toujours visibles.
   const CLIMB_SELECTORS=["#paletteBtn","#calcFabTop","#undoBtn","#redoBtn","#monthLabel"];
+  let catSvgSeq=0;
+  // Souffle de poussière au sol (appui d'un départ en courant, réception d'un saut).
+  function catDust(x,y,n){
+    if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+    for(let i=0;i<(n||1);i++){
+      const d=document.createElement("div");
+      d.className="catDust";
+      d.style.left=(x+(Math.random()*14-7))+"px";
+      d.style.top=(y+(Math.random()*4-2))+"px";
+      d.style.animationDelay=(i*70)+"ms";
+      document.body.appendChild(d);
+      setTimeout(()=>d.remove(),900+i*70);
+    }
+  }
   function pickClimbTarget(vw,vh){
     const cands=CLIMB_SELECTORS.map(s=>document.querySelector(s)).filter(elm=>{
       if(!elm||elm.offsetParent===null)return false;
@@ -6585,36 +7445,95 @@ function closePhotoModal(){
     return {x:r.left+r.width/2, top:r.top, h:r.height};
   }
   function spawnEasterCat(){
-    if(document.querySelector(".easterCat"))return;
-    if(document.hidden)return;
+    if(document.querySelector(".easterCat"))return false;
+    if(document.hidden)return false;
     const pm=document.getElementById("photoModal");
-    if(pm&&!pm.classList.contains("hidden"))return;  // pas de chat pendant qu'on regarde ses photos
+    if(pm&&!pm.classList.contains("hidden"))return false;  // pas de chat pendant qu'on regarde ses photos
     const CAT_W=58,CAT_H=28;
     const vw=Math.max(200,window.innerWidth||360);
     const vh=Math.max(300,window.innerHeight||640);
     const el=document.createElement("div");
     el.className="easterCat";
-    el.innerHTML='<div class="catLift"><svg viewBox="0 0 70 34" aria-hidden="true" focusable="false">'
-      +'<defs><radialGradient id="catSheen" cx="50%" cy="42%" r="55%">'
-      +'<stop offset="0%" stop-color="#d3d9e6" stop-opacity=".2"/>'
-      +'<stop offset="100%" stop-color="#d3d9e6" stop-opacity="0"/></radialGradient></defs>'
-      +'<g class="cTail"><path d="M19.37 17.37 L17.94 17.81 L16.72 18.06 L15.61 18.19 L14.58 18.20 L13.64 18.10 L12.78 17.91 L11.99 17.62 L11.27 17.25 L10.61 16.80 L10.01 16.26 L9.48 15.63 L9.01 14.93 L8.63 14.15 L8.32 13.31 L8.11 12.40 L8.00 11.45 L7.98 10.45 L8.07 9.43 L8.28 8.38 L8.60 7.33 L9.05 6.27 L9.62 5.23 L10.32 4.21 L11.15 3.22 L12.13 2.27 L13.26 1.37 L12.74 0.63 L11.47 1.42 L10.30 2.31 L9.25 3.27 L8.32 4.30 L7.52 5.39 L6.84 6.53 L6.28 7.71 L5.85 8.92 L5.54 10.15 L5.36 11.39 L5.32 12.64 L5.40 13.88 L5.62 15.10 L5.98 16.29 L6.48 17.43 L7.13 18.52 L7.92 19.54 L8.86 20.46 L9.94 21.27 L11.15 21.95 L12.49 22.49 L13.95 22.86 L15.52 23.07 L17.17 23.10 L18.92 22.94 L20.63 22.63 Z" fill="#111"/></g>'
+    // Rig SVG : deux masses (arrière-train + poitrail) reliées par un tronc légèrement creusé au
+    // ventre, pattes en deux segments avec coussinet, queue en trois segments, tête avec museau,
+    // oreilles doublées, yeux en amande et moustaches. Les segments se chevauchent de quelques
+    // dixièmes aux articulations pour qu'aucune couture n'apparaisse quand ils pivotent.
+    const gid="catSheen"+(catSvgSeq++);
+    /* Une patte = hanche + jarret + coussinet. Les angles de repos (cuisse inclinée, jarret
+       coudé vers l'arrière sur les pattes arrière, antérieurs presque droits) sont portés par
+       les groupes STATIQUES : les groupes animés .cUp/.cLo n'ont jamais d'attribut transform. */
+    const leg=(cls,x,y,shade,paw,hip,knee)=>'<g class="cLeg '+cls+'" transform="translate('+x+','+y+') rotate('+hip+')">'
+      +'<g class="cUp"><rect x="-1.95" y="-1" width="3.9" height="7.6" rx="1.95" fill="'+shade+'"/>'
+      +'<g transform="translate(0,6.2) rotate('+knee+')"><g class="cLo">'
+      +'<rect x="-1.55" y="-.8" width="3.1" height="6.2" rx="1.55" fill="'+shade+'"/>'
+      +'<ellipse cx=".5" cy="5.3" rx="2.05" ry="1.2" fill="'+paw+'"/>'
+      +'</g></g></g></g>';
+    el.innerHTML='<div class="catShadow"></div><div class="catLift">'
+      +'<svg viewBox="0 0 70 34" aria-hidden="true" focusable="false">'
+      +'<defs>'
+      +'<radialGradient id="'+gid+'" cx="42%" cy="26%" r="62%">'
+      +'<stop offset="0%" stop-color="#e2e8f4" stop-opacity=".2"/>'
+      +'<stop offset="100%" stop-color="#e2e8f4" stop-opacity="0"/></radialGradient>'
+      +'</defs>'
       +'<g class="catRig">'
-      +'<g class="cLegBR" transform="translate(22,23)"><rect x="-2.6" y="0" width="5.2" height="11" rx="2.6" fill="#0a0a0a"/></g>'
-      +'<g class="cLegFR" transform="translate(48,23)"><rect x="-2.6" y="0" width="5.2" height="11" rx="2.6" fill="#0a0a0a"/></g>'
-      +'<ellipse cx="36" cy="17" rx="20" ry="9.5" fill="#111"/>'
-      +'<ellipse cx="31" cy="11.5" rx="14" ry="4.5" fill="url(#catSheen)"/>'
-      +'<g class="cLegBL" transform="translate(26,24)"><rect x="-2.6" y="0" width="5.2" height="11" rx="2.6" fill="#0a0a0a"/></g>'
-      +'<g class="cLegFL" transform="translate(52,24)"><rect x="-2.6" y="0" width="5.2" height="11" rx="2.6" fill="#0a0a0a"/></g>'
+      /* Queue : 3 segments emboîtés. Les groupes intermédiaires portent l'angle de repos (une
+         courbe en S, comme une queue portée haute) ; les groupes animés, eux, ne portent aucun
+         attribut transform et se contentent d'ajouter leur rotation par-dessus. */
+      +'<g class="cTail" transform="translate(19.5,13.2) rotate(16)"><g class="cT1">'
+      +'<rect x="-7.5" y="-1.3" width="8.4" height="2.6" rx="1.3" fill="#0e0e0e"/>'
+      +'<g transform="translate(-7.5,0) rotate(-11)"><g class="cT2">'
+      +'<rect x="-6.2" y="-1.15" width="7" height="2.3" rx="1.15" fill="#0e0e0e"/>'
+      +'<g transform="translate(-6.2,0) rotate(-15)"><g class="cT3">'
+      +'<rect x="-5.4" y="-.95" width="6.2" height="1.9" rx=".95" fill="#0e0e0e"/>'
+      +'</g></g></g></g></g></g>'
+
+      // pattes du côté opposé : plus sombres et un peu plus hautes (perspective), derrière le corps
+      +leg("cLegBR",26.5,17.2,"#070707","#0b0b0b",-13,20)
+      +leg("cLegFR",45.5,17.2,"#070707","#0b0b0b",4,-4)
+      // tronc : bande dorsale creusée au ventre, puis les deux masses qui donnent la silhouette
+      +'<path d="M23.5,11.4 C31,9.4 41,9.2 48.5,11 C49.2,14.4 49.2,17.4 48.6,20.4'
+      +' C41,22.3 31,22.3 23.5,20.6 C22.9,17.4 22.9,14.6 23.5,11.4 Z" fill="#111"/>'
+      // arrière-train (masse haute et ronde) et cage thoracique (plus basse, plus étroite)
+      +'<ellipse cx="25.6" cy="16" rx="7.4" ry="6.4" fill="#111"/>'
+      +'<ellipse cx="45.6" cy="16.2" rx="7.6" ry="6.2" fill="#111"/>'
+      // encolure : le cou s'élève de l'épaule vers la tête, ce qui décolle la tête du tronc
+      +'<path d="M47.6,11.4 C50.4,9.6 53.4,8.6 56.2,8.8 C56.4,11.6 55.6,13.8 53.8,15.4'
+      +' C52,17 49.6,17.2 47.6,16.2 Z" fill="#111"/>'
+      // collerette : la fourrure du poitrail déborde sur l'épaule (une pointe, pas un bloc)
+      +'<path d="M50.2,13.4 C52.6,14.6 53.6,16.6 53.4,19 C52.6,16.8 51.4,15.2 49.4,14.2 Z" fill="#151515"/>'
+      +'<ellipse cx="34" cy="12.4" rx="12.5" ry="4" fill="url(#'+gid+')"/>'
+      // pattes du côté visible : un ton plus clair, devant le corps
+      +leg("cLegBL",29.5,18.4,"#0d0d0d","#151515",-13,20)
+      +leg("cLegFL",48.5,18.4,"#0d0d0d","#151515",4,-4)
       +'<g class="cHead">'
-      +'<path d="M46 4 L50 -3 L53 5 Z" fill="#111"/><path d="M58 4 L61 -3 L63 6 Z" fill="#111"/>'
-      +'<path d="M48.3 3.4 L50 -0.6 L51.8 3.9 Z" fill="#3c2b31"/><path d="M59.3 3.6 L61 -0.6 L62.5 4.4 Z" fill="#3c2b31"/>'
-      +'<circle cx="55" cy="9" r="8.5" fill="#111"/>'
-      +'<circle cx="54.5" cy="7.5" r="1" fill="#f4c94a"/><circle cx="58" cy="7.2" r="1" fill="#f4c94a"/>'
-      +'<circle cx="54.2" cy="7.1" r=".34" fill="#fff"/><circle cx="57.7" cy="6.8" r=".34" fill="#fff"/>'
-      +'<path d="M62.3 9.7 L64.1 9.3 L63.2 11.1 Z" fill="#e69aa6"/>'
-      +'<g stroke="rgba(255,255,255,.4)" stroke-width=".5" stroke-linecap="round" fill="none">'
-      +'<path d="M62 10 L70 8.5"/><path d="M62.2 10.7 L70.5 10.6"/><path d="M62 11.3 L70 12.9"/></g>'
+      // oreilles : pavillon sombre puis intérieur rosé, tracées avant le crâne pour s'y fondre
+      +'<path class="cEarL" d="M51.6,5.4 L51.4,-.6 L56.2,3.4 Z" fill="#101010"/>'
+      +'<path class="cEarR" d="M59.8,3.4 L62.6,-1.6 L64.4,4.6 Z" fill="#101010"/>'
+      +'<path d="M52.4,4.6 L52.3,1.2 L55,3.6 Z" fill="#3c2b31"/>'
+      +'<path d="M60.7,3.6 L62.5,.4 L63.6,4.2 Z" fill="#3c2b31"/>'
+      // crâne : front bombé, joues qui s'évasent, menton court
+      +'<path d="M50.6,10.4 C50.2,6.4 52.9,3.6 56.5,3.6 C60.3,3.6 63.3,6.1 63.9,9.5'
+      +' C64.4,12.8 62.4,15.6 59,16.2 C55,16.9 51.3,14.6 50.6,10.4 Z" fill="#131313"/>'
+      +'<ellipse cx="61.2" cy="12.3" rx="3.2" ry="2.5" fill="#181818"/>'
+      // yeux en amande, pupille fendue, reflet ; l'œil éloigné est plus petit (trois quarts)
+      +'<g class="cEyes">'
+      +'<path d="M53.5,9 C54.1,7.8 55.8,7.8 56.4,9.1 C55.8,10.4 54.1,10.4 53.5,9 Z" fill="#d9b94f"/>'
+      +'<path d="M58,9.1 C58.8,7.7 61,7.7 61.7,9.2 C61,10.7 58.8,10.7 58,9.1 Z" fill="#e8c65a"/>'
+      +'<ellipse cx="55" cy="9.1" rx=".5" ry="1.55" fill="#14100a"/>'
+      +'<ellipse cx="59.9" cy="9.2" rx=".62" ry="1.85" fill="#14100a"/>'
+      +'<circle cx="54.4" cy="8.4" r=".28" fill="#fff" opacity=".8"/>'
+      +'<circle cx="59.2" cy="8.4" r=".34" fill="#fff" opacity=".9"/>'
+      +'</g>'
+      // truffe, plis de la bouche, langue (sortie seulement pendant la toilette)
+      +'<path d="M62.1,10.9 L63.9,10.7 L63,12.3 Z" fill="#e08a96"/>'
+      +'<path class="cTongue" d="M62.6,12.6 C63.6,13.5 63.6,14.7 62.8,15.5 C62.1,14.5 62,13.4 62.6,12.6 Z" fill="#e58fa0"/>'
+      +'<g stroke="rgba(255,255,255,.2)" stroke-width=".42" stroke-linecap="round" fill="none">'
+      +'<path d="M62.8,12.5 C62.2,13.4 61.4,13.7 60.7,13.3"/>'
+      +'<path d="M63,12.7 C63.2,13.6 63.7,13.9 64.3,13.7"/></g>'
+      // moustaches : trois de chaque côté du museau, plus une sur la joue
+      +'<g stroke="rgba(255,255,255,.4)" stroke-width=".46" stroke-linecap="round" fill="none">'
+      +'<path d="M62.6,11.5 L68.6,9.8"/><path d="M62.8,12.3 L69,12.2"/><path d="M62.6,13 L68.4,14.6"/>'
+      +'<path d="M59.4,11.9 L55.4,10.8"/></g>'
       +'</g>'
       +'</g></svg></div>';
     // Zone tactile : touchée, elle ouvre la modale des photos de Zéphyr.
@@ -6644,7 +7563,8 @@ function closePhotoModal(){
         const r=el.getBoundingClientRect();photoSetOrigin(r.left+r.width/2,r.top+r.height/2);
         openPhotoModal();};
       setTimeout(()=>{el.style.opacity="0";setTimeout(()=>el.remove(),650);},3000);
-      return;
+      el.classList.add("sit");
+      return true;
     }
     const rnd=(a,b)=>a+Math.random()*(b-a);
     const ri=(a,b)=>Math.round(rnd(a,b));
@@ -6658,45 +7578,108 @@ function closePhotoModal(){
     // trajectoire : montée freinée par la « gravité », chute accélérée). Le « sol » reste géré
     // nativement par bottom:10px ; on ne calcule ici que l'offset vertical du perchoir.
     const groundTop=vh-10-CAT_H;
-    const target=Math.random()<0.5?pickClimbTarget(vw,vh):null;
+    let stepTimer=null,perched=false,tapped=false;
+    // Deux temps de rAF avant chaque transition pour « committer » la position de départ.
+    function moveX(x){curX=x;requestAnimationFrame(()=>{void el.offsetWidth;
+      requestAnimationFrame(()=>{el.style.transform="translateX("+x+"px)";});});}
+    function liftTo(y){requestAnimationFrame(()=>{void lift.offsetWidth;
+      requestAnimationFrame(()=>{lift.style.transform="translateY("+y+"px)";});});}
+    const POSES=["walking","crouch","leaping","land","dropping","falling","rising","dashing","brake",
+      "creep","curl","stretch","idle","loaf","sit","look","groom","wiggle","flick"];
+    function pose(cls){for(const p of POSES)if(p!==cls)el.classList.remove(p);if(cls)el.classList.add(cls);}
+    // « perché » n'est pas une pose mais un état (il pilote l'ombre au sol) : géré à part pour
+    // qu'un changement de pose ne l'effface pas.
+    function setPerched(on){perched=on;el.classList.toggle("perched",on);}
+    const WALK_TRANS="transform 2.2s cubic-bezier(.4,0,.2,1)";
+    const footY=vh-10;                       // le sol à l'écran (bottom:10px)
+    let curX=startX;
+    const dustAtCat=n=>catDust(curX+CAT_W/2,footY,n||2);
+    function xTrans(t){el.style.transition=t;}
+    // Place la couche verticale sans animation (départ d'une entrée par le haut ou par le bas).
+    function liftNow(y){lift.style.transition="none";lift.style.transform="translateY("+y+"px)";void lift.offsetWidth;}
+    function liftFree(){lift.style.transition="";}
+
+    // ---- Construction d'une séquence d'étapes {enter,dur}, tirée au hasard ----
+    const steps=[];
+    const walkInDur=ri(1900,2700), walkOutDur=ri(1900,2700);
+    /* Manière d'arriver, tirée au sort — c'est là que se joue la surprise :
+       - walk   : il entre par un bord en marchant (le passage classique) ;
+       - dash   : il traverse en courant et freine en dérapant au milieu de l'écran ;
+       - drop   : il tombe du haut de l'écran, pattes en parachute, et amortit la réception ;
+       - peek   : il escalade le bord bas, passe d'abord la tête, regarde, puis monte ;
+       - creep  : il approche au ralenti, ventre au sol, à l'affût ;
+       - perch  : il était déjà là, pelotonné sur un bouton de la barre du haut. */
+    const perchTarget=pickClimbTarget(vw,vh);
+    let mode=pick(["walk","walk","walk","dash","drop","peek","creep","perch"]);
+    if(mode==="perch"&&!perchTarget)mode="walk";
+    // Il ne traverse sans s'arrêter que s'il est arrivé en marchant ou en courant.
+    const justPassing=(mode==="walk"&&Math.random()<0.22)||(mode==="dash"&&Math.random()<0.34);
+
+    // Perchoir : soit celui de l'entrée « perch », soit un grimper en cours de route.
+    const target=mode==="perch"?perchTarget:(!justPassing&&Math.random()<0.5?perchTarget:null);
+    const groundTopRef=groundTop;
     let walkX=restX,jumpDy=null;
     if(target){
       walkX=Math.max(20,Math.min(vw-CAT_W-20,Math.round(target.x-CAT_W/2)));
       // Se love SUR le bouton : pattes sur son bord supérieur, corps au-dessus (bouton visible).
       const perchTop=Math.max(2,Math.round(target.top-CAT_H+5));
-      jumpDy=perchTop-groundTop; // négatif = vers le haut
+      jumpDy=perchTop-groundTopRef; // négatif = vers le haut
     }
-    const climbs=jumpDy!=null;
-    let stepTimer=null,perched=false,tapped=false;
-    // Deux temps de rAF avant chaque transition pour « committer » la position de départ.
-    function moveX(x){requestAnimationFrame(()=>{void el.offsetWidth;
-      requestAnimationFrame(()=>{el.style.transform="translateX("+x+"px)";});});}
-    function liftTo(y){requestAnimationFrame(()=>{void lift.offsetWidth;
-      requestAnimationFrame(()=>{lift.style.transform="translateY("+y+"px)";});});}
-    const POSES=["walking","crouch","leaping","land","dropping","curl","stretch","idle","loaf","look","groom","wiggle","flick"];
-    function pose(cls){for(const p of POSES)if(p!==cls)el.classList.remove(p);if(cls)el.classList.add(cls);}
+    const climbs=jumpDy!=null&&mode!=="perch";
 
-    // ---- Construction d'une séquence d'étapes {enter,dur}, tirée au hasard ----
-    const steps=[];
-    const walkInDur=ri(1900,2700), walkOutDur=ri(1900,2700);
-    // Parfois (au sol) le chat ne fait que traverser sans s'arrêter.
-    const justPassing=!climbs && Math.random()<0.26;
-
-    steps.push({enter:()=>{pose("walking");moveX(justPassing?endX:walkX);},dur:justPassing?walkOutDur:walkInDur});
+    if(mode==="perch"){
+      // Déjà en place, pelotonné, avant même qu'on le remarque.
+      el.style.transform="translateX("+walkX+"px)";curX=walkX;
+      liftNow(jumpDy);setPerched(true);
+      steps.push({enter:()=>{liftFree();pose("curl");},dur:ri(2400,4200)});
+    }else if(mode==="drop"){
+      // Arrivée par le haut : il apparaît en chute, se réceptionne et fait voler la poussière.
+      el.style.transform="translateX("+restX+"px)";curX=restX;
+      liftNow(-(vh+CAT_H));
+      steps.push({enter:()=>{liftFree();pose("falling");liftTo(0);},dur:760});
+      steps.push({enter:()=>{pose("land");dustAtCat(3);},dur:210});
+      steps.push({enter:()=>pose("flick"),dur:ri(500,900)});
+    }else if(mode==="peek"){
+      // Il escalade le bord du bas : d'abord la tête, il vérifie que la voie est libre, puis il monte.
+      el.style.transform="translateX("+restX+"px)";curX=restX;
+      liftNow(38);
+      steps.push({enter:()=>{liftFree();pose("rising");liftTo(13);},dur:620});
+      steps.push({enter:()=>pose("look"),dur:ri(1300,2100)});
+      steps.push({enter:()=>{pose("rising");liftTo(0);},dur:520});
+      steps.push({enter:()=>{pose("land");dustAtCat(1);},dur:170});
+    }else if(mode==="dash"){
+      // Sprint : le départ soulève la poussière, et il pile en dérapant s'il s'arrête.
+      const dashDur=justPassing?ri(760,980):ri(560,760);
+      el.style.transform="translateX("+startX+"px)";
+      steps.push({enter:()=>{xTrans("transform "+dashDur+"ms cubic-bezier(.22,.55,.2,1)");
+        pose("dashing");dustAtCat(2);moveX(justPassing?endX:walkX);},dur:dashDur});
+      if(!justPassing){
+        steps.push({enter:()=>{xTrans(WALK_TRANS);pose("brake");dustAtCat(3);},dur:380});
+        steps.push({enter:()=>pose("idle"),dur:ri(300,700)});
+      }
+    }else if(mode==="creep"){
+      // Approche furtive : très lent, ventre au sol — on le remarque souvent une fois arrivé.
+      el.style.transform="translateX("+startX+"px)";
+      steps.push({enter:()=>{xTrans("transform 4.2s linear");pose("creep");moveX(walkX);},dur:4200});
+      steps.push({enter:()=>{xTrans(WALK_TRANS);pose("look");},dur:ri(900,1500)});
+    }else{
+      el.style.transform="translateX("+startX+"px)";
+      steps.push({enter:()=>{pose("walking");moveX(justPassing?endX:walkX);},dur:justPassing?walkOutDur:walkInDur});
+    }
 
     if(!justPassing){
       if(climbs){
-        // Frétillement mignon (guette) puis bond arqué sur le bouton.
+        // Frétillement (il guette, se dandine) puis bond arqué sur le bouton.
         steps.push({enter:()=>pose("wiggle"),dur:ri(650,1050)});
         steps.push({enter:()=>pose("crouch"),dur:180});
-        steps.push({enter:()=>{pose("leaping");liftTo(jumpDy);perched=true;},dur:480});
+        steps.push({enter:()=>{pose("leaping");liftTo(jumpDy);setPerched(true);},dur:480});
         steps.push({enter:()=>pose("land"),dur:150});
-      }else{
+      }else if(mode==="walk"){
         steps.push({enter:()=>pose("idle"),dur:ri(350,900)});
       }
 
       // 1 à 3 activités aléatoires, sans répéter deux fois de suite la même.
-      const acts=["curl","loaf","stretch","look","groom"];
+      const acts=["curl","loaf","stretch","look","groom","sit"];
       const n=1+Math.floor(Math.random()*3);
       let last=null;
       for(let i=0;i<n;i++){
@@ -6706,6 +7689,9 @@ function closePhotoModal(){
         }else if(a==="loaf"){
           steps.push({enter:()=>pose("loaf"),dur:ri(1500,3000)});
           if(Math.random()<0.5)steps.push({enter:()=>pose("flick"),dur:ri(700,1300)});
+        }else if(a==="sit"){
+          steps.push({enter:()=>pose("sit"),dur:ri(1400,2600)});
+          if(Math.random()<0.6)steps.push({enter:()=>pose("look"),dur:2400});
         }else if(a==="stretch"){
           steps.push({enter:()=>pose("stretch"),dur:ri(950,1400)});
           steps.push({enter:()=>pose("idle"),dur:300});
@@ -6719,17 +7705,36 @@ function closePhotoModal(){
         }
       }
 
-      if(climbs){
+      if(perchPlanned()){
         steps.push({enter:()=>pose("crouch"),dur:170});
-        steps.push({enter:()=>{pose("dropping");liftTo(0);perched=false;},dur:420});
-        steps.push({enter:()=>pose("land"),dur:150});
+        steps.push({enter:()=>{pose("dropping");liftTo(0);setPerched(false);},dur:420});
+        steps.push({enter:()=>{pose("land");dustAtCat(2);},dur:150});
       }
-      steps.push({enter:()=>{pose("walking");moveX(endX);},dur:walkOutDur});
+      pushExit(steps);
+    }
+
+    // Le chat est-il censé être perché à ce stade de la séquence ?
+    function perchPlanned(){return climbs||mode==="perch";}
+    /* Manière de repartir, elle aussi tirée au sort : à pas tranquilles, en sprintant, ou en
+       se laissant glisser sous le bord bas de l'écran. */
+    function pushExit(list){
+      const ex=pick(["walk","walk","dash","duck"]);
+      if(ex==="dash"){
+        const d=ri(620,820);
+        list.push({enter:()=>pose("crouch"),dur:160});
+        list.push({enter:()=>{xTrans("transform "+d+"ms cubic-bezier(.3,.5,.2,1)");
+          pose("dashing");dustAtCat(2);moveX(endX);},dur:d});
+      }else if(ex==="duck"){
+        list.push({enter:()=>pose("look"),dur:520});
+        list.push({enter:()=>{pose("rising");liftTo(40);},dur:560});
+      }else{
+        list.push({enter:()=>{pose("walking");moveX(endX);},dur:walkOutDur});
+      }
     }
 
     // ---- Lecture séquentielle (interruptible : un tap sur le chat coupe la séquence en cours
     //      et enchaîne sur une sortie propre — s'il est perché, il redescend d'abord). ----
-    el.style.transform="translateX("+startX+"px)";
+    //      La position de départ est déjà posée plus haut par le mode d'arrivée tiré au sort.
     function runSteps(list){
       let i=0;
       (function nextStep(){
@@ -6748,31 +7753,52 @@ function closePhotoModal(){
       clearTimeout(stepTimer);
       catPurr();
       const out=[];
+      xTrans(WALK_TRANS);
       if(perched){
         out.push({enter:()=>pose("crouch"),dur:170});
-        out.push({enter:()=>{pose("dropping");liftTo(0);perched=false;},dur:420});
-        out.push({enter:()=>pose("land"),dur:150});
+        out.push({enter:()=>{pose("dropping");liftTo(0);setPerched(false);},dur:420});
+        out.push({enter:()=>{pose("land");dustAtCat(2);},dur:150});
       }
+      // Il lève la tête vers toi, donne un coup de queue content, puis s'en va.
       out.push({enter:()=>pose("look"),dur:520});
-      out.push({enter:()=>{pose("walking");moveX(endX);},dur:walkOutDur});
+      out.push({enter:()=>pose("flick"),dur:620});
+      pushExit(out);
       runSteps(out);
       setTimeout(openPhotoModal,300);   // laisse voir la réaction du chat avant la modale
     };
     runSteps(steps);
+    return true;
   }
-  // Intervalle "assez fréquent, un peu moins que les poissons (15-30s)" : 25 à 55s.
-  const MIN_GAP=25000, MAX_GAP=55000;
-  let nextAt=Date.now()+6000+Math.random()*9000; // premier chat entre 6 et 15s après le chargement
+  /* Cadence : réglée dans Réglages → « Zéphyr, le chat ». nextAt=null signifie « jamais »
+     (fréquence désactivée) ; la minuterie est reprogrammée immédiatement quand on change le
+     réglage, sans attendre le passage suivant ni recharger l'app. */
+  const freqDef=()=>CAT_FREQ_DEF[CAT_FREQS.includes(state.catFreq)?state.catFreq:"normal"];
+  let nextAt=null;
+  function planNext(first){
+    const f=freqDef();
+    if(!f.max){nextAt=null;return;}
+    nextAt=Date.now()+(first?f.first:(f.min+Math.random()*(f.max-f.min)));
+  }
   function tick(){
-    if(Date.now()>=nextAt){
-      spawnEasterCat();
-      nextAt=Date.now()+MIN_GAP+Math.random()*(MAX_GAP-MIN_GAP);
-    }
+    if(nextAt===null)return;
+    if(Date.now()>=nextAt){spawnEasterCat();planNext(false);}
   }
-  setInterval(tick,3000);
+  planNext(true);
+  setInterval(tick,1500);
   document.addEventListener("visibilitychange",()=>{
-    if(!document.hidden&&Date.now()>=nextAt)tick();
+    if(!document.hidden&&nextAt!==null&&Date.now()>=nextAt)tick();
   });
+  // Points d'entrée utilisés par les réglages (déclarés plus haut) : « le faire venir » et
+  // reprogrammation après un changement de fréquence.
+  catSpawnNow=()=>{const ok=spawnEasterCat();planNext(false);return ok;};
+  catRescheduleCat=()=>{
+    const f=freqDef();
+    if(!f.max){nextAt=null;return;}
+    // On garde l'échéance en cours si elle tient déjà dans la nouvelle fenêtre, sinon on
+    // replanifie : passer de « rare » à « souvent » ne doit pas laisser attendre 5 minutes.
+    const maxAt=Date.now()+f.max;
+    if(nextAt===null||nextAt>maxAt)planNext(true);
+  };
 })();
 
 /* ---------- Raccourcis d'icône (manifest shortcuts, appui long sur l'icône Android) ----------
@@ -6896,7 +7922,7 @@ async function gdApi(url,opt,_retried,keepalive){
 function gdSerialize(){
   dataUpdatedAt = Date.now();
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,customBudgets:state.customBudgets,current:state.current,
-    theme:state.theme,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
+    theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
     confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,
     cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,
@@ -6909,7 +7935,9 @@ function gdApply(d){
   state.customBudgets=sanitizeCustomBudgets(d.customBudgets);
   state.categories=sanitizeCategories(d.categories)||DEFAULT_CATEGORIES.map(c=>({...c}));
   if(typeof d.current==="string"&&(/^\d{4}-\d{2}$/.test(d.current)||(isCustom(d.current)&&state.customBudgets[d.current])))state.current=d.current;
-  if(typeof d.theme==="string"&&THEMES.some(t=>t[0]===d.theme))state.theme=d.theme;
+  state.customTheme=sanitizeCustomTheme(d.customTheme);
+  if(isThemeId(d.theme))state.theme=d.theme;
+  state.catFreq=CAT_FREQS.includes(d.catFreq)?d.catFreq:"normal";
   if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
   if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
@@ -6921,7 +7949,7 @@ function gdApply(d){
   if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths);if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
   folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
@@ -7047,7 +8075,7 @@ function gdStableStringify(o){
   return "{"+keys.map(k=>JSON.stringify(k)+":"+gdStableStringify(o[k])).join(",")+"}";
 }
 function gdSnapshotOf(d){
-  return{months:d.months||{},customBudgets:d.customBudgets||{},current:d.current||null,theme:d.theme||null,categories:d.categories||[],
+  return{months:d.months||{},customBudgets:d.customBudgets||{},current:d.current||null,theme:d.theme||null,customTheme:sanitizeCustomTheme(d.customTheme),catFreq:CAT_FREQS.includes(d.catFreq)?d.catFreq:"normal",categories:d.categories||[],
     budgetView:d.budgetView||null,savings:d.savings||null,savingsMigrated:!!d.savingsMigrated,savingsPerMonth:!!d.savingsPerMonth,
     statsOrder:sanitizeStatsOrder(d.statsOrder),heroMetric:sanitizeHeroMetric(d.heroMetric),labels:sanitizeLabels(d.labels),
     expanded:Array.isArray(d.expanded)?[...d.expanded].sort():[],
@@ -7057,7 +8085,7 @@ function gdContentEquals(remote){
   // IMPORTANT : ce local doit contenir exactement les mêmes champs que ceux lus par gdSnapshotOf
   // (dont categories) — sinon la comparaison est toujours « différente » et le raccourci
   // « déjà à jour » ne se déclenche jamais (fausses invites de restauration).
-  const local={months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,categories:state.categories,
+  const local={months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,
     budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,expanded:[...expanded],folded:[...folded]};
   return gdStableStringify(gdSnapshotOf(local))===gdStableStringify(gdSnapshotOf(remote));
 }
