@@ -1422,12 +1422,17 @@ html{scroll-behavior:smooth}
    rotation, qui tournerait alors autour d'un point vide). Les groupes animés ne portent donc
    jamais d'attribut transform : les décalages d'articulation sont portés par des groupes
    intermédiaires statiques. */
-.easterCat{position:fixed;left:0;bottom:10px;width:58px;height:28px;z-index:300;
+/* --cs : échelle de Zéphyr, réglée dans les Réglages. Toutes les dimensions liées à son
+   gabarit (lui, son ombre, sa zone tactile, ses accessoires et ses effets au sol) en
+   dépendent, pour qu'un chat plus grand reste proportionné dans tous ses détails. */
+.easterCat{position:fixed;left:0;bottom:10px;z-index:300;
+  width:calc(58px * var(--cs,1));height:calc(28px * var(--cs,1));
   pointer-events:none;user-select:none;
   transform:translateX(-70px);transition:transform 2.2s cubic-bezier(.4,0,.2,1);will-change:transform}
 /* Ombre de contact : elle reste au sol (hors de .catLift), rétrécit et pâlit quand le chat
    s'élève — c'est ce qui vend la hauteur du saut. */
-.easterCat .catShadow{position:absolute;left:3px;right:3px;bottom:-5px;height:7px;pointer-events:none;
+.easterCat .catShadow{position:absolute;left:5%;right:5%;pointer-events:none;
+  bottom:calc(-5px * var(--cs,1));height:calc(7px * var(--cs,1));
   background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.34),rgba(0,0,0,0) 70%);
   transition:opacity .4s ease,transform .45s cubic-bezier(.4,0,.2,1);will-change:transform,opacity}
 .easterCat.leaping .catShadow,.easterCat.falling .catShadow{opacity:.2;transform:scale(.6,.5)}
@@ -1627,14 +1632,16 @@ html{scroll-behavior:smooth}
    de l'appli en passant devant), seul ce calque invisible capte le tap. Il déborde de 12/16px
    autour du chat pour rester attrapable au doigt malgré ses 58×28px. */
 .easterCat .catLift{position:relative}
-.easterCat .catHit{position:absolute;inset:-16px -12px;pointer-events:auto;cursor:pointer;
+.easterCat .catHit{position:absolute;pointer-events:auto;cursor:pointer;
+  inset:calc(-16px * var(--cs,1)) calc(-12px * var(--cs,1));
   background:none;border:none;padding:0;-webkit-tap-highlight-color:transparent;z-index:2}
 /* Repère « touche-moi » : sans lui, Zéphyr perché sur un bouton n'a l'air que d'un décor. Il ne
    s'allume que lorsqu'il est posé (jamais en marchant), et au survol à la souris. */
 .easterCat .catHalo{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;
   transition:opacity .45s ease}
 .easterCat.hint .catHalo,.easterCat .catHit:hover+.catHalo{opacity:1}
-.easterCat .catHaloRing{position:absolute;left:50%;top:52%;width:80px;height:58px;border-radius:50%;
+.easterCat .catHaloRing{position:absolute;left:50%;top:52%;border-radius:50%;
+  width:calc(80px * var(--cs,1));height:calc(58px * var(--cs,1));
   background:radial-gradient(50% 50% at 50% 50%,rgba(255,214,120,.34),rgba(255,214,120,0) 70%);
   animation:catHaloPulse 2.4s ease-in-out infinite}
 @supports (background:color-mix(in srgb,red 50%,transparent)){
@@ -1643,7 +1650,8 @@ html{scroll-behavior:smooth}
 }
 @keyframes catHaloPulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.55}
   50%{transform:translate(-50%,-50%) scale(1.08);opacity:.95}}
-.easterCat .catHaloPaw{position:absolute;left:50%;top:-15px;font-style:normal;font-size:13px;line-height:1;
+.easterCat .catHaloPaw{position:absolute;left:50%;font-style:normal;line-height:1;
+  top:calc(-15px * var(--cs,1));font-size:calc(13px * var(--cs,1));
   filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));animation:catPawBob 1.7s ease-in-out infinite}
 @keyframes catPawBob{0%,100%{transform:translate(-50%,0);opacity:.7}
   50%{transform:translate(-50%,-3.5px);opacity:1}}
@@ -1656,9 +1664,75 @@ html{scroll-behavior:smooth}
 @keyframes catPurrUp{0%{opacity:0;transform:translate(-50%,0) scale(.5)}
   25%{opacity:1;transform:translate(-50%,-14px) scale(1.15)}
   100%{opacity:0;transform:translate(-50%,-54px) scale(1)}}
+/* ---- Empreintes : il laisse ses pas derrière lui quand il marche, et elles s'effacent. ---- */
+.catPrint{position:fixed;z-index:298;pointer-events:none;
+  width:calc(11px * var(--cs,1));height:calc(11px * var(--cs,1));
+  color:rgba(0,0,0,.3);animation:catPrintFade 2.6s ease-out both}
+.catPrint svg{display:block;width:100%;height:100%;fill:currentColor}
+@keyframes catPrintFade{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--prot,90deg)) scale(.7)}
+  12%{opacity:1;transform:translate(-50%,-50%) rotate(var(--prot,90deg)) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--prot,90deg)) scale(1)}}
+
+/* ---- Rappel : il descend du plafond le long d'une ficelle, pattes avant sur la corde. ---- */
+.catRope{position:fixed;top:0;z-index:302;pointer-events:none;width:calc(2px * var(--cs,1));
+  background:linear-gradient(180deg,#b9a986,#8d7d5c);border-radius:0 0 2px 2px;
+  box-shadow:0 0 0 .5px rgba(0,0,0,.12);transition:opacity .5s ease}
+.easterCat.rappel .catLift{transition:transform 2.6s cubic-bezier(.35,.05,.5,1)}
+.easterCat.rappel .catRig{transform-origin:50px 12px;transform:rotate(-24deg)}
+.easterCat.rappel .cLegFL .cUp,.easterCat.rappel .cLegFR .cUp{transform:rotate(-140deg)}
+.easterCat.rappel .cLegFL .cLo,.easterCat.rappel .cLegFR .cLo{transform:rotate(14deg)}
+.easterCat.rappel .cLegBL .cUp,.easterCat.rappel .cLegBR .cUp{transform:rotate(28deg)}
+.easterCat.rappel .cLegBL .cLo,.easterCat.rappel .cLegBR .cLo{transform:rotate(-16deg)}
+.easterCat.rappel .cT1{transform:rotate(34deg)}
+.easterCat.rappel .cT2{transform:rotate(22deg)}
+.easterCat.rappel .cT3{transform:rotate(14deg)}
+.easterCat.rappel .cHead{transform:rotate(9deg)}
+.easterCat.rappel .catShadow{opacity:.14;transform:scale(.45,.4)}
+
+/* ---- Pelote de laine : elle roule en déroulant son fil, il la rattrape et la tripote. ---- */
+.catYarnTrail{position:fixed;left:0;top:0;width:100%;height:100%;z-index:297;pointer-events:none;
+  transition:opacity .6s ease}
+.catYarnTrail path{fill:none;stroke:#c46a7a;stroke-width:calc(1.6 * var(--cs,1));stroke-linecap:round;opacity:.85}
+.catYarn{position:fixed;left:0;z-index:299;pointer-events:none;
+  bottom:calc(11px * var(--cs,1));width:calc(14px * var(--cs,1));height:calc(14px * var(--cs,1));
+  transform:translateX(-60px);transition:transform .25s ease,opacity .3s ease}
+.catYarn svg{display:block;width:100%;height:100%}
+
+/* ---- Skate et tapis volant ---- */
+.catBoard,.catRug{position:absolute;inset:0;pointer-events:none;z-index:0}
+.catBoard svg,.catRug svg{display:block;width:100%;height:100%;overflow:visible}
+.easterCat.faceLeft .catBoard svg,.easterCat.faceLeft .catRug svg{transform:scaleX(-1);transform-origin:center}
+.catBoard .bWheel{transform-box:fill-box;transform-origin:50% 50%;animation:motoSpin .26s linear infinite}
+/* En équilibre sur la planche : quatre pattes serrées, corps fléchi, queue en balancier. */
+.easterCat.skate .catRig{transform:translateY(-1px)}
+.easterCat.skate .cBody{transform:scaleY(.94)}
+.easterCat.skate .cLegFL .cUp,.easterCat.skate .cLegFR .cUp{transform:rotate(-16deg)}
+.easterCat.skate .cLegBL .cUp,.easterCat.skate .cLegBR .cUp{transform:rotate(24deg)}
+.easterCat.skate .cLo{transform:rotate(16deg)}
+.easterCat.skate .cT1{transform:rotate(-30deg);animation:tailSway1 .9s ease-in-out infinite}
+.easterCat.skate .cT2{transform:rotate(-14deg)}
+.easterCat.skate .cHead{transform:rotate(-5deg)}
+/* Ollie : la planche et le chat décollent ensemble, nez de planche relevé. */
+.easterCat.ollie .catRig{transform:translateY(-3px) rotate(-13deg)}
+.easterCat.ollie .catBoard{transform:rotate(-16deg);transform-origin:34% 88%;transition:transform .25s ease}
+.easterCat.ollie .cUp{transform:rotate(-6deg)}
+.easterCat.ollie .cLo{transform:rotate(30deg)}
+.easterCat.ollie .cT1{transform:rotate(-48deg)}
+/* Tapis volant : posé en pain de mie au milieu du tapis, qui ondule. */
+.easterCat.carpet .catRig{transform:translateY(1px)}
+.easterCat.carpet .cUp{transform:rotate(70deg)}
+.easterCat.carpet .cLo{transform:rotate(92deg)}
+.easterCat.carpet .cT1{transform:rotate(24deg);animation:tailSway1 2.4s ease-in-out infinite}
+.easterCat.carpet .cT2{transform:rotate(20deg)}
+.easterCat.carpet .cHead{transform:rotate(-8deg)}
+.easterCat.carpet .catRug{animation:rugWave 1.9s ease-in-out infinite}
+@keyframes rugWave{0%,100%{transform:rotate(-2.4deg) translateY(0)}50%{transform:rotate(2.4deg) translateY(-1.5px)}}
+.easterCat.carpet .catShadow{opacity:.12;transform:scale(.5,.4)}
+
 /* ---- Papillon : il vole en zigzag au-dessus de lui, Zéphyr le suit du regard, tente un coup
    de patte, saute… et le rate (évidemment). ---- */
-.catFly{position:fixed;left:0;bottom:0;z-index:301;width:17px;height:17px;pointer-events:none;
+.catFly{position:fixed;left:0;bottom:0;z-index:301;pointer-events:none;
+  width:calc(17px * var(--cs,1));height:calc(17px * var(--cs,1));
   transition:transform 1.05s cubic-bezier(.42,0,.4,1),opacity .4s ease}
 .catFly svg{display:block;width:100%;height:100%;overflow:visible}
 .catFly .fWL,.catFly .fWR{transform-box:fill-box;animation:flyFlap .17s ease-in-out infinite}
@@ -1678,7 +1752,8 @@ html{scroll-behavior:smooth}
 @keyframes swatArm{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(-78deg)}}
 
 /* ---- Parachute : il descend du plafond en se balançant, largue la voilure à l'atterrissage. ---- */
-.catChute{position:absolute;left:50%;bottom:18px;width:62px;height:42px;margin-left:-31px;
+.catChute{position:absolute;left:50%;bottom:calc(18px * var(--cs,1));
+  width:calc(62px * var(--cs,1));height:calc(42px * var(--cs,1));margin-left:calc(-31px * var(--cs,1));
   pointer-events:none;z-index:0;transform-origin:50% 100%;
   transition:opacity .55s ease,transform .8s cubic-bezier(.3,0,.4,1)}
 .catChute svg{display:block;width:100%;height:100%;overflow:visible}
@@ -1725,7 +1800,8 @@ html{scroll-behavior:smooth}
 
 /* Boulette de papier : le jouet qu'il poursuit. Elle roule au sol (rotation proportionnelle à
    la distance parcourue, pour que ça ne patine pas), puis s'écrase quand il lui saute dessus. */
-.catBall{position:fixed;left:0;bottom:12px;z-index:299;width:11px;height:11px;pointer-events:none;
+.catBall{position:fixed;left:0;z-index:299;pointer-events:none;
+  bottom:calc(12px * var(--cs,1));width:calc(11px * var(--cs,1));height:calc(11px * var(--cs,1));
   border-radius:50%;background:radial-gradient(60% 55% at 38% 32%,#f4efe2,#d9d2c0 60%,#bdb5a2);
   box-shadow:0 1px 2px rgba(0,0,0,.3);transform:translateX(-60px);
   transition:transform .25s ease,opacity .25s ease}
@@ -1734,14 +1810,15 @@ html{scroll-behavior:smooth}
   background:linear-gradient(115deg,transparent 42%,rgba(0,0,0,.14) 44%,transparent 47%),
     linear-gradient(35deg,transparent 55%,rgba(0,0,0,.12) 57%,transparent 60%)}
 /* Souffle de poussière : à l'appui d'un départ en courant et à chaque réception de saut. */
-.catDust{position:fixed;z-index:299;pointer-events:none;width:16px;height:16px;border-radius:50%;
+.catDust{position:fixed;z-index:299;pointer-events:none;border-radius:50%;
+  width:calc(16px * var(--cs,1));height:calc(16px * var(--cs,1));
   background:radial-gradient(circle at 50% 60%,rgba(255,255,255,.5),rgba(150,150,150,.16) 60%,transparent 72%);
   animation:catDustOut .62s ease-out both}
 @keyframes catDustOut{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
   25%{opacity:.85}
   100%{opacity:0;transform:translate(-50%,-140%) scale(1.9)}}
 @media (prefers-reduced-motion:reduce){
-  .catDust,.catBall,.catFly{display:none}
+  .catDust,.catBall,.catFly,.catPrint,.catYarnTrail{display:none}
   .easterCat .cEyes,.easterCat .cEarL,.easterCat .cEarR{animation:none}
   .easterCat .catHaloRing,.easterCat .catHaloPaw{animation:none}
 }
@@ -2278,6 +2355,17 @@ html{scroll-behavior:smooth}
         <option value="max">Très souvent</option>
       </select>
     </div>
+    <div class="settingSelRow">
+      <span class="ssTxt"><span class="ssTitle">Taille</span>
+        <span class="ssSub">Change aussi la taille de ses accessoires et de ses empreintes.</span></span>
+      <select class="setSel" id="catSizeSel" aria-label="Taille de Zéphyr">
+        <option value="mini">Minuscule</option>
+        <option value="small">Petit</option>
+        <option value="normal">Normal</option>
+        <option value="big">Grand</option>
+        <option value="huge">Géant</option>
+      </select>
+    </div>
     <button type="button" class="bkbtn" id="catCallBtn" style="width:100%;margin-top:4px">🐾 Le faire venir maintenant</button>
     <div class="hr"></div>
     <div class="slabel">Tri</div>
@@ -2745,6 +2833,17 @@ const CAT_FREQ_DEF={
   max:   {min:4500,     max:11000,    first:2500,  label:"Très souvent"}
 };
 const CAT_FREQS=Object.keys(CAT_FREQ_DEF);
+/* Taille de Zéphyr : facteur d'échelle appliqué à tout son gabarit (lui, son ombre, sa zone
+   tactile, ses accessoires et ses effets au sol). "normal" = les 58×28 px d'origine. */
+const CAT_SIZE_DEF={
+  mini:  {scale:0.7,  label:"Minuscule"},
+  small: {scale:0.85, label:"Petit"},
+  normal:{scale:1,    label:"Normal"},
+  big:   {scale:1.3,  label:"Grand"},
+  huge:  {scale:1.7,  label:"Géant"}
+};
+const CAT_SIZES=Object.keys(CAT_SIZE_DEF);
+const catScale=()=>CAT_SIZE_DEF[CAT_SIZES.includes(state.catSize)?state.catSize:"normal"].scale;
 const TE_GROUPS=[
   {id:"fond",name:"Fonds",vars:[["--paper","Fond de l'app"],["--card","Cartes"],["--soft","Fonds discrets"],["--line","Bordures"]]},
   {id:"texte",name:"Textes",vars:[["--ink","Texte principal"],["--muted","Texte secondaire"],["--faint","Texte discret"]]},
@@ -2993,7 +3092,7 @@ function sanitizeLabels(o){const out={};if(o&&typeof o==="object")for(const id o
   if(typeof v==="string"){const t=v.trim().slice(0,24);if(t&&t!==STAT_META[id].label)out[id]=t;}}return out;}
 function metricLabel(id){const m=STAT_META[id];if(!m)return"";const c=state.labels&&state.labels[id];
   return (typeof c==="string"&&c.trim())?c:m.label;}
-let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",customTheme:null,catFreq:"normal",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,savingsPerMonth:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpCat:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2,cmpListOpen:false};
+let state={months:{},customBudgets:{},current:mKey(new Date()),theme:"forest",customTheme:null,catFreq:"normal",catSize:"normal",categories:DEFAULT_CATEGORIES.map(c=>({...c})),budgetView:"cards",savings:{detailed:false,total:0,deduct:true,lines:[]},savingsMigrated:false,savingsPerMonth:false,statsOrder:STAT_IDS.slice(),heroMetric:"reste",labels:{},confirmDelete:{budget:true,expense:false,income:false,savings:false},compact:false,moveMode:false,sortBudgets:"recent",sortExpenses:"recent",seq:0,showSearch:false,showEntryPct:false,cmpCat:null,cmpCbPoste:null,cmpYear:null,cmpA:null,cmpB:null,cmpSpan:1,cmpCbA:null,cmpCbB:null,cmpMonths:6,cmpDensity:"med",cmpListCount:2,cmpListOpen:false};
 // Tris (configurables dans les Réglages). Deux tris indépendants : les budgets (postes) et les
 // dépenses. Par défaut « plus récent d'abord » (ordre décroissant d'ajout). « Manuel » = ordre
 // choisi au glisser-déposer (postes uniquement). Un « seq » d'ordre d'ajout est attribué à chaque
@@ -3017,7 +3116,7 @@ const expanded=new Set();
 let detailLineId=null,detailEntrySearch="";
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
-try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;state.customTheme=sanitizeCustomTheme(d.customTheme);if(isThemeId(d.theme))state.theme=d.theme;if(CAT_FREQS.includes(d.catFreq))state.catFreq=d.catFreq;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpCat==="string")state.cmpCat=d.cmpCat;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med");if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen}}
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;state.customTheme=sanitizeCustomTheme(d.customTheme);if(isThemeId(d.theme))state.theme=d.theme;if(CAT_FREQS.includes(d.catFreq))state.catFreq=d.catFreq;if(CAT_SIZES.includes(d.catSize))state.catSize=d.catSize;if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(typeof d.compact==="boolean")state.compact=d.compact;if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(typeof d.cmpCat==="string")state.cmpCat=d.cmpCat;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med");if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen}}
 catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
@@ -3062,7 +3161,15 @@ function applyShowEntryPct(){
 }
 /* Points d'entrée de l'easter egg utilisés par les réglages. Déclarés ici (donc avant le premier
    applyCatFreq() de l'initialisation) et remplacés plus bas par le bloc de Zéphyr. */
-let catSpawnNow=()=>false, catRescheduleCat=()=>{};
+let catSpawnNow=()=>false, catRescheduleCat=()=>{}, catRestart=()=>false;
+/* Taille : une seule variable CSS (--cs) porte l'échelle, et le bloc de Zéphyr en déduit ses
+   dimensions en pixels au moment d'apparaître. Changer le réglage relance donc un passage,
+   pour voir tout de suite le résultat plutôt que d'attendre le suivant. */
+function applyCatSize(){
+  const sel=document.getElementById("catSizeSel");
+  if(sel)sel.value=CAT_SIZES.includes(state.catSize)?state.catSize:"normal";
+  document.documentElement.style.setProperty("--cs",String(catScale()));
+}
 /* Réglage de la fréquence : le sélecteur reflète l'état, et la minuterie de Zéphyr est
    reprogrammée aussitôt (pas besoin d'attendre le passage suivant ni de recharger). */
 function applyCatFreq(){
@@ -3074,8 +3181,14 @@ function applyCatFreq(){
 }
 document.getElementById("catFreqSel").onchange=e=>{
   state.catFreq=CAT_FREQS.includes(e.target.value)?e.target.value:"normal";
-  applyCatFreq();commit();
+  applyCatFreq();applyCatSize();commit();
   toast(state.catFreq==="off"?"Zéphyr ne passera plus":"Zéphyr : passage "+CAT_FREQ_DEF[state.catFreq].label.toLowerCase());
+};
+document.getElementById("catSizeSel").onchange=e=>{
+  state.catSize=CAT_SIZES.includes(e.target.value)?e.target.value:"normal";
+  applyCatSize();commit();
+  toast("Zéphyr : taille "+CAT_SIZE_DEF[state.catSize].label.toLowerCase());
+  if(state.catFreq!=="off")catRestart();
 };
 document.getElementById("catCallBtn").onclick=()=>{
   if(state.catFreq==="off"){toast("Choisis d'abord une fréquence");return;}
@@ -3288,7 +3401,7 @@ function sanitizeGlobalSavings(sv){
 }
 migrate();
 let saveFailWarned=false;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen}));saveFailWarned=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,catSize:state.catSize,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen}));saveFailWarned=false;}
   catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
 
 function emptySavings(){return{detailed:false,total:0,deduct:true,lines:[]};}
@@ -6689,7 +6802,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;re
 
 /* ---------- HISTORIQUE (annuler / rétablir) ---------- */
 let history=[],hIndex=-1,recTimer;
-const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
+const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,catSize:state.catSize,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
   if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
@@ -6712,7 +6825,7 @@ function gdMarkDataChanged(){
 }
 function updateUndoUI(){document.getElementById("undoBtn").disabled=hIndex<=0;
   document.getElementById("redoBtn").disabled=hIndex>=history.length-1;}
-function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.customBudgets=(d.customBudgets&&typeof d.customBudgets==="object")?d.customBudgets:{};state.current=d.current;state.customTheme=sanitizeCustomTheme(d.customTheme);state.theme=isThemeId(d.theme)?d.theme:state.theme;state.catFreq=CAT_FREQS.includes(d.catFreq)?d.catFreq:state.catFreq;
+function restoreSnap(s){const d=JSON.parse(s);state.months=d.months;state.customBudgets=(d.customBudgets&&typeof d.customBudgets==="object")?d.customBudgets:{};state.current=d.current;state.customTheme=sanitizeCustomTheme(d.customTheme);state.theme=isThemeId(d.theme)?d.theme:state.theme;state.catFreq=CAT_FREQS.includes(d.catFreq)?d.catFreq:state.catFreq;state.catSize=CAT_SIZES.includes(d.catSize)?d.catSize:state.catSize;
   state.categories=Array.isArray(d.categories)&&d.categories.length?d.categories:DEFAULT_CATEGORIES.map(c=>({...c}));
   state.budgetView=(d.budgetView==="cards"||d.budgetView==="flow")?d.budgetView:state.budgetView;
   if(d.savings&&typeof d.savings==="object")state.savings=sanitizeGlobalSavings(d.savings);
@@ -6728,7 +6841,7 @@ function undo(){
   clearTimeout(recTimer);
   const before=history[hIndex];hIndex--;const after=history[hIndex];
   restoreSnap(after);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
   queueHistoryChange("undo",diffSnapshots(before,after));
 }
 function redo(){
@@ -6736,7 +6849,7 @@ function redo(){
   clearTimeout(recTimer);
   const before=history[hIndex];hIndex++;const after=history[hIndex];
   restoreSnap(after);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
   queueHistoryChange("redo",diffSnapshots(before,after));
 }
 
@@ -6913,7 +7026,7 @@ function longPressInfo(el,msg,ms){
   return()=>fired;
 }
 function exportData(){
-  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen},null,2);
+  const payload=JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,catSize:state.catSize,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen},null,2);
   const blob=new Blob([payload],{type:"application/json"});const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="budget-"+new Date().toISOString().slice(0,10)+".json";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -7009,6 +7122,8 @@ function importData(file){
     state.customTheme=sanitizeCustomTheme(d.customTheme);
     if(isThemeId(d.theme))state.theme=d.theme;
     state.catFreq=CAT_FREQS.includes(d.catFreq)?d.catFreq:"normal";
+  state.catSize=CAT_SIZES.includes(d.catSize)?d.catSize:"normal";
+    state.catSize=CAT_SIZES.includes(d.catSize)?d.catSize:"normal";
     if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
     if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
     else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
@@ -7020,7 +7135,7 @@ function importData(file){
     if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths);if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+    migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
   }catch(e){toast("Fichier de sauvegarde invalide");}};
@@ -7203,7 +7318,7 @@ window.addEventListener("pagehide",flushAll);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushAll();});
 window.addEventListener("blur",flushAll);
 
-applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
+applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();ensure(state.current);record();render();
 if(localDataCorrupted)toast("⚠ Données locales illisibles — nouveau départ. Si tu as un export .json, réimporte-le depuis les Réglages.",7000);
 
 /* ---------- Photos de Zéphyr (easter egg) ----------
@@ -7517,6 +7632,21 @@ function closePhotoModal(){
   });
 })();
 
+/* Accessoire de saison (hémisphère nord) : bonnet à pompon de décembre à février, rien le reste
+   de l'année. Le bonnet vit dans le groupe de la tête, pour suivre ses mouvements. */
+function catSeason(){
+  const m=new Date().getMonth()+1;
+  return (m===12||m<=2)?"winter":null;
+}
+function catHatSVG(){
+  return '<g class="cHat">'
+    +'<path d="M50.4,4.6 C51,.6 54.2,-1.6 57.6,-1.4 C61.2,-1.2 63.8,1.4 64.2,5.2'
+    +' C60,3.4 54.6,3.2 50.4,4.6 Z" fill="#c0392b"/>'
+    +'<path d="M49.8,6.4 C54.4,4.4 60.4,4.6 64.8,6.8 L64.4,9 C59.8,6.6 54,6.4 49.4,8.6 Z" fill="#f1efe7"/>'
+    +'<circle cx="58.4" cy="-2.6" r="2.3" fill="#f1efe7"/>'
+    +'</g>';
+}
+
 /* ---------- Zéphyr, le petit chat noir surprise ----------
    Un clin d'œil discret : de temps en temps, Zéphyr traverse le bas de l'écran
    en marchant sur ses 4 pattes, s'arrête — parfois pour grimper se lover sur un bouton de la
@@ -7557,7 +7687,11 @@ function closePhotoModal(){
     if(document.hidden)return false;
     const pm=document.getElementById("photoModal");
     if(pm&&!pm.classList.contains("hidden"))return false;  // pas de chat pendant qu'on regarde ses photos
-    const CAT_W=58,CAT_H=28;
+    // Gabarit réel du passage : figé à l'apparition, pour que toutes les distances calculées
+    // ensuite (perchoir, saut, corde, empreintes) restent cohérentes entre elles.
+    const cs=catScale();
+    const sc=v=>Math.round(v*cs);
+    const CAT_W=sc(58),CAT_H=sc(28);
     const vw=Math.max(200,window.innerWidth||360);
     const vh=Math.max(300,window.innerHeight||640);
     const el=document.createElement("div");
@@ -7567,14 +7701,15 @@ function closePhotoModal(){
     // oreilles doublées, yeux en amande et moustaches. Les segments se chevauchent de quelques
     // dixièmes aux articulations pour qu'aucune couture n'apparaisse quand ils pivotent.
     const gid="catSheen"+(catSvgSeq++);
+    const season=catSeason();
     /* Une patte = hanche + jarret + coussinet. Les angles de repos (cuisse inclinée, jarret
        coudé vers l'arrière sur les pattes arrière, antérieurs presque droits) sont portés par
        les groupes STATIQUES : les groupes animés .cUp/.cLo n'ont jamais d'attribut transform. */
     const leg=(cls,x,y,shade,paw,hip,knee)=>'<g class="cLeg '+cls+'" transform="translate('+x+','+y+') rotate('+hip+')">'
-      +'<g class="cUp"><rect x="-1.95" y="-1" width="3.9" height="7.6" rx="1.95" fill="'+shade+'"/>'
+      +'<g class="cUp"><rect x="-2.25" y="-1" width="4.5" height="7.6" rx="2.25" fill="'+shade+'"/>'
       +'<g transform="translate(0,6.2) rotate('+knee+')"><g class="cLo">'
-      +'<rect x="-1.55" y="-.8" width="3.1" height="6.2" rx="1.55" fill="'+shade+'"/>'
-      +'<ellipse cx=".5" cy="5.3" rx="2.05" ry="1.2" fill="'+paw+'"/>'
+      +'<rect x="-1.8" y="-.8" width="3.6" height="6.2" rx="1.8" fill="'+shade+'"/>'
+      +'<ellipse cx=".5" cy="5.3" rx="2.3" ry="1.35" fill="'+paw+'"/>'
       +'</g></g></g></g>';
     el.innerHTML='<div class="catShadow"></div><div class="catLift">'
       +'<svg viewBox="0 0 70 34" aria-hidden="true" focusable="false">'
@@ -7587,12 +7722,12 @@ function closePhotoModal(){
       /* Queue : 3 segments emboîtés. Les groupes intermédiaires portent l'angle de repos (une
          courbe en S, comme une queue portée haute) ; les groupes animés, eux, ne portent aucun
          attribut transform et se contentent d'ajouter leur rotation par-dessus. */
-      +'<g class="cTail" transform="translate(19.5,13.2) rotate(16)"><g class="cT1">'
-      +'<rect x="-7.5" y="-1.3" width="8.4" height="2.6" rx="1.3" fill="#0e0e0e"/>'
+      +'<g class="cTail" transform="translate(18.6,12.6) rotate(16)"><g class="cT1">'
+      +'<rect x="-7.5" y="-1.5" width="8.4" height="3" rx="1.5" fill="#0e0e0e"/>'
       +'<g transform="translate(-7.5,0) rotate(-11)"><g class="cT2">'
-      +'<rect x="-6.2" y="-1.15" width="7" height="2.3" rx="1.15" fill="#0e0e0e"/>'
+      +'<rect x="-6.2" y="-1.3" width="7" height="2.6" rx="1.3" fill="#0e0e0e"/>'
       +'<g transform="translate(-6.2,0) rotate(-15)"><g class="cT3">'
-      +'<rect x="-5.4" y="-.95" width="6.2" height="1.9" rx=".95" fill="#0e0e0e"/>'
+      +'<rect x="-5.4" y="-1.05" width="6.2" height="2.1" rx="1.05" fill="#0e0e0e"/>'
       +'</g></g></g></g></g></g>'
 
       // pattes du côté opposé : plus sombres et un peu plus hautes (perspective), derrière le corps
@@ -7600,17 +7735,17 @@ function closePhotoModal(){
       +leg("cLegFR",45.5,17.2,"#070707","#0b0b0b",4,-4)
       // tronc : bande dorsale creusée au ventre, puis les deux masses qui donnent la silhouette
       +'<g class="cBody">'
-      +'<path d="M23.5,11.4 C31,9.4 41,9.2 48.5,11 C49.2,14.4 49.2,17.4 48.6,20.4'
-      +' C41,22.3 31,22.3 23.5,20.6 C22.9,17.4 22.9,14.6 23.5,11.4 Z" fill="#111"/>'
-      // arrière-train (masse haute et ronde) et cage thoracique (plus basse, plus étroite)
-      +'<ellipse cx="25.6" cy="16" rx="7.4" ry="6.4" fill="#111"/>'
-      +'<ellipse cx="45.6" cy="16.2" rx="7.6" ry="6.2" fill="#111"/>'
+      +'<path d="M23,10.2 C31,8 41.5,7.8 49,9.8 C49.8,13.6 49.8,17.6 49.2,21.4'
+      +' C41.5,23.6 31,23.6 23,21.6 C22.3,17.6 22.3,14.2 23,10.2 Z" fill="#111"/>'
+      // arrière-train (masse haute et ronde) et cage thoracique (un peu plus basse et large)
+      +'<ellipse cx="25.4" cy="16" rx="8.2" ry="7.6" fill="#111"/>'
+      +'<ellipse cx="45.8" cy="16.2" rx="8.4" ry="7.2" fill="#111"/>'
       // encolure : le cou s'élève de l'épaule vers la tête, ce qui décolle la tête du tronc
-      +'<path d="M47.6,11.4 C50.4,9.6 53.4,8.6 56.2,8.8 C56.4,11.6 55.6,13.8 53.8,15.4'
-      +' C52,17 49.6,17.2 47.6,16.2 Z" fill="#111"/>'
+      +'<path d="M47.8,10.6 C50.6,8.8 53.6,8 56.4,8.2 C56.6,11.2 55.8,13.6 54,15.2'
+      +' C52.2,16.8 49.8,17 47.8,16 Z" fill="#111"/>'
       // collerette : la fourrure du poitrail déborde sur l'épaule (une pointe, pas un bloc)
-      +'<path d="M50.2,13.4 C52.6,14.6 53.6,16.6 53.4,19 C52.6,16.8 51.4,15.2 49.4,14.2 Z" fill="#151515"/>'
-      +'<ellipse cx="34" cy="12.4" rx="12.5" ry="4" fill="url(#'+gid+')"/>'
+      +'<path d="M50.6,13.2 C53.2,14.6 54.2,16.8 54,19.6 C53.2,17.2 51.8,15.4 49.6,14.2 Z" fill="#151515"/>'
+      +'<ellipse cx="34" cy="11.8" rx="13" ry="4.2" fill="url(#'+gid+')"/>'
       +'</g>'
       // pattes du côté visible : un ton plus clair, devant le corps
       +leg("cLegBL",29.5,18.4,"#0d0d0d","#151515",-13,20)
@@ -7644,6 +7779,7 @@ function closePhotoModal(){
       +'<g stroke="rgba(255,255,255,.4)" stroke-width=".46" stroke-linecap="round" fill="none">'
       +'<path d="M62.6,11.5 L68.6,9.8"/><path d="M62.8,12.3 L69,12.2"/><path d="M62.6,13 L68.4,14.6"/>'
       +'<path d="M59.4,11.9 L55.4,10.8"/></g>'
+      +(season==="winter"?catHatSVG():"")
       +'</g>'
       +'</g></svg></div>';
     document.body.appendChild(el);
@@ -7710,13 +7846,16 @@ function closePhotoModal(){
       requestAnimationFrame(()=>{lift.style.transform="translateY("+y+"px)";});});}
     const POSES=["walking","crouch","leaping","land","dropping","falling","rising","dashing","brake",
       "creep","curl","stretch","idle","loaf","sit","look","groom","wiggle","flick",
-      "gaze","swat","chute","moto","wheelie"];
+      "gaze","swat","chute","moto","wheelie","rappel","skate","ollie","carpet"];
     // Poses « posé » : c'est là qu'on invite à le toucher.
     const RESTING=["idle","curl","loaf","sit","look","groom","flick","stretch"];
+    // Allures au sol : ce sont elles qui laissent des empreintes.
+    const TRACKING=["walking","creep","dashing","brake"];
     function pose(cls){
       for(const p of POSES)if(p!==cls)el.classList.remove(p);
       if(cls)el.classList.add(cls);
       el.classList.toggle("hint",!tapped&&RESTING.indexOf(cls)>=0);
+      if(TRACKING.indexOf(cls)>=0)startPrints(cls==="dashing");else stopPrints();
     }
     // « perché » n'est pas une pose mais un état (il pilote l'ombre au sol) : géré à part pour
     // qu'un changement de pose ne l'effface pas.
@@ -7832,7 +7971,130 @@ function closePhotoModal(){
       lift.appendChild(m);
       return m;
     }
-    function cleanupCat(){el.remove();if(ball){ball.remove();ball=null;}if(fly){fly.remove();fly=null;}}
+    /* Corde de rappel : ancrée en haut de l'écran, donc hors du chat (qui ne mesure que 28px).
+       Elle est tracée d'un coup sur toute sa longueur — une corde qui pend du plafond — et le
+       chat descend le long. */
+    let rope=null;
+    function makeRope(x){
+      rope=document.createElement("div");
+      rope.className="catRope";
+      rope.style.left=Math.round(x)+"px";
+      rope.style.height=Math.max(40,vh-sc(27))+"px";
+      document.body.appendChild(rope);
+      return rope;
+    }
+    /* Pelote de laine : elle roule comme la boulette, mais laisse derrière elle un fil qui se
+       déroule. Le fil est tracé d'avance jusqu'au point d'arrêt puis révélé au fur et à mesure
+       (stroke-dashoffset) : ça reste synchrone avec le roulement sans le suivre image par image. */
+    let yarn=null,yarnTrail=null;
+    function makeYarn(x){
+      yarn=document.createElement("div");
+      yarn.className="catYarn";
+      yarn.innerHTML='<svg viewBox="0 0 14 14" aria-hidden="true">'
+        +'<circle cx="7" cy="7" r="6.4" fill="#d3798a"/>'
+        +'<g stroke="#a8505f" stroke-width=".8" fill="none" stroke-linecap="round">'
+        +'<path d="M1.4,5.4 C5,3.4 9.4,3.8 12.4,6.2"/><path d="M.9,8.4 C4.6,6.4 9.6,6.8 13,9.2"/>'
+        +'<path d="M4.2,1.2 C3.2,5 4,9.6 6.6,13.2"/><path d="M9.4,1.1 C8.6,5 9.2,9.4 11.6,12.6"/></g>'
+        +'</svg>';
+      yarn.style.transform="translateX("+x+"px) rotate(0deg)";
+      document.body.appendChild(yarn);
+      return yarn;
+    }
+    function makeYarnTrail(x0,x1,ms){
+      const y=vh-sc(14);
+      // fil légèrement ondulé entre le point d'entrée et le point d'arrêt
+      const n=6;let d="M"+x0+","+y;
+      for(let i=1;i<=n;i++){
+        const px=x0+(x1-x0)*(i/n), py=y+(i%2?-5:4);
+        d+=" Q"+(x0+(x1-x0)*((i-0.5)/n))+","+py+" "+px+","+y;
+      }
+      yarnTrail=document.createElementNS("http://www.w3.org/2000/svg","svg");
+      yarnTrail.setAttribute("class","catYarnTrail");
+      yarnTrail.setAttribute("aria-hidden","true");
+      const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+      path.setAttribute("d",d);
+      yarnTrail.appendChild(path);
+      document.body.appendChild(yarnTrail);
+      const len=Math.abs(x1-x0)*1.35+40;
+      path.style.strokeDasharray=len;
+      path.style.strokeDashoffset=len;
+      requestAnimationFrame(()=>{void path.getBoundingClientRect();
+        requestAnimationFrame(()=>{
+          path.style.transition="stroke-dashoffset "+ms+"ms cubic-bezier(.1,.55,.3,1)";
+          path.style.strokeDashoffset="0";
+        });});
+      return yarnTrail;
+    }
+    function rollYarn(x,ms){
+      if(!yarn)return;
+      const cur=parseFloat(/translateX\((-?[\d.]+)px\)/.exec(yarn.style.transform)[1]);
+      const deg=(x-cur)*6;
+      yarn.style.transition="transform "+ms+"ms cubic-bezier(.1,.55,.3,1)";
+      requestAnimationFrame(()=>{void yarn.offsetWidth;
+        requestAnimationFrame(()=>{if(yarn)yarn.style.transform="translateX("+x+"px) rotate("+deg+"deg)";});});
+    }
+    /* Planche à roulettes : même viewBox que le chat, la planche passe pile sous ses coussinets. */
+    function makeBoard(){
+      const b=document.createElement("div");
+      b.className="catBoard";
+      b.innerHTML='<svg viewBox="0 0 70 34" aria-hidden="true">'
+        +'<path d="M17,29.6 C19,27.6 23,27.2 26,27.4 L50,27.4 C53,27.2 57,27.6 59,29.6'
+        +' C56.6,30.8 53,31 50,30.8 L26,30.8 C23,31 19.4,30.8 17,29.6 Z" fill="#3f4a63"/>'
+        +'<path d="M24,28.2 L52,28.2" stroke="#59678a" stroke-width=".8" fill="none"/>'
+        +'<path d="M27,30.8 L27,32 M49,30.8 L49,32" stroke="#7a7f8c" stroke-width="1.4" stroke-linecap="round"/>'
+        +'<g class="bWheel"><circle cx="27" cy="32.4" r="2.1" fill="#e6c65a" stroke="#8d7620" stroke-width=".6"/></g>'
+        +'<g class="bWheel"><circle cx="49" cy="32.4" r="2.1" fill="#e6c65a" stroke="#8d7620" stroke-width=".6"/></g>'
+        +'</svg>';
+      lift.appendChild(b);
+      return b;
+    }
+    /* Tapis volant : franges aux deux bouts, motif simple, et une ondulation portée par le CSS. */
+    function makeRug(){
+      const r=document.createElement("div");
+      r.className="catRug";
+      r.innerHTML='<svg viewBox="0 0 70 34" aria-hidden="true">'
+        +'<path d="M11,23.8 C24,21.6 48,21.6 61,23.8 C48,27 24,27 11,23.8 Z" fill="#8e4a6b"/>'
+        +'<path d="M16,23.6 C27,21.9 45,21.9 56,23.6 C45,25.9 27,25.9 16,23.6 Z" fill="#b0688a"/>'
+        +'<path d="M24,23.2 L26,24.5 M34,22.9 L36,24.2 M44,23.2 L46,24.5" stroke="#f0d9a8" stroke-width=".7" stroke-linecap="round" fill="none"/>'
+        +'<g stroke="#f0d9a8" stroke-width=".8" stroke-linecap="round">'
+        +'<path d="M11,23.8 L7.4,23 M11.4,24.7 L7.6,24.4 M11.8,25.5 L8.2,25.8"/>'
+        +'<path d="M61,23.8 L64.6,23 M60.6,24.7 L64.4,24.4 M60.2,25.5 L63.8,25.8"/></g>'
+        +'</svg>';
+      lift.appendChild(r);
+      return r;
+    }
+    /* Empreintes : semées pendant la marche, décalées alternativement de part et d'autre de son
+       axe, et effacées toutes seules. On lit sa position réelle (l'animation est en cours), pas
+       sa position cible. */
+    let printTimer=null,printSide=1;
+    function stampPrint(){
+      // Sécurité : si le chat a disparu du DOM sans passer par le nettoyage, on coupe le semis
+      // au lieu de tamponner indéfiniment des empreintes à la position zéro.
+      if(!el.isConnected){stopPrints();return;}
+      const r=el.getBoundingClientRect();
+      const cx=(r.width?r.left+r.width/2:curX+CAT_W/2)-dir*sc(5);
+      const aloft=/translateY\((-?[\d.]+)px\)/.exec(lift.style.transform);
+      if(aloft&&Math.abs(parseFloat(aloft[1]))>sc(3))return;   // en l'air : pas d'empreinte
+      const d=document.createElement("div");
+      d.className="catPrint";
+      d.innerHTML=pawSVG();
+      d.style.left=cx+"px";
+      d.style.top=(footY-sc(3)+printSide*sc(2))+"px";
+      d.style.setProperty("--prot",(dir>0?100:80)+printSide*6+"deg");
+      printSide=-printSide;
+      document.body.appendChild(d);
+      setTimeout(()=>d.remove(),2700);
+    }
+    function startPrints(fast){
+      stopPrints();
+      printTimer=setInterval(stampPrint,fast?150:240);
+    }
+    function stopPrints(){if(printTimer){clearInterval(printTimer);printTimer=null;}}
+    function cleanupCat(){
+      stopPrints();el.remove();
+      [["ball",ball],["fly",fly],["rope",rope],["yarn",yarn],["yarnTrail",yarnTrail]].forEach(([k,n])=>{if(n)n.remove();});
+      ball=fly=rope=yarn=yarnTrail=null;
+    }
 
     // ---- Construction d'une séquence d'étapes {enter,dur}, tirée au hasard ----
     const steps=[];
@@ -7845,24 +8107,25 @@ function closePhotoModal(){
        - creep  : il approche au ralenti, ventre au sol, à l'affût ;
        - perch  : il était déjà là, pelotonné sur un bouton de la barre du haut. */
     const perchTarget=pickClimbTarget(vw,vh);
-    let mode=pick(["walk","walk","dash","drop","peek","creep","perch","zoomies","slide","ball",
-      "fly","chute","moto"]);
+    let mode=pick(["walk","walk","walk","dash","drop","peek","creep","perch","zoomies","slide",
+      "ball","fly","chute","moto","rappel","yarn","skate","carpet"]);
     if(mode==="perch"&&!perchTarget)mode="walk";
-    // La moto se suffit à elle-même : il arrive, fait son numéro et repart avec, sans passer par
-    // les activités au sol ni la sortie classique (il ne peut pas s'éloigner à pied avec la moto).
-    const selfRun=(mode==="moto");
+    // Un véhicule se suffit à lui-même : il arrive, fait son numéro et repart avec, sans passer
+    // par les activités au sol ni la sortie classique (il ne peut pas s'en aller à pied avec).
+    const selfRun=(mode==="moto"||mode==="skate"||mode==="carpet");
     // Il ne traverse sans s'arrêter que s'il est arrivé en marchant ou en courant.
     const justPassing=(mode==="walk"&&Math.random()<0.22)||(mode==="dash"&&Math.random()<0.34);
 
     // Perchoir : soit celui de l'entrée « perch », soit un grimper en cours de route.
     const target=mode==="perch"?perchTarget
-      :(!justPassing&&!selfRun&&mode!=="ball"&&mode!=="fly"&&mode!=="chute"&&Math.random()<0.45?perchTarget:null);
+      :(!justPassing&&!selfRun&&["ball","fly","chute","rappel","yarn"].indexOf(mode)<0
+        &&Math.random()<0.45?perchTarget:null);
     const groundTopRef=groundTop;
     let walkX=restX,jumpDy=null;
     if(target){
       walkX=Math.max(20,Math.min(vw-CAT_W-20,Math.round(target.x-CAT_W/2)));
       // Se love SUR le bouton : pattes sur son bord supérieur, corps au-dessus (bouton visible).
-      const perchTop=Math.max(2,Math.round(target.top-CAT_H+5));
+      const perchTop=Math.max(2,Math.round(target.top-CAT_H+sc(5)));
       jumpDy=perchTop-groundTopRef; // négatif = vers le haut
     }
     const climbs=jumpDy!=null&&mode!=="perch";
@@ -7882,8 +8145,8 @@ function closePhotoModal(){
     }else if(mode==="peek"){
       // Il escalade le bord du bas : d'abord la tête, il vérifie que la voie est libre, puis il monte.
       el.style.transform="translateX("+restX+"px)";curX=restX;
-      liftNow(38);
-      steps.push({enter:()=>{liftFree();pose("rising");liftTo(13);},dur:620});
+      liftNow(sc(38));
+      steps.push({enter:()=>{liftFree();pose("rising");liftTo(sc(13));},dur:620});
       steps.push({enter:()=>pose("look"),dur:ri(1300,2100)});
       steps.push({enter:()=>{pose("rising");liftTo(0);},dur:520});
       steps.push({enter:()=>{pose("land");dustAtCat(1);},dur:170});
@@ -7931,12 +8194,12 @@ function closePhotoModal(){
       el.style.transform="translateX("+startX+"px)";
       const stop=Math.max(24,Math.min(vw-CAT_W-24,walkX+dir*22));
       const wait=Math.max(20,Math.min(vw-CAT_W-20,stop-dir*30));
-      steps.push({enter:()=>{makeBall(startX+dir*CAT_W*0.6);rollBall(stop+dir*14,1500);},dur:520});
+      steps.push({enter:()=>{makeBall(startX+dir*CAT_W*0.6);rollBall(stop+dir*sc(14),1500);},dur:520});
       steps.push({enter:()=>{xTrans("transform 900ms cubic-bezier(.2,.6,.3,1)");
         pose("dashing");dustAtCat(2);moveX(wait);},dur:900});
       steps.push({enter:()=>{xTrans(WALK_TRANS);pose("wiggle");},dur:ri(600,950)});
       steps.push({enter:()=>pose("crouch"),dur:180});
-      steps.push({enter:()=>{pose("leaping");liftTo(-16);moveX(stop);},dur:340});
+      steps.push({enter:()=>{pose("leaping");liftTo(sc(-16));moveX(stop);},dur:340});
       steps.push({enter:()=>{pose("dropping");liftTo(0);},dur:260});
       steps.push({enter:()=>{pose("land");popBall();dustAtCat(3);},dur:220});
       steps.push({enter:()=>pose("flick"),dur:ri(700,1100)});
@@ -7946,16 +8209,16 @@ function closePhotoModal(){
       el.style.transform="translateX("+startX+"px)";curX=startX;
       const fx1=Math.max(30,Math.min(vw-30,walkX+CAT_W/2+dir*10));
       const fx2=Math.max(30,Math.min(vw-30,fx1-dir*26));
-      steps.push({enter:()=>{makeFly(startX+dir*40,74);flyTo(fx1,58,1400);
+      steps.push({enter:()=>{makeFly(startX+dir*sc(40),sc(74));flyTo(fx1,sc(58),1400);
         pose("walking");moveX(walkX);},dur:1400});
-      steps.push({enter:()=>{pose("gaze");flyTo(fx2,50,900);},dur:950});
-      steps.push({enter:()=>{pose("swat");flyTo(fx1,62,700);},dur:780});
+      steps.push({enter:()=>{pose("gaze");flyTo(fx2,sc(50),900);},dur:950});
+      steps.push({enter:()=>{pose("swat");flyTo(fx1,sc(62),700);},dur:780});
       steps.push({enter:()=>pose("wiggle"),dur:ri(450,700)});
       steps.push({enter:()=>pose("crouch"),dur:180});
-      steps.push({enter:()=>{pose("leaping");liftTo(-30);flyTo(fx2+dir*18,96,520);},dur:400});
+      steps.push({enter:()=>{pose("leaping");liftTo(sc(-30));flyTo(fx2+dir*sc(18),sc(96),520);},dur:400});
       steps.push({enter:()=>{pose("dropping");liftTo(0);},dur:300});
       steps.push({enter:()=>{pose("land");dustAtCat(2);},dur:200});
-      steps.push({enter:()=>{pose("gaze");flyTo(endX,112,1600);},dur:900});
+      steps.push({enter:()=>{pose("gaze");flyTo(endX,sc(112),1600);},dur:900});
       steps.push({enter:()=>{if(fly){fly.style.opacity="0";}pose("sit");},dur:ri(700,1100)});
       steps.push({enter:()=>{if(fly){fly.remove();fly=null;}pose("flick");},dur:ri(500,900)});
     }else if(mode==="chute"){
@@ -7983,6 +8246,63 @@ function closePhotoModal(){
       steps.push({enter:()=>{xTrans(WALK_TRANS);pose("wheelie");dustAtCat(2);},dur:ri(700,1000)});
       steps.push({enter:()=>{xTrans("transform "+d2+"ms cubic-bezier(.5,0,.7,1)");
         pose("moto");dustAtCat(3);moveX(endX);},dur:d2});
+    }else if(mode==="rappel"){
+      /* Descente en rappel : une ficelle pend du plafond, il se laisse glisser le long, pattes
+         avant sur la corde, lâche tout près du sol et se réceptionne. */
+      el.style.transform="translateX("+restX+"px)";curX=restX;
+      liftNow(-(vh-sc(70)));
+      makeRope(restX+(dir>0?sc(42):sc(16)));
+      steps.push({enter:()=>{liftFree();pose("rappel");liftTo(0);},dur:2650});
+      steps.push({enter:()=>{pose("falling");},dur:150});
+      steps.push({enter:()=>{pose("land");dustAtCat(2);
+        if(rope){rope.style.opacity="0";const r=rope;rope=null;setTimeout(()=>r.remove(),600);}},dur:220});
+      steps.push({enter:()=>pose("look"),dur:ri(600,1000)});
+    }else if(mode==="yarn"){
+      /* Pelote de laine : elle traverse en déroulant son fil, il lui court après, lui saute
+         dessus, puis la tripote à coups de patte avant de s'en désintéresser. */
+      el.style.transform="translateX("+startX+"px)";curX=startX;
+      const x0=startX+dir*CAT_W*0.6;
+      const stop=Math.max(26,Math.min(vw-CAT_W-26,walkX+dir*26));
+      const wait=Math.max(20,Math.min(vw-CAT_W-20,stop-dir*32));
+      steps.push({enter:()=>{makeYarn(x0);makeYarnTrail(x0+sc(7),stop+sc(14),1700);rollYarn(stop+sc(14),1700);},dur:540});
+      steps.push({enter:()=>{xTrans("transform 950ms cubic-bezier(.2,.6,.3,1)");
+        pose("dashing");dustAtCat(2);moveX(wait);},dur:950});
+      steps.push({enter:()=>{xTrans(WALK_TRANS);pose("wiggle");},dur:ri(550,900)});
+      steps.push({enter:()=>pose("crouch"),dur:180});
+      steps.push({enter:()=>{pose("leaping");liftTo(sc(-14));moveX(stop);},dur:330});
+      steps.push({enter:()=>{pose("dropping");liftTo(0);},dur:250});
+      steps.push({enter:()=>{pose("land");dustAtCat(2);},dur:200});
+      // il la tripote : deux coups de patte, la pelote sursaute un peu à chaque fois
+      steps.push({enter:()=>{pose("swat");rollYarn(stop+sc(14)+dir*sc(9),320);},dur:640});
+      steps.push({enter:()=>{pose("swat");rollYarn(stop+sc(14)-dir*sc(6),300);},dur:560});
+      steps.push({enter:()=>pose("sit"),dur:ri(800,1300)});
+      steps.push({enter:()=>pose("flick"),dur:ri(500,900)});
+    }else if(mode==="skate"){
+      /* Skate : il arrive en équilibre sur la planche, place un ollie au milieu de l'écran,
+         se réceptionne et repart de l'autre côté. */
+      el.style.transform="translateX("+startX+"px)";curX=startX;
+      makeBoard();
+      const mid=Math.max(24,Math.min(vw-CAT_W-24,Math.round(vw*(0.4+Math.random()*0.2))));
+      const d1=ri(1100,1500), d2=ri(900,1200);
+      steps.push({enter:()=>{xTrans("transform "+d1+"ms cubic-bezier(.2,.55,.35,1)");
+        pose("skate");moveX(mid);},dur:d1});
+      steps.push({enter:()=>{xTrans(WALK_TRANS);pose("ollie");liftTo(sc(-13));},dur:330});
+      steps.push({enter:()=>{pose("skate");liftTo(0);},dur:260});
+      steps.push({enter:()=>{pose("skate");dustAtCat(2);},dur:200});
+      steps.push({enter:()=>{xTrans("transform "+d2+"ms cubic-bezier(.45,0,.7,1)");moveX(endX);},dur:d2});
+    }else if(mode==="carpet"){
+      /* Tapis volant : il traverse à mi-hauteur, pelotonné au milieu du tapis qui ondule, avec
+         un creux puis une remontée en cours de route. */
+      el.style.transform="translateX("+startX+"px)";curX=startX;
+      makeRug();
+      const h1=-Math.round(vh*0.32), h2=-Math.round(vh*0.22), h3=-Math.round(vh*0.4);
+      liftNow(h1);
+      const d1=ri(1500,1900), d2=ri(1300,1700);
+      steps.push({enter:()=>{liftFree();pose("carpet");
+        xTrans("transform "+d1+"ms cubic-bezier(.3,.3,.5,.9)");moveX(Math.round(vw*0.45));
+        liftTo(h2);},dur:d1});
+      steps.push({enter:()=>{xTrans("transform "+d2+"ms cubic-bezier(.4,.1,.6,1)");
+        moveX(endX);liftTo(h3);},dur:d2});
     }else{
       el.style.transform="translateX("+startX+"px)";
       steps.push({enter:()=>{pose("walking");moveX(justPassing?endX:walkX);},dur:justPassing?walkOutDur:walkInDur});
@@ -8053,7 +8373,7 @@ function closePhotoModal(){
           pose("dashing");dustAtCat(2);moveX(endX);},dur:d});
       }else if(ex==="duck"){
         list.push({enter:()=>pose("look"),dur:520});
-        list.push({enter:()=>{pose("rising");liftTo(40);},dur:560});
+        list.push({enter:()=>{pose("rising");liftTo(sc(40));},dur:560});
       }else{
         list.push({enter:()=>{pose("walking");moveX(endX);},dur:walkOutDur});
       }
@@ -8082,9 +8402,11 @@ function closePhotoModal(){
       catPurr();
       const out=[];
       // En moto, il ne peut pas partir à pied : il remet les gaz et disparaît avec.
-      if(el.querySelector(".catMoto")){
-        out.push({enter:()=>{xTrans("transform 820ms cubic-bezier(.5,0,.7,1)");
-          pose("moto");dustAtCat(2);moveX(endX);},dur:840});
+      const ride=el.querySelector(".catMoto")?"moto":el.querySelector(".catBoard")?"skate"
+        :el.querySelector(".catRug")?"carpet":null;
+      if(ride){
+        out.push({enter:()=>{xTrans("transform 900ms cubic-bezier(.5,0,.7,1)");
+          pose(ride);if(ride!=="carpet")dustAtCat(2);moveX(endX);},dur:920});
         runSteps(out);
         setTimeout(openPhotoModal,300);
         return;
@@ -8092,7 +8414,7 @@ function closePhotoModal(){
       xTrans(WALK_TRANS);
       // S'il est encore en l'air (parachute, saut, bond après le papillon), il se pose d'abord.
       const aloft=/translateY\((-?[\d.]+)px\)/.exec(lift.style.transform);
-      if(aloft&&Math.abs(parseFloat(aloft[1]))>2&&!perched){
+      if(aloft&&Math.abs(parseFloat(aloft[1]))>sc(2)&&!perched){
         out.push({enter:()=>{pose("dropping");liftTo(0);
           const c=el.querySelector(".catChute");if(c){c.classList.add("off");setTimeout(()=>c.remove(),900);}},dur:420});
         out.push({enter:()=>{pose("land");dustAtCat(2);},dur:150});
@@ -8134,6 +8456,16 @@ function closePhotoModal(){
   // Points d'entrée utilisés par les réglages (déclarés plus haut) : « le faire venir » et
   // reprogrammation après un changement de fréquence.
   catSpawnNow=()=>{const ok=spawnEasterCat();planNext(false);return ok;};
+  /* Relance : on efface le passage en cours et ses accessoires, puis on en déclenche un neuf.
+     Sert au changement de taille, pour voir le résultat tout de suite. */
+  catRestart=()=>{
+    const c=document.querySelector(".easterCat");
+    if(c)c.remove();
+    document.querySelectorAll(".catFly,.catBall,.catYarn,.catYarnTrail,.catRope,.catPrint,.catDust")
+      .forEach(e=>e.remove());
+    planNext(false);
+    return spawnEasterCat();
+  };
   catRescheduleCat=()=>{
     const f=freqDef();
     if(!f.max){nextAt=null;return;}
@@ -8265,7 +8597,7 @@ async function gdApi(url,opt,_retried,keepalive){
 function gdSerialize(){
   dataUpdatedAt = Date.now();
   return JSON.stringify({app:"budget",updatedAt:dataUpdatedAt,months:state.months,customBudgets:state.customBudgets,current:state.current,
-    theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
+    theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,catSize:state.catSize,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,
     savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,
     confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,
     cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,
@@ -8281,6 +8613,7 @@ function gdApply(d){
   state.customTheme=sanitizeCustomTheme(d.customTheme);
   if(isThemeId(d.theme))state.theme=d.theme;
   state.catFreq=CAT_FREQS.includes(d.catFreq)?d.catFreq:"normal";
+  state.catSize=CAT_SIZES.includes(d.catSize)?d.catSize:"normal";
   if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;
   if(d.savings&&typeof d.savings==="object"){state.savings=sanitizeGlobalSavings(d.savings);state.savingsMigrated=(typeof d.savingsMigrated==="boolean")?d.savingsMigrated:true;}
   else{state.savings={detailed:false,total:0,deduct:true,lines:[]};state.savingsMigrated=false;}
@@ -8292,7 +8625,7 @@ function gdApply(d){
   if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths);if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen
   expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
   folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
-  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
+  migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
 }
 
 // --- Opérations fichier Drive ---
@@ -8418,7 +8751,7 @@ function gdStableStringify(o){
   return "{"+keys.map(k=>JSON.stringify(k)+":"+gdStableStringify(o[k])).join(",")+"}";
 }
 function gdSnapshotOf(d){
-  return{months:d.months||{},customBudgets:d.customBudgets||{},current:d.current||null,theme:d.theme||null,customTheme:sanitizeCustomTheme(d.customTheme),catFreq:CAT_FREQS.includes(d.catFreq)?d.catFreq:"normal",categories:d.categories||[],
+  return{months:d.months||{},customBudgets:d.customBudgets||{},current:d.current||null,theme:d.theme||null,customTheme:sanitizeCustomTheme(d.customTheme),catFreq:CAT_FREQS.includes(d.catFreq)?d.catFreq:"normal",catSize:CAT_SIZES.includes(d.catSize)?d.catSize:"normal",categories:d.categories||[],
     budgetView:d.budgetView||null,savings:d.savings||null,savingsMigrated:!!d.savingsMigrated,savingsPerMonth:!!d.savingsPerMonth,
     statsOrder:sanitizeStatsOrder(d.statsOrder),heroMetric:sanitizeHeroMetric(d.heroMetric),labels:sanitizeLabels(d.labels),
     expanded:Array.isArray(d.expanded)?[...d.expanded].sort():[],
@@ -8428,7 +8761,7 @@ function gdContentEquals(remote){
   // IMPORTANT : ce local doit contenir exactement les mêmes champs que ceux lus par gdSnapshotOf
   // (dont categories) — sinon la comparaison est toujours « différente » et le raccourci
   // « déjà à jour » ne se déclenche jamais (fausses invites de restauration).
-  const local={months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,categories:state.categories,
+  const local={months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,catFreq:state.catFreq,catSize:state.catSize,categories:state.categories,
     budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,expanded:[...expanded],folded:[...folded]};
   return gdStableStringify(gdSnapshotOf(local))===gdStableStringify(gdSnapshotOf(remote));
 }
