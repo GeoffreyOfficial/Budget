@@ -1447,6 +1447,10 @@ html{scroll-behavior:smooth}
 .easterCat svg{display:block;width:100%;height:100%;overflow:visible}
 .easterCat .catRig{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:50px 32px}
 .easterCat .cHead{transition:transform .5s cubic-bezier(.4,0,.2,1);transform-box:view-box;transform-origin:52px 14px}
+/* Le tronc est seul à « respirer » : mettre à l'échelle tout le gabarit (tête et pattes
+   comprises) donnait l'impression que le chat changeait de taille d'une pose à l'autre. */
+.easterCat .cBody{transform-box:view-box;transform-origin:36px 21px;
+  transition:transform .5s cubic-bezier(.4,0,.2,1)}
 /* Articulations : hanche (haut de la cuisse) et genou (haut du tibia). */
 .easterCat .cUp,.easterCat .cLo{transform-box:fill-box;transform-origin:50% 0%;
   transition:transform .35s ease}
@@ -1486,7 +1490,7 @@ html{scroll-behavior:smooth}
 .easterCat.dashing .cLegFR .cUp,.easterCat.dashing .cLegBL .cUp{animation:hipB .17s linear infinite}
 .easterCat.dashing .cLegFL .cLo,.easterCat.dashing .cLegBR .cLo{animation:kneeA .17s linear infinite}
 .easterCat.dashing .cLegFR .cLo,.easterCat.dashing .cLegBL .cLo{animation:kneeB .17s linear infinite}
-.easterCat.dashing .catRig{transform:scaleX(1.07) scaleY(.94)}
+.easterCat.dashing .catRig{transform:scaleX(1.04) scaleY(.97)}
 .easterCat.dashing .cHead{transform:rotate(-6deg)}
 .easterCat.dashing .cT1{transform:rotate(-16deg)}
 .easterCat.dashing .cT2{transform:rotate(-10deg)}
@@ -1504,7 +1508,8 @@ html{scroll-behavior:smooth}
 .easterCat.brake .cHead{transform:rotate(-12deg)}
 
 /* ---- Approche furtive : ventre au sol, pattes très fléchies, tête tendue en avant ---- */
-.easterCat.creep .catRig{transform:translateY(3px) scaleY(.78)}
+.easterCat.creep .catRig{transform:translateY(3px)}
+.easterCat.creep .cBody{transform:scaleY(.82)}
 .easterCat.creep .cUp{transform:rotate(-12deg)}
 .easterCat.creep .cLo{transform:rotate(46deg)}
 .easterCat.creep .cHead{transform:rotate(4deg)}
@@ -1517,13 +1522,13 @@ html{scroll-behavior:smooth}
 @keyframes hipCreepB{0%,100%{transform:rotate(6deg)}50%{transform:rotate(-16deg)}}
 
 /* ---- Anticipation / détente / réception ---- */
-.easterCat.crouch .catRig{transition:transform .18s ease-out;transform:translateY(2px) scaleY(.8) scaleX(1.07)}
+.easterCat.crouch .catRig{transition:transform .18s ease-out;transform:translateY(2px) scaleY(.87) scaleX(1.04)}
 .easterCat.crouch .cUp{transition:transform .18s ease-out;transform:rotate(-14deg)}
 .easterCat.crouch .cLo{transition:transform .18s ease-out;transform:rotate(52deg)}
 .easterCat.crouch .cHead{transform:rotate(8deg)}
 .easterCat.crouch .cT1{transform:rotate(-24deg)}
 .easterCat.crouch .cT2{transform:rotate(-16deg)}
-.easterCat.leaping .catRig{transition:transform .22s cubic-bezier(.2,.7,.3,1);transform:scaleY(1.1) scaleX(.94) rotate(-11deg)}
+.easterCat.leaping .catRig{transition:transform .22s cubic-bezier(.2,.7,.3,1);transform:scaleY(1.05) scaleX(.97) rotate(-11deg)}
 .easterCat.leaping .cLegFL .cUp,.easterCat.leaping .cLegFR .cUp{transform:rotate(-36deg)}
 .easterCat.leaping .cLegFL .cLo,.easterCat.leaping .cLegFR .cLo{transform:rotate(-14deg)}
 .easterCat.leaping .cLegBL .cUp,.easterCat.leaping .cLegBR .cUp{transform:rotate(34deg)}
@@ -1533,7 +1538,8 @@ html{scroll-behavior:smooth}
 .easterCat.leaping .cT3{transform:rotate(-12deg)}
 .easterCat.leaping .cHead{transform:rotate(-10deg)}
 /* Chute libre : pattes en parachute, queue qui sert de balancier. */
-.easterCat.falling .catRig{transform:scaleY(1.04) rotate(6deg)}
+.easterCat.falling .catRig{transform:rotate(6deg)}
+.easterCat.falling .cBody{transform:scaleY(1.04)}
 .easterCat.falling .cLegFL .cUp,.easterCat.falling .cLegFR .cUp{transform:rotate(-30deg)}
 .easterCat.falling .cLegBL .cUp,.easterCat.falling .cLegBR .cUp{transform:rotate(26deg)}
 .easterCat.falling .cLo{transform:rotate(34deg)}
@@ -1541,7 +1547,7 @@ html{scroll-behavior:smooth}
 .easterCat.falling .cT2{transform:rotate(-34deg)}
 .easterCat.falling .cT3{transform:rotate(-26deg)}
 .easterCat.falling .cEyes{animation:none}
-.easterCat.land .catRig{transition:transform .13s ease-out;transform:scaleY(.84) scaleX(1.09)}
+.easterCat.land .catRig{transition:transform .13s ease-out;transform:scaleY(.9) scaleX(1.05)}
 .easterCat.land .cUp{transition:transform .13s ease-out;transform:rotate(-8deg)}
 .easterCat.land .cLo{transition:transform .13s ease-out;transform:rotate(40deg)}
 .easterCat.land .cT1{transform:rotate(-18deg)}
@@ -1550,7 +1556,7 @@ html{scroll-behavior:smooth}
 /* Étirement : la « révérence » du chat — pattes avant tendues loin devant, poitrail et tête
    au ras du sol, croupe haute, queue dressée. L'ancrage du corps étant aux pattes avant
    (50,32), une rotation positive relève l'arrière-train. */
-.easterCat.stretch .catRig{transform:rotate(10deg) scaleY(1.04)}
+.easterCat.stretch .catRig{transform:rotate(10deg)}
 .easterCat.stretch .cLegFL .cUp,.easterCat.stretch .cLegFR .cUp{transform:rotate(-42deg)}
 .easterCat.stretch .cLegFL .cLo,.easterCat.stretch .cLegFR .cLo{transform:rotate(12deg)}
 .easterCat.stretch .cLegBL .cUp,.easterCat.stretch .cLegBR .cUp{transform:rotate(20deg)}
@@ -1559,21 +1565,23 @@ html{scroll-behavior:smooth}
 .easterCat.stretch .cT2{transform:rotate(-24deg)}
 .easterCat.stretch .cT3{transform:rotate(-14deg)}
 .easterCat.stretch .cHead{transform:rotate(7deg)}
-.easterCat.curl .catRig{transform-origin:36px 22px;animation:catBreathe 3.4s ease-in-out infinite}
-.easterCat.curl .cUp{transform:rotate(82deg)}
-.easterCat.curl .cLo{transform:rotate(98deg)}
+.easterCat.curl .catRig{transform:translateY(3.5px)}
+.easterCat.curl .cBody{animation:catBreathe 3.4s ease-in-out infinite}
+.easterCat.curl .cUp{transform:rotate(86deg)}
+.easterCat.curl .cLo{transform:rotate(104deg)}
 .easterCat.curl .cT1{transform:rotate(148deg)}
 .easterCat.curl .cT2{transform:rotate(26deg)}
 .easterCat.curl .cT3{transform:rotate(26deg)}
-.easterCat.curl .cHead{transform:rotate(22deg)}
-@keyframes catBreathe{0%,100%{transform:scale(.68)}50%{transform:scale(.665) translateY(.5px)}}
-.easterCat.idle .catRig{animation:idleBreathe 3.8s ease-in-out infinite}
+.easterCat.curl .cHead{transform:rotate(26deg)}
+@keyframes catBreathe{0%,100%{transform:scaleY(.9)}50%{transform:scaleY(.93)}}
+.easterCat.idle .cBody{animation:idleBreathe 3.8s ease-in-out infinite}
 .easterCat.idle .cT1{animation:tailSway1 2.8s ease-in-out infinite}
 .easterCat.idle .cT2{animation:tailSway2 2.8s ease-in-out infinite .1s}
 .easterCat.idle .cT3{animation:tailSway3 2.8s ease-in-out infinite .2s}
-@keyframes idleBreathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.03)}}
+@keyframes idleBreathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.035) scaleX(1.006)}}
 /* « Pain de mie » : pattes repliées sous le corps, éveillé, queue ramenée le long du flanc. */
-.easterCat.loaf .catRig{transform:translateY(2px) scaleY(.88)}
+.easterCat.loaf .catRig{transform:translateY(2px)}
+.easterCat.loaf .cBody{transform:scaleY(.88)}
 .easterCat.loaf .cUp{transform:rotate(70deg)}
 .easterCat.loaf .cLo{transform:rotate(92deg)}
 .easterCat.loaf .cT1{transform:rotate(30deg)}
@@ -1597,7 +1605,7 @@ html{scroll-behavior:smooth}
 /* Toilette : la tête plonge vers le flanc, la langue sort à chaque coup. */
 .easterCat.groom .cHead{animation:groomLick .52s ease-in-out infinite}
 @keyframes groomLick{0%,100%{transform:rotate(34deg)}50%{transform:rotate(52deg)}}
-.easterCat.groom .catRig{transform:scaleY(.97)}
+.easterCat.groom .cBody{transform:scaleY(.97)}
 .easterCat.groom .cTongue{animation:tongueOut .52s ease-in-out infinite}
 @keyframes tongueOut{0%,100%{opacity:0;transform:scaleY(.2)}55%{opacity:1;transform:scaleY(1)}}
 .easterCat .cTongue{opacity:0;transform-box:fill-box;transform-origin:50% 0%}
@@ -1618,14 +1626,113 @@ html{scroll-behavior:smooth}
 /* Zone tactile : le chat lui-même reste pointer-events:none (il ne doit jamais bloquer un bouton
    de l'appli en passant devant), seul ce calque invisible capte le tap. Il déborde de 12/16px
    autour du chat pour rester attrapable au doigt malgré ses 58×28px. */
+.easterCat .catLift{position:relative}
 .easterCat .catHit{position:absolute;inset:-16px -12px;pointer-events:auto;cursor:pointer;
   background:none;border:none;padding:0;-webkit-tap-highlight-color:transparent;z-index:2}
+/* Repère « touche-moi » : sans lui, Zéphyr perché sur un bouton n'a l'air que d'un décor. Il ne
+   s'allume que lorsqu'il est posé (jamais en marchant), et au survol à la souris. */
+.easterCat .catHalo{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;
+  transition:opacity .45s ease}
+.easterCat.hint .catHalo,.easterCat .catHit:hover+.catHalo{opacity:1}
+.easterCat .catHaloRing{position:absolute;left:50%;top:52%;width:80px;height:58px;border-radius:50%;
+  background:radial-gradient(50% 50% at 50% 50%,rgba(255,214,120,.34),rgba(255,214,120,0) 70%);
+  animation:catHaloPulse 2.4s ease-in-out infinite}
+@supports (background:color-mix(in srgb,red 50%,transparent)){
+  .easterCat .catHaloRing{background:radial-gradient(50% 50% at 50% 50%,
+    color-mix(in srgb,var(--accent-2) 46%,transparent),transparent 70%)}
+}
+@keyframes catHaloPulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.55}
+  50%{transform:translate(-50%,-50%) scale(1.08);opacity:.95}}
+.easterCat .catHaloPaw{position:absolute;left:50%;top:-15px;font-style:normal;font-size:13px;line-height:1;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));animation:catPawBob 1.7s ease-in-out infinite}
+@keyframes catPawBob{0%,100%{transform:translate(-50%,0);opacity:.7}
+  50%{transform:translate(-50%,-3.5px);opacity:1}}
+/* Retour au doigt / à la souris : le halo s'intensifie, sans toucher au gabarit du chat. */
+.easterCat .catHit:active+.catHalo{opacity:1}
+.easterCat .catHit:active+.catHalo .catHaloRing{animation:none;transform:translate(-50%,-50%) scale(1.12);opacity:1}
 /* Petit cœur/patte qui s'envole quand on touche Zéphyr. */
 .catPurr{position:fixed;z-index:400;pointer-events:none;font-size:22px;line-height:1;
   animation:catPurrUp 1s cubic-bezier(.2,.8,.3,1) both}
 @keyframes catPurrUp{0%{opacity:0;transform:translate(-50%,0) scale(.5)}
   25%{opacity:1;transform:translate(-50%,-14px) scale(1.15)}
   100%{opacity:0;transform:translate(-50%,-54px) scale(1)}}
+/* ---- Papillon : il vole en zigzag au-dessus de lui, Zéphyr le suit du regard, tente un coup
+   de patte, saute… et le rate (évidemment). ---- */
+.catFly{position:fixed;left:0;bottom:0;z-index:301;width:17px;height:17px;pointer-events:none;
+  transition:transform 1.05s cubic-bezier(.42,0,.4,1),opacity .4s ease}
+.catFly svg{display:block;width:100%;height:100%;overflow:visible}
+.catFly .fWL,.catFly .fWR{transform-box:fill-box;animation:flyFlap .17s ease-in-out infinite}
+.catFly .fWL{transform-origin:100% 60%}
+.catFly .fWR{transform-origin:0% 60%}
+@keyframes flyFlap{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.3)}}
+/* Il suit le papillon des yeux, tête levée, queue qui fouette. */
+.easterCat.gaze .cHead{transform:rotate(-26deg)}
+.easterCat.gaze .catRig{transform:rotate(-4deg)}
+.easterCat.gaze .cT1{animation:tailFlick .85s ease-in-out infinite}
+/* Coup de patte en l'air : une antérieure fouette vers le haut, en rafale. */
+.easterCat.swat .catRig{transform:rotate(-7deg)}
+.easterCat.swat .cHead{transform:rotate(-20deg)}
+.easterCat.swat .cLegFL .cUp{animation:swatArm .42s ease-in-out infinite}
+.easterCat.swat .cLegFR .cUp{animation:swatArm .42s ease-in-out infinite .12s}
+.easterCat.swat .cLegFL .cLo,.easterCat.swat .cLegFR .cLo{transform:rotate(-26deg)}
+@keyframes swatArm{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(-78deg)}}
+
+/* ---- Parachute : il descend du plafond en se balançant, largue la voilure à l'atterrissage. ---- */
+.catChute{position:absolute;left:50%;bottom:18px;width:62px;height:42px;margin-left:-31px;
+  pointer-events:none;z-index:0;transform-origin:50% 100%;
+  transition:opacity .55s ease,transform .8s cubic-bezier(.3,0,.4,1)}
+.catChute svg{display:block;width:100%;height:100%;overflow:visible}
+.catChute.off{opacity:0;transform:translate(14px,-26px) rotate(24deg) scale(.72)}
+.easterCat.chute .catLift{transition:transform 2.9s cubic-bezier(.35,.1,.5,1)}
+/* Pendule : le chat et la voilure basculent ensemble, le pivot étant au-dessus de lui. */
+.easterCat.chute .catRig{transform-origin:36px -16px;animation:chuteSway 2.5s ease-in-out infinite}
+.easterCat.chute .catChute{animation:chuteSway 2.5s ease-in-out infinite}
+@keyframes chuteSway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.easterCat.chute .cUp{transform:rotate(-9deg)}
+.easterCat.chute .cLo{transform:rotate(24deg)}
+.easterCat.chute .cT1{transform:rotate(26deg)}
+.easterCat.chute .cT2{transform:rotate(16deg)}
+.easterCat.chute .cHead{transform:rotate(-10deg)}
+.easterCat.chute .catShadow{opacity:.16;transform:scale(.5,.45)}
+
+/* ---- Moto : il traverse à fond, roues qui tournent, et lève la roue avant au passage. ---- */
+.catMoto{position:absolute;inset:0;pointer-events:none;z-index:0;transform-origin:31% 80%;
+  transition:transform .3s cubic-bezier(.2,.8,.3,1)}
+.catMoto svg{display:block;width:100%;height:100%;overflow:visible}
+.easterCat.faceLeft .catMoto svg{transform:scaleX(-1);transform-origin:center}
+.catMoto .mWheel{transform-box:fill-box;transform-origin:50% 50%;animation:motoSpin .2s linear infinite}
+@keyframes motoSpin{to{transform:rotate(360deg)}}
+/* Assis sur la selle : pattes repliées sur le cadre, buste penché sur le guidon, queue au vent. */
+.easterCat.moto .catRig,.easterCat.wheelie .catRig{transform:translateY(-6px) rotate(-5deg)}
+.easterCat.moto .cLegFL .cUp,.easterCat.moto .cLegFR .cUp,
+.easterCat.wheelie .cLegFL .cUp,.easterCat.wheelie .cLegFR .cUp{transform:rotate(-40deg)}
+.easterCat.moto .cLegFL .cLo,.easterCat.moto .cLegFR .cLo,
+.easterCat.wheelie .cLegFL .cLo,.easterCat.wheelie .cLegFR .cLo{transform:rotate(52deg)}
+.easterCat.moto .cLegBL .cUp,.easterCat.moto .cLegBR .cUp,
+.easterCat.wheelie .cLegBL .cUp,.easterCat.wheelie .cLegBR .cUp{transform:rotate(76deg)}
+.easterCat.moto .cLegBL .cLo,.easterCat.moto .cLegBR .cLo,
+.easterCat.wheelie .cLegBL .cLo,.easterCat.wheelie .cLegBR .cLo{transform:rotate(-84deg)}
+.easterCat.moto .cHead,.easterCat.wheelie .cHead{transform:rotate(-7deg)}
+.easterCat.moto .cT1{transform:rotate(-26deg);animation:tailSway1 .3s ease-in-out infinite}
+.easterCat.moto .cT2{transform:rotate(-14deg)}
+.easterCat.moto .cT3{transform:rotate(-8deg)}
+.easterCat.moto .cEarL{transform:rotate(-24deg)}
+.easterCat.moto .cEarR{transform:rotate(-18deg)}
+/* Roue avant en l'air : la moto et le chat basculent ensemble autour de la roue arrière. */
+.easterCat.wheelie .catMoto{transform:rotate(-24deg)}
+.easterCat.wheelie .catRig{transform:translateY(-9px) rotate(-26deg)}
+.easterCat.wheelie .cT1{transform:rotate(-46deg)}
+
+/* Boulette de papier : le jouet qu'il poursuit. Elle roule au sol (rotation proportionnelle à
+   la distance parcourue, pour que ça ne patine pas), puis s'écrase quand il lui saute dessus. */
+.catBall{position:fixed;left:0;bottom:12px;z-index:299;width:11px;height:11px;pointer-events:none;
+  border-radius:50%;background:radial-gradient(60% 55% at 38% 32%,#f4efe2,#d9d2c0 60%,#bdb5a2);
+  box-shadow:0 1px 2px rgba(0,0,0,.3);transform:translateX(-60px);
+  transition:transform .25s ease,opacity .25s ease}
+/* quelques plis pour que ça ressemble à du papier froissé plutôt qu'à une bille */
+.catBall::after{content:"";position:absolute;inset:2px;border-radius:50%;
+  background:linear-gradient(115deg,transparent 42%,rgba(0,0,0,.14) 44%,transparent 47%),
+    linear-gradient(35deg,transparent 55%,rgba(0,0,0,.12) 57%,transparent 60%)}
 /* Souffle de poussière : à l'appui d'un départ en courant et à chaque réception de saut. */
 .catDust{position:fixed;z-index:299;pointer-events:none;width:16px;height:16px;border-radius:50%;
   background:radial-gradient(circle at 50% 60%,rgba(255,255,255,.5),rgba(150,150,150,.16) 60%,transparent 72%);
@@ -1634,8 +1741,9 @@ html{scroll-behavior:smooth}
   25%{opacity:.85}
   100%{opacity:0;transform:translate(-50%,-140%) scale(1.9)}}
 @media (prefers-reduced-motion:reduce){
-  .catDust{display:none}
+  .catDust,.catBall,.catFly{display:none}
   .easterCat .cEyes,.easterCat .cEarL,.easterCat .cEarR{animation:none}
+  .easterCat .catHaloRing,.easterCat .catHaloPaw{animation:none}
 }
 
 /* ---------- Section repliable (« Liste des budgets » dans Comparer) ----------
@@ -7491,6 +7599,7 @@ function closePhotoModal(){
       +leg("cLegBR",26.5,17.2,"#070707","#0b0b0b",-13,20)
       +leg("cLegFR",45.5,17.2,"#070707","#0b0b0b",4,-4)
       // tronc : bande dorsale creusée au ventre, puis les deux masses qui donnent la silhouette
+      +'<g class="cBody">'
       +'<path d="M23.5,11.4 C31,9.4 41,9.2 48.5,11 C49.2,14.4 49.2,17.4 48.6,20.4'
       +' C41,22.3 31,22.3 23.5,20.6 C22.9,17.4 22.9,14.6 23.5,11.4 Z" fill="#111"/>'
       // arrière-train (masse haute et ronde) et cage thoracique (plus basse, plus étroite)
@@ -7502,6 +7611,7 @@ function closePhotoModal(){
       // collerette : la fourrure du poitrail déborde sur l'épaule (une pointe, pas un bloc)
       +'<path d="M50.2,13.4 C52.6,14.6 53.6,16.6 53.4,19 C52.6,16.8 51.4,15.2 49.4,14.2 Z" fill="#151515"/>'
       +'<ellipse cx="34" cy="12.4" rx="12.5" ry="4" fill="url(#'+gid+')"/>'
+      +'</g>'
       // pattes du côté visible : un ton plus clair, devant le corps
       +leg("cLegBL",29.5,18.4,"#0d0d0d","#151515",-13,20)
       +leg("cLegFL",48.5,18.4,"#0d0d0d","#151515",4,-4)
@@ -7536,12 +7646,21 @@ function closePhotoModal(){
       +'<path d="M59.4,11.9 L55.4,10.8"/></g>'
       +'</g>'
       +'</g></svg></div>';
-    // Zone tactile : touchée, elle ouvre la modale des photos de Zéphyr.
-    const hit=document.createElement("button");
-    hit.type="button";hit.className="catHit";hit.setAttribute("aria-label","Voir les photos de Zéphyr");
-    el.appendChild(hit);
     document.body.appendChild(el);
     const lift=el.querySelector(".catLift");
+    /* Zone tactile : touchée, elle ouvre la modale des photos de Zéphyr. Elle est placée DANS
+       .catLift et non dans .easterCat, parce que c'est .catLift qui porte le décalage vertical :
+       perché sur un bouton de la barre du haut, le chat montait mais sa zone tactile restait au
+       sol — on le voyait en haut sans pouvoir le toucher. */
+    const hit=document.createElement("button");
+    hit.type="button";hit.className="catHit";hit.setAttribute("aria-label","Voir les photos de Zéphyr");
+    lift.appendChild(hit);
+    // Repère « touche-moi » : halo doux + patte qui flotte au-dessus, visibles seulement quand
+    // il est posé (jamais pendant qu'il marche ou court, où ils feraient du bruit visuel).
+    const halo=document.createElement("span");
+    halo.className="catHalo";halo.setAttribute("aria-hidden","true");
+    halo.innerHTML='<i class="catHaloRing"></i><i class="catHaloPaw">🐾</i>';
+    lift.appendChild(halo);
     const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     // Petite patte qui s'envole à l'endroit du tap, avant l'ouverture de la modale.
     function catPurr(){
@@ -7563,17 +7682,22 @@ function closePhotoModal(){
         const r=el.getBoundingClientRect();photoSetOrigin(r.left+r.width/2,r.top+r.height/2);
         openPhotoModal();};
       setTimeout(()=>{el.style.opacity="0";setTimeout(()=>el.remove(),650);},3000);
-      el.classList.add("sit");
+      el.classList.add("sit");el.classList.add("hint");
       return true;
     }
     const rnd=(a,b)=>a+Math.random()*(b-a);
     const ri=(a,b)=>Math.round(rnd(a,b));
     const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
     // Sens de passage aléatoire : entre par la gauche (regarde à droite) ou par la droite (miroir).
-    const dir=Math.random()<0.5?1:-1;
-    if(dir<0)el.classList.add("faceLeft");
-    const startX=dir>0?(-CAT_W-10):(vw+CAT_W+10);
-    const endX  =dir>0?(vw+CAT_W+10):(-CAT_W-10);
+    let dir=Math.random()<0.5?1:-1, startX=0, endX=0;
+    // Change le sens du chat : miroir de l'image ET recalcul des bords d'entrée/sortie, pour
+    // qu'un demi-tour en pleine course reparte du bon côté.
+    function faceTo(d){
+      dir=d;el.classList.toggle("faceLeft",d<0);
+      startX=d>0?(-CAT_W-10):(vw+CAT_W+10);
+      endX  =d>0?(vw+CAT_W+10):(-CAT_W-10);
+    }
+    faceTo(dir);
     // Déplacement horizontal porté par .easterCat ; saut/chute portés par .catLift (vraie
     // trajectoire : montée freinée par la « gravité », chute accélérée). Le « sol » reste géré
     // nativement par bottom:10px ; on ne calcule ici que l'offset vertical du perchoir.
@@ -7585,8 +7709,15 @@ function closePhotoModal(){
     function liftTo(y){requestAnimationFrame(()=>{void lift.offsetWidth;
       requestAnimationFrame(()=>{lift.style.transform="translateY("+y+"px)";});});}
     const POSES=["walking","crouch","leaping","land","dropping","falling","rising","dashing","brake",
-      "creep","curl","stretch","idle","loaf","sit","look","groom","wiggle","flick"];
-    function pose(cls){for(const p of POSES)if(p!==cls)el.classList.remove(p);if(cls)el.classList.add(cls);}
+      "creep","curl","stretch","idle","loaf","sit","look","groom","wiggle","flick",
+      "gaze","swat","chute","moto","wheelie"];
+    // Poses « posé » : c'est là qu'on invite à le toucher.
+    const RESTING=["idle","curl","loaf","sit","look","groom","flick","stretch"];
+    function pose(cls){
+      for(const p of POSES)if(p!==cls)el.classList.remove(p);
+      if(cls)el.classList.add(cls);
+      el.classList.toggle("hint",!tapped&&RESTING.indexOf(cls)>=0);
+    }
     // « perché » n'est pas une pose mais un état (il pilote l'ombre au sol) : géré à part pour
     // qu'un changement de pose ne l'effface pas.
     function setPerched(on){perched=on;el.classList.toggle("perched",on);}
@@ -7598,6 +7729,110 @@ function closePhotoModal(){
     // Place la couche verticale sans animation (départ d'une entrée par le haut ou par le bas).
     function liftNow(y){lift.style.transition="none";lift.style.transform="translateY("+y+"px)";void lift.offsetWidth;}
     function liftFree(){lift.style.transition="";}
+    // Repositionnement instantané (demi-tour hors écran) : sans couper la transition, le chat
+    // « glisserait » d'un bord à l'autre en traversant l'écran à l'envers.
+    function jumpTo(x){const t=el.style.transition;el.style.transition="none";
+      el.style.transform="translateX("+x+"px)";curX=x;void el.offsetWidth;el.style.transition=t;}
+    /* Boulette de papier : elle roule devant lui, il la poursuit et lui saute dessus. */
+    let ball=null;
+    function makeBall(x){
+      ball=document.createElement("div");
+      ball.className="catBall";
+      ball.style.transform="translateX("+x+"px) rotate(0deg)";
+      document.body.appendChild(ball);
+      return ball;
+    }
+    function rollBall(x,ms){
+      if(!ball)return;
+      const deg=(x-parseFloat(/translateX\((-?[\d.]+)px\)/.exec(ball.style.transform)[1]))*7;
+      ball.style.transition="transform "+ms+"ms cubic-bezier(.1,.55,.3,1)";
+      requestAnimationFrame(()=>{void ball.offsetWidth;
+        requestAnimationFrame(()=>{if(ball)ball.style.transform="translateX("+x+"px) rotate("+deg+"deg)";});});
+    }
+    function popBall(){
+      if(!ball)return;
+      const b=ball;ball=null;
+      const m=/translateX\((-?[\d.]+)px\)/.exec(b.style.transform);
+      b.style.transition="transform .22s ease-out,opacity .22s ease-out";
+      b.style.transform="translateX("+(m?m[1]:0)+"px) scale(.35)";
+      b.style.opacity="0";
+      setTimeout(()=>b.remove(),320);
+    }
+    /* Papillon : élément indépendant du chat (il vole plus haut que lui et continue sa route
+       après l'avoir semé), donc suivi à part pour être retiré avec le reste. */
+    let fly=null;
+    function makeFly(x,y){
+      fly=document.createElement("div");
+      fly.className="catFly";
+      fly.innerHTML='<svg viewBox="0 0 20 18" aria-hidden="true">'
+        +'<path class="fWL" d="M9.4,9 C6.6,2.6 1.2,1.8 .9,5.6 C.6,9.4 4.4,10.2 9.4,9 Z" fill="#f0a93c"/>'
+        +'<path class="fWL" d="M9.4,9.6 C6.2,13.8 2.2,14.6 2.1,11.6 C2,8.8 5.4,8.4 9.4,9.6 Z" fill="#e2783a"/>'
+        +'<path class="fWR" d="M10.6,9 C13.4,2.6 18.8,1.8 19.1,5.6 C19.4,9.4 15.6,10.2 10.6,9 Z" fill="#f0a93c"/>'
+        +'<path class="fWR" d="M10.6,9.6 C13.8,13.8 17.8,14.6 17.9,11.6 C18,8.8 14.6,8.4 10.6,9.6 Z" fill="#e2783a"/>'
+        +'<ellipse cx="10" cy="9.3" rx=".9" ry="4" fill="#3a2b22"/>'
+        +'<path d="M9.6,5.4 C8.6,3.4 7.4,2.6 6.6,2.8 M10.4,5.4 C11.4,3.4 12.6,2.6 13.4,2.8" '
+        +'stroke="#3a2b22" stroke-width=".55" fill="none" stroke-linecap="round"/>'
+        +'</svg>';
+      fly.style.transition="none";
+      fly.style.transform="translate("+x+"px,"+(-y)+"px)";
+      document.body.appendChild(fly);
+      void fly.offsetWidth;fly.style.transition="";
+      return fly;
+    }
+    // y = hauteur au-dessus du sol, en pixels (le papillon est ancré en bas de l'écran).
+    function flyTo(x,y,ms){
+      if(!fly)return;
+      fly.style.transition="transform "+ms+"ms cubic-bezier(.42,0,.4,1),opacity .4s ease";
+      requestAnimationFrame(()=>{void fly.offsetWidth;
+        requestAnimationFrame(()=>{if(fly)fly.style.transform="translate("+x+"px,"+(-y)+"px)";});});
+    }
+    /* Parachute : voilure + suspentes, posée DANS .catLift pour descendre avec lui, larguée à
+       l'atterrissage. Les couleurs suivent le thème pour rester dans l'ambiance de l'app. */
+    function makeChute(){
+      const c=document.createElement("div");
+      c.className="catChute";
+      c.innerHTML='<svg viewBox="0 0 62 42" aria-hidden="true">'
+        +'<path d="M2,17 A29,17 0 0 1 60,17 Z" fill="var(--accent)"/>'
+        +'<path d="M12.5,17 A29,17 0 0 1 21.7,3.4 C19.4,7.2 18.4,11.6 18.2,17 Z" fill="var(--accent-2)"/>'
+        +'<path d="M31,17 L31,1.2 C34.6,1.2 38,2 41,3.4 C38.6,7.4 37.4,11.8 37.2,17 Z" fill="var(--accent-2)"/>'
+        +'<path d="M49.4,17 C49.2,11.6 48.2,7.2 45.9,3.4 A29,17 0 0 1 55.2,17 Z" fill="var(--accent-2)"/>'
+        +'<path d="M2,17 L31,40 M18.2,17 L31,40 M31,17 L31,40 M43.8,17 L31,40 M60,17 L31,40" '
+        +'stroke="rgba(255,255,255,.55)" stroke-width=".7" fill="none"/>'
+        +'</svg>';
+      lift.appendChild(c);
+      return c;
+    }
+    /* Moto : même viewBox que le chat, donc les coordonnées se correspondent — la selle tombe
+       pile sous son ventre une fois qu'il est remonté de quelques pixels. */
+    function makeMoto(){
+      const m=document.createElement("div");
+      m.className="catMoto";
+      m.innerHTML='<svg viewBox="0 0 70 34" aria-hidden="true">'
+        // cadre : moyeu arrière -> selle -> réservoir -> fourche avant
+        +'<path d="M22,27 L30,17.5 L45,16.5 L59,27" stroke="#2a2a2e" stroke-width="2.2" fill="none" stroke-linejoin="round"/>'
+        +'<path d="M22,27 L34,21 L45,16.5" stroke="#2a2a2e" stroke-width="1.8" fill="none"/>'
+        // réservoir et selle
+        +'<path d="M33,16.8 L46,15.4 L47.4,19.6 L34.4,21 Z" fill="#c0392b"/>'
+        +'<path d="M25.6,18.4 L34,16.6 L34.6,19.4 L26.2,21 Z" fill="#1d1d20"/>'
+        // guidon, phare, échappement
+        // guidon bas, passé SOUS la tête pour rester visible devant le poitrail
+        +'<path d="M46.8,16.4 L54.2,17.4" stroke="#2a2a2e" stroke-width="1.7" stroke-linecap="round" fill="none"/>'
+        +'<path d="M52.4,16.8 L59.4,18.6" stroke="#2a2a2e" stroke-width="1.5" stroke-linecap="round" fill="none"/>'
+        +'<circle cx="61.2" cy="20.4" r="2.4" fill="#f2d479"/>'
+        +'<circle cx="61.2" cy="20.4" r="2.4" fill="none" stroke="#2a2a2e" stroke-width=".8"/>'
+        +'<path d="M27,22.4 L17.6,24.4" stroke="#4a4d54" stroke-width="2" stroke-linecap="round" fill="none"/>'
+        // roues (jante + rayons qui tournent)
+        +'<g class="mWheel"><circle cx="22" cy="27" r="5.6" fill="none" stroke="#191a1d" stroke-width="2.3"/>'
+        +'<path d="M22,22 L22,32 M17,27 L27,27 M18.5,23.5 L25.5,30.5 M25.5,23.5 L18.5,30.5" '
+        +'stroke="#5c5f66" stroke-width=".7"/></g>'
+        +'<g class="mWheel"><circle cx="59" cy="27" r="5.6" fill="none" stroke="#191a1d" stroke-width="2.3"/>'
+        +'<path d="M59,22 L59,32 M54,27 L64,27 M55.5,23.5 L62.5,30.5 M62.5,23.5 L55.5,30.5" '
+        +'stroke="#5c5f66" stroke-width=".7"/></g>'
+        +'</svg>';
+      lift.appendChild(m);
+      return m;
+    }
+    function cleanupCat(){el.remove();if(ball){ball.remove();ball=null;}if(fly){fly.remove();fly=null;}}
 
     // ---- Construction d'une séquence d'étapes {enter,dur}, tirée au hasard ----
     const steps=[];
@@ -7610,13 +7845,18 @@ function closePhotoModal(){
        - creep  : il approche au ralenti, ventre au sol, à l'affût ;
        - perch  : il était déjà là, pelotonné sur un bouton de la barre du haut. */
     const perchTarget=pickClimbTarget(vw,vh);
-    let mode=pick(["walk","walk","walk","dash","drop","peek","creep","perch"]);
+    let mode=pick(["walk","walk","dash","drop","peek","creep","perch","zoomies","slide","ball",
+      "fly","chute","moto"]);
     if(mode==="perch"&&!perchTarget)mode="walk";
+    // La moto se suffit à elle-même : il arrive, fait son numéro et repart avec, sans passer par
+    // les activités au sol ni la sortie classique (il ne peut pas s'éloigner à pied avec la moto).
+    const selfRun=(mode==="moto");
     // Il ne traverse sans s'arrêter que s'il est arrivé en marchant ou en courant.
     const justPassing=(mode==="walk"&&Math.random()<0.22)||(mode==="dash"&&Math.random()<0.34);
 
     // Perchoir : soit celui de l'entrée « perch », soit un grimper en cours de route.
-    const target=mode==="perch"?perchTarget:(!justPassing&&Math.random()<0.5?perchTarget:null);
+    const target=mode==="perch"?perchTarget
+      :(!justPassing&&!selfRun&&mode!=="ball"&&mode!=="fly"&&mode!=="chute"&&Math.random()<0.45?perchTarget:null);
     const groundTopRef=groundTop;
     let walkX=restX,jumpDy=null;
     if(target){
@@ -7662,12 +7902,93 @@ function closePhotoModal(){
       el.style.transform="translateX("+startX+"px)";
       steps.push({enter:()=>{xTrans("transform 4.2s linear");pose("creep");moveX(walkX);},dur:4200});
       steps.push({enter:()=>{xTrans(WALK_TRANS);pose("look");},dur:ri(900,1500)});
+    }else if(mode==="zoomies"){
+      /* Crise de folie : il traverse l'écran à fond, ressort de l'autre côté, fait demi-tour
+         hors champ et revient en sens inverse avant de piler. */
+      el.style.transform="translateX("+startX+"px)";
+      const d1=ri(640,820), d2=ri(560,720);
+      steps.push({enter:()=>{xTrans("transform "+d1+"ms cubic-bezier(.25,.6,.25,1)");
+        pose("dashing");dustAtCat(2);moveX(endX);},dur:d1});
+      steps.push({enter:()=>{faceTo(-dir);jumpTo(startX);pose("dashing");},dur:220});
+      steps.push({enter:()=>{xTrans("transform "+d2+"ms cubic-bezier(.25,.6,.2,1)");
+        dustAtCat(2);moveX(walkX);},dur:d2});
+      steps.push({enter:()=>{xTrans(WALK_TRANS);pose("brake");dustAtCat(3);},dur:380});
+      steps.push({enter:()=>pose("look"),dur:ri(600,1100)});
+    }else if(mode==="slide"){
+      /* Dérapage sur le parquet : il arrive lancé, pattes plantées, dépasse l'endroit visé,
+         puis revient tranquillement sur ses pas comme si de rien n'était. */
+      el.style.transform="translateX("+startX+"px)";
+      const over=Math.max(16,Math.min(vw-CAT_W-16,walkX+dir*ri(30,58)));
+      steps.push({enter:()=>{xTrans("transform 680ms cubic-bezier(.04,.75,.25,1)");
+        pose("brake");dustAtCat(3);moveX(over);},dur:700});
+      steps.push({enter:()=>pose("look"),dur:ri(450,750)});
+      steps.push({enter:()=>{xTrans("transform 620ms cubic-bezier(.4,0,.2,1)");
+        pose("walking");moveX(walkX);},dur:640});
+      steps.push({enter:()=>{xTrans(WALK_TRANS);pose("idle");},dur:ri(250,500)});
+    }else if(mode==="ball"){
+      /* Une boulette de papier roule en travers de l'écran : il déboule derrière, la guette,
+         lui saute dessus — et prend l'air très fier ensuite. */
+      el.style.transform="translateX("+startX+"px)";
+      const stop=Math.max(24,Math.min(vw-CAT_W-24,walkX+dir*22));
+      const wait=Math.max(20,Math.min(vw-CAT_W-20,stop-dir*30));
+      steps.push({enter:()=>{makeBall(startX+dir*CAT_W*0.6);rollBall(stop+dir*14,1500);},dur:520});
+      steps.push({enter:()=>{xTrans("transform 900ms cubic-bezier(.2,.6,.3,1)");
+        pose("dashing");dustAtCat(2);moveX(wait);},dur:900});
+      steps.push({enter:()=>{xTrans(WALK_TRANS);pose("wiggle");},dur:ri(600,950)});
+      steps.push({enter:()=>pose("crouch"),dur:180});
+      steps.push({enter:()=>{pose("leaping");liftTo(-16);moveX(stop);},dur:340});
+      steps.push({enter:()=>{pose("dropping");liftTo(0);},dur:260});
+      steps.push({enter:()=>{pose("land");popBall();dustAtCat(3);},dur:220});
+      steps.push({enter:()=>pose("flick"),dur:ri(700,1100)});
+    }else if(mode==="fly"){
+      /* Chasse au papillon : l'insecte zigzague au-dessus de lui, Zéphyr le suit, tente un coup
+         de patte, saute… et le rate. Le papillon repart tranquillement — évidemment. */
+      el.style.transform="translateX("+startX+"px)";curX=startX;
+      const fx1=Math.max(30,Math.min(vw-30,walkX+CAT_W/2+dir*10));
+      const fx2=Math.max(30,Math.min(vw-30,fx1-dir*26));
+      steps.push({enter:()=>{makeFly(startX+dir*40,74);flyTo(fx1,58,1400);
+        pose("walking");moveX(walkX);},dur:1400});
+      steps.push({enter:()=>{pose("gaze");flyTo(fx2,50,900);},dur:950});
+      steps.push({enter:()=>{pose("swat");flyTo(fx1,62,700);},dur:780});
+      steps.push({enter:()=>pose("wiggle"),dur:ri(450,700)});
+      steps.push({enter:()=>pose("crouch"),dur:180});
+      steps.push({enter:()=>{pose("leaping");liftTo(-30);flyTo(fx2+dir*18,96,520);},dur:400});
+      steps.push({enter:()=>{pose("dropping");liftTo(0);},dur:300});
+      steps.push({enter:()=>{pose("land");dustAtCat(2);},dur:200});
+      steps.push({enter:()=>{pose("gaze");flyTo(endX,112,1600);},dur:900});
+      steps.push({enter:()=>{if(fly){fly.style.opacity="0";}pose("sit");},dur:ri(700,1100)});
+      steps.push({enter:()=>{if(fly){fly.remove();fly=null;}pose("flick");},dur:ri(500,900)});
+    }else if(mode==="chute"){
+      /* Descente en parachute : il tombe du plafond en se balançant au bout de ses suspentes,
+         largue la voilure en touchant le sol et s'ébroue. */
+      el.style.transform="translateX("+restX+"px)";curX=restX;
+      const drift=Math.max(16,Math.min(vw-CAT_W-16,restX+(Math.random()<0.5?-1:1)*ri(18,44)));
+      liftNow(-(vh+CAT_H));
+      const chute=makeChute();
+      steps.push({enter:()=>{liftFree();pose("chute");liftTo(0);
+        xTrans("transform 2.9s cubic-bezier(.3,0,.5,1)");moveX(drift);},dur:2950});
+      steps.push({enter:()=>{xTrans(WALK_TRANS);pose("land");dustAtCat(3);
+        chute.classList.add("off");setTimeout(()=>chute.remove(),900);},dur:260});
+      steps.push({enter:()=>pose("look"),dur:ri(700,1100)});
+      steps.push({enter:()=>pose("stretch"),dur:ri(900,1300)});
+    }else if(mode==="moto"){
+      /* Passage en moto : roues qui tournent, gaz au passage, roue avant levée au milieu de
+         l'écran, puis il disparaît de l'autre côté. */
+      el.style.transform="translateX("+startX+"px)";curX=startX;
+      makeMoto();
+      const mid=Math.max(24,Math.min(vw-CAT_W-24,Math.round(vw*0.45)));
+      const d1=ri(900,1200), d2=ri(750,1000);
+      steps.push({enter:()=>{xTrans("transform "+d1+"ms cubic-bezier(.25,.5,.3,1)");
+        pose("moto");dustAtCat(2);moveX(mid);},dur:d1});
+      steps.push({enter:()=>{xTrans(WALK_TRANS);pose("wheelie");dustAtCat(2);},dur:ri(700,1000)});
+      steps.push({enter:()=>{xTrans("transform "+d2+"ms cubic-bezier(.5,0,.7,1)");
+        pose("moto");dustAtCat(3);moveX(endX);},dur:d2});
     }else{
       el.style.transform="translateX("+startX+"px)";
       steps.push({enter:()=>{pose("walking");moveX(justPassing?endX:walkX);},dur:justPassing?walkOutDur:walkInDur});
     }
 
-    if(!justPassing){
+    if(!justPassing&&!selfRun){
       if(climbs){
         // Frétillement (il guette, se dandine) puis bond arqué sur le bouton.
         steps.push({enter:()=>pose("wiggle"),dur:ri(650,1050)});
@@ -7679,7 +8000,7 @@ function closePhotoModal(){
       }
 
       // 1 à 3 activités aléatoires, sans répéter deux fois de suite la même.
-      const acts=["curl","loaf","stretch","look","groom","sit"];
+      const acts=["curl","loaf","stretch","look","groom","sit","spin"];
       const n=1+Math.floor(Math.random()*3);
       let last=null;
       for(let i=0;i<n;i++){
@@ -7698,6 +8019,12 @@ function closePhotoModal(){
         }else if(a==="look"){
           steps.push({enter:()=>pose("look"),dur:2400});
           steps.push({enter:()=>pose("idle"),dur:ri(300,700)});
+        }else if(a==="spin"){
+          // Il court après sa queue : quelques demi-tours sur place, puis il s'assoit, l'air de rien.
+          steps.push({enter:()=>pose("wiggle"),dur:320});
+          for(let k=0;k<4;k++)steps.push({enter:()=>{faceTo(-dir);pose("dashing");},dur:170});
+          steps.push({enter:()=>pose("sit"),dur:ri(700,1200)});
+          steps.push({enter:()=>pose("flick"),dur:ri(500,900)});
         }else if(a==="groom"){
           const licks=1+Math.floor(Math.random()*3);
           steps.push({enter:()=>pose("groom"),dur:licks*520+300});
@@ -7738,7 +8065,7 @@ function closePhotoModal(){
     function runSteps(list){
       let i=0;
       (function nextStep(){
-        if(i>=list.length){el.remove();return;}
+        if(i>=list.length){cleanupCat();return;}
         const s=list[i++];
         try{s.enter();}catch(e){}
         stepTimer=setTimeout(nextStep,s.dur);
@@ -7750,10 +8077,26 @@ function closePhotoModal(){
       const r=el.getBoundingClientRect();
       photoSetOrigin(r.left+r.width/2,r.top+r.height/2);  // la modale jaillira d'ici
       hit.remove();                     // un seul tap par passage
+      el.classList.remove("hint");      // repère inutile une fois touché
       clearTimeout(stepTimer);
       catPurr();
       const out=[];
+      // En moto, il ne peut pas partir à pied : il remet les gaz et disparaît avec.
+      if(el.querySelector(".catMoto")){
+        out.push({enter:()=>{xTrans("transform 820ms cubic-bezier(.5,0,.7,1)");
+          pose("moto");dustAtCat(2);moveX(endX);},dur:840});
+        runSteps(out);
+        setTimeout(openPhotoModal,300);
+        return;
+      }
       xTrans(WALK_TRANS);
+      // S'il est encore en l'air (parachute, saut, bond après le papillon), il se pose d'abord.
+      const aloft=/translateY\((-?[\d.]+)px\)/.exec(lift.style.transform);
+      if(aloft&&Math.abs(parseFloat(aloft[1]))>2&&!perched){
+        out.push({enter:()=>{pose("dropping");liftTo(0);
+          const c=el.querySelector(".catChute");if(c){c.classList.add("off");setTimeout(()=>c.remove(),900);}},dur:420});
+        out.push({enter:()=>{pose("land");dustAtCat(2);},dur:150});
+      }
       if(perched){
         out.push({enter:()=>pose("crouch"),dur:170});
         out.push({enter:()=>{pose("dropping");liftTo(0);setPerched(false);},dur:420});
