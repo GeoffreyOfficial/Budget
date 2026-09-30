@@ -6398,9 +6398,11 @@ function axisFmt(v){
   if(v>=1000){const k=v/1000;return k.toLocaleString("fr-FR",{maximumFractionDigits:k<10?1:0})+"k";}
   return Math.round(v).toLocaleString("fr-FR");
 }
-function groupedBars(data,density){
+// opts.single : une seule barre par groupe (dépensé seul, centrée, sans repère budget/revenus).
+function groupedBars(data,density,opts){
+  const single=!!(opts&&opts.single);
   const N=data.length;if(N===0)return'<p class="empty">Pas encore de mois à comparer.</p>';
-  const vals=data.flatMap(d=>[d.rev,d.dep]);
+  const vals=data.flatMap(d=>single?[d.dep]:[d.rev,d.dep]);
   const maxV=niceCeil(Math.max(1,...vals)); // haut de l'échelle, arrondi « rond »
   const padL=40,padR=8,padB=26,padT=12,H=180;
   // La zone de tracé (barres + lignes de repère) est un SVG à part, qui défile horizontalement ;
@@ -6450,11 +6452,11 @@ function groupedBars(data,density){
   }
   let prevYearTag=null;
   data.forEach((d,i)=>{const cx=i*gw+gw/2;
-    const x1=cx-bw-gap/2,x2=cx+gap/2;const over=d.dep>d.rev&&d.rev>0;
+    const x1=cx-bw-gap/2,x2=single?cx-bw/2:cx+gap/2;const over=!single&&d.dep>d.rev&&d.rev>0;
     const revY=yFor(d.rev),depY=yFor(d.dep);
     const revTip=esc((d.label||"")+" — "+(d.revLabel||"Revenus")+" : "+eur0(d.rev));
     const depTip=esc((d.label||"")+" — "+(d.depLabel||"Dépensé")+" : "+eur0(d.dep));
-    s+='<rect x="'+x1.toFixed(1)+'" y="'+revY.toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,zeroY-revY).toFixed(1)+'" rx="3" fill="'+cIn+'" tabindex="0" role="button" data-tip="'+revTip+'"><title>'+revTip+'</title></rect>';
+    if(!single)s+='<rect x="'+x1.toFixed(1)+'" y="'+revY.toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,zeroY-revY).toFixed(1)+'" rx="3" fill="'+cIn+'" tabindex="0" role="button" data-tip="'+revTip+'"><title>'+revTip+'</title></rect>';
     s+='<rect x="'+x2.toFixed(1)+'" y="'+depY.toFixed(1)+'" width="'+bw+'" height="'+Math.max(0,zeroY-depY).toFixed(1)+'" rx="3" fill="'+(over?cRed:cOut)+'" tabindex="0" role="button" data-tip="'+depTip+'"><title>'+depTip+'</title></rect>';
     // Quand les groupes sont serrés (beaucoup de mois affichés), on saute des libellés d'axe X
     // pour éviter qu'ils se chevauchent — le mois courant reste toujours affiché.
@@ -6732,7 +6734,7 @@ function renderComparerCustom(){
 }
 // Panel "Une catégorie dans le temps" isolé pour pouvoir le rafraîchir seul (sans recharger
 // tout l'onglet Comparer) quand on change la catégorie sélectionnée. On compare une CATÉGORIE
-// (et non une dépense nommée) : budget prévu et dépensé de toutes les lignes de cette catégorie,
+// (et non une dépense nommée) : dépensé de toutes les lignes de cette catégorie,
 // mois après mois. La sélection est mémorisée dans state.cmpCat (id de catégorie, "" = sans catégorie).
 // Liste des catégories réellement utilisées sur les mois comparés, dans l'ordre des réglages
 // (les catégories de state.categories d'abord, « Sans catégorie » en dernier).
@@ -6747,14 +6749,12 @@ function buildCatPanelHTML(rows,cats){
   const opts=cats.map(c=>'<option value="'+esc(c.id)+'"'+(c.id===state.cmpCat?' selected':'')+'>'+c.icon+' '+esc(c.name)+'</option>').join("");
   const pdata=rows.map(r=>{const lines=state.months[r.k].lines.filter(l=>catById(l.category||"").id===state.cmpCat);
     const rev=lines.reduce((s,l)=>s+(+l.planned||0),0),dep=lines.reduce((s,l)=>s+spent(l),0);
-    return{label:r.label,cur:r.cur,rev,dep,revLabel:"Budget",depLabel:"Dépensé"};});
+    return{label:r.label,cur:r.cur,rev,dep,depLabel:"Dépensé"};});
   return '<div class="panel" id="catPanel"><h3>Une catégorie dans le temps</h3>'
-    +'<p class="psub">Budget prévu et dépensé de la catégorie, mois après mois</p>'
+    +'<p class="psub">Dépensé dans la catégorie, mois après mois</p>'
     +'<div class="selrow"><label>Catégorie</label><select id="catCmpSel">'+opts+'</select></div>'
-    +groupedBars(pdata,state.cmpDensity)
-    +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Budget</span>'
-    +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
-    +'<span><span style="background:'+gv("--red")+'"></span>Dépassé budget</span></div></div>';
+    +groupedBars(pdata,state.cmpDensity,{single:true})
+    +'<div class="glegend"><span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span></div></div>';
 }
 function attachCatSelHandler(rows,cats){
   const sel=document.getElementById("catCmpSel");
@@ -6812,7 +6812,7 @@ function renderComparer(){
   fitListScroll("monthsListScroll",state.cmpListCount);
   // Comparer ne montre que les mois ÉCHUS (calendairement terminés). Un mois non échu — le mois
   // EN COURS comme un mois À VENIR — est forcément incomplet (moins de dépenses, plus de reste) et
-  // fausserait chaque comparaison, moyenne, « meilleur reste », etc. Règle : on garde uniquement
+  // fausserait chaque comparaison, moyenne, médiane, etc. Règle : on garde uniquement
   // les mois strictement antérieurs au mois calendaire courant. Ainsi, au 11 août 2026, on exclut
   // août 2026 (en cours) et septembre 2026 (à venir), mais on garde juillet 2026, …, août 2025.
   // La liste de navigation des mois ci-dessus, elle, reste complète.
@@ -6830,27 +6830,13 @@ function renderComparer(){
 
   const avgDep=rows.reduce((s,r)=>s+r.dep,0)/rows.length;
   const medDep=median(rows.map(r=>r.dep));
-  const best=rows.reduce((a,b)=>b.reste>a.reste?b:a);
-  const curT=totals(ensure(state.current));
   c.insertAdjacentHTML("beforeend",
-    '<div class="daysum" style="grid-template-columns:1fr 1fr">'
+    '<div class="daysum" style="grid-template-columns:1fr 1fr 1fr">'
     +'<div class="dsum"><div class="k">Mois suivis</div><div class="v">'+rows.length+'</div></div>'
-    +'<div class="dsum"><div class="k">Meilleur reste</div><div class="v" style="text-transform:capitalize">'+mShortY(best.k,true)+'</div></div>'
     +'<div class="dsum"><div class="k">Dépense moy.</div><div class="v">'+eur0(avgDep)+'</div></div>'
     +'<div class="dsum"><div class="k">Dépense médiane</div><div class="v">'+eur0(medDep)+'</div></div>'
-    +'<div class="dsum"><div class="k">Épargne</div><div class="v">'+eur0(curT.savings)+'</div></div>'
-    +'<div class="dsum"><div class="k">Épargne déduite</div><div class="v">'+eur0(curT.deducted)+'</div></div>'
     +'</div>');
   if(excludedUnfinished)c.insertAdjacentHTML("beforeend",'<p class="psub" style="margin:-4px 2px 12px;opacity:.85">Seuls les mois échus sont comparés — le mois en cours et les mois à venir sont exclus.</p>');
-
-  // grouped bars revenus vs dépensé — tous les mois, défile horizontalement au-delà de cmpMonths
-  const shown=rows;
-  c.insertAdjacentHTML("beforeend",
-    '<div class="panel"><h3>Revenus vs dépensé</h3><p class="psub">'+shown.length+' mois</p>'
-    +groupedBars(shown,state.cmpDensity)
-    +'<div class="glegend"><span><span style="background:'+gv("--money-in")+'"></span>Revenus</span>'
-    +'<span><span style="background:'+gv("--money-out")+'"></span>Dépensé</span>'
-    +'<span><span style="background:'+gv("--red")+'"></span>Dépassé revenus</span></div></div>');
 
   // comparaison d'une catégorie dans le temps
   const cmpCats=cmpCatsUsed(keys);
