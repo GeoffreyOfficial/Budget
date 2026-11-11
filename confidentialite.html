@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Règles de confidentialité — Carnet Budget</title>
+<meta name="description" content="Comment Carnet Budget utilise et protège vos données, y compris l'accès à Google Drive.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231E4D3B'/><text x='50%25' y='58%25' font-size='34' text-anchor='middle' fill='%23EDF3EA' font-family='sans-serif' font-weight='700'>€</text></svg>">
+<style>
+:root{--paper:#EEF0EA;--card:#fff;--line:#d5dacb;--ink:#20261E;--muted:#5C6355;--accent:#1E4D3B}
+@media (prefers-color-scheme:dark){:root{--paper:#12151A;--card:#1B2027;--line:#2f3741;--ink:#E7ECEF;--muted:#95A0AC;--accent:#3DD6A0}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .1em}
+h2{font-size:1.15rem;margin:2em 0 .4em;color:var(--accent)}
+.sub{color:var(--muted);margin:0 0 1.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:1em 0}
+ul{padding-left:1.2em}li{margin:.3em 0}
+code{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:.05em .35em;font-size:.9em}
+a{color:var(--accent)}
+footer{color:var(--muted);font-size:.9rem;margin-top:3em;border-top:1px solid var(--line);padding-top:1em}
+</style>
+</head>
+<body>
+<main>
+<p><a href="./">← Retour à Carnet Budget</a></p>
+<h1>Règles de confidentialité</h1>
+<p class="sub">Carnet Budget · mise à jour le 11 novembre 2026</p>
+
+<div class="card"><strong>En bref :</strong> Carnet Budget n'a pas de serveur. Vos données restent sur votre appareil et, si vous l'activez, dans un seul fichier de votre propre Google Drive. Personne d'autre, y compris l'éditeur de l'application, n'y a accès.</div>
+
+<h2>1. Qui sommes-nous</h2>
+<p>Carnet Budget est une application web personnelle et gratuite de suivi de budget, publiée sur <a href="https://geoffreyofficial.github.io/Budget/">geoffreyofficial.github.io/Budget</a>. Elle ne contient ni publicité ni outil de mesure d'audience.</p>
+
+<h2>2. Données que vous saisissez</h2>
+<p>Revenus, dépenses, catégories, budgets, épargne et préférences d'affichage. Ces données sont enregistrées <strong>uniquement dans le stockage local de votre navigateur</strong> (localStorage), sur votre appareil. Elles ne sont jamais envoyées à un serveur de l'éditeur.</p>
+
+<h2>3. Sauvegarde Google Drive (facultative)</h2>
+<p>Si vous appuyez sur « Connecter Google Drive », l'application vous demande l'autorisation <code>drive.file</code>. Cette autorisation est volontairement limitée :</p>
+<ul>
+  <li>l'application ne peut voir et modifier <strong>que les fichiers qu'elle a créés elle-même</strong>, en pratique un seul fichier nommé <code>budget-backup.json</code> ;</li>
+  <li>elle n'a <strong>aucun accès</strong> à vos autres fichiers, documents ou photos Google Drive ;</li>
+  <li>elle lit l'adresse e-mail du compte connecté, uniquement pour l'afficher dans les réglages afin que vous sachiez quel compte est utilisé.</li>
+</ul>
+<p>Les échanges se font directement entre votre navigateur et Google, de façon chiffrée (HTTPS). Le jeton d'accès délivré par Google est valable environ une heure et n'est conservé que sur votre appareil.</p>
+
+<h2>4. Utilisation des données Google</h2>
+<p>Les données obtenues via les API Google servent <strong>exclusivement</strong> à sauvegarder et restaurer votre propre budget. Elles ne sont ni vendues, ni partagées, ni transférées à des tiers, ni utilisées pour de la publicité, ni pour entraîner des modèles d'intelligence artificielle. L'utilisation des informations reçues des API Google respecte les <a href="https://developers.google.com/terms/api-services-user-data-policy">Règles concernant les données utilisateur des services API Google</a>, y compris les exigences d'utilisation limitée.</p>
+
+<h2>5. Autres connexions réseau</h2>
+<ul>
+  <li><strong>GitHub Pages</strong> héberge l'application ; comme tout hébergeur web, GitHub peut enregistrer des données techniques de connexion (adresse IP, navigateur).</li>
+  <li>Une fonctionnalité décorative (les photos affichées en touchant le chat) interroge l'API publique de GitHub pour lister les images du dossier de l'application. Aucune donnée de budget n'est transmise.</li>
+</ul>
+
+<h2>6. Conservation et suppression</h2>
+<ul>
+  <li><strong>Sur l'appareil :</strong> vos données restent tant que vous ne les effacez pas (bouton de réinitialisation de l'application ou effacement des données du site dans le navigateur).</li>
+  <li><strong>Dans Google Drive :</strong> le fichier <code>budget-backup.json</code> est dans votre Drive ; vous pouvez le télécharger ou le supprimer à tout moment.</li>
+  <li><strong>Révoquer l'accès :</strong> bouton « Se déconnecter » dans les réglages de l'application, ou depuis <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+</ul>
+
+<h2>7. Cookies</h2>
+<p>L'application n'utilise pas de cookies. La connexion Google affiche une fenêtre fournie par Google, soumise aux <a href="https://policies.google.com/privacy">règles de confidentialité de Google</a>.</p>
+
+<h2>8. Contact</h2>
+<p>Pour toute question : <a href="mailto:hibou.du.95@gmail.com">hibou.du.95@gmail.com</a></p>
+
+<h2>9. Modifications</h2>
+<p>Toute modification de ces règles sera publiée sur cette page, avec sa date de mise à jour.</p>
+
+<footer>Carnet Budget — application personnelle, sans serveur ni publicité.</footer>
+</main>
+</body>
+</html>
