@@ -4081,6 +4081,70 @@ html[data-density="2"] .app .row.dA-li:has(>.details:not(.hidden))>.details{marg
 /* l'en-tête d'un poste ouvert défile avec la liste (plus de bloc flottant au milieu des dépenses) */
 .row.dA-li:has(>.details:not(.hidden))>.rtop{position:static}
 </style>
+<style id="bdlist2css">
+.bdListRow{grid-template-columns:36px minmax(0,1fr) auto;grid-template-rows:auto auto auto;row-gap:4px}
+.bdListRow .blIc{grid-row:1 / 3}
+.bdListRow .blAmt{white-space:nowrap;font-size:14.5px;font-variant-numeric:tabular-nums;text-align:right}
+.bdListRow .blAmt b{font-weight:750}
+.bdListRow .blAmt i{font-style:normal;font-weight:500;color:var(--muted);font-size:12.5px}
+.bdListRow .blAmt.neg b{color:var(--red)}
+.bdListRow .blCnt{grid-column:2;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bdListRow .blRest{grid-column:3;justify-self:end;font-size:12.5px;font-weight:650;white-space:nowrap}
+.bdListRow .blBar{grid-column:1 / 4;grid-row:3}
+@media (max-width:340px){.bdListRow .blAmt i{display:none}}
+</style>
+<style id="syncfixcss">
+.syncbadge .sbTxt{display:none}
+.syncbadge.cta,.syncbadge.err,.syncbadge.off{width:auto;max-width:100%;min-width:0;height:34px;padding:0 14px;gap:6px;border-radius:99px;font-size:12.5px!important;box-sizing:border-box}
+.syncbadge.cta .sbTxt,.syncbadge.err .sbTxt,.syncbadge.off .sbTxt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.syncbadge.cta::before,.syncbadge.err::before,.syncbadge.off::before{position:static;box-shadow:none;flex:none}
+.syncbadge.off{background:var(--card);box-shadow:var(--dA-shadow)}
+.topbarRow>.syncbar{min-width:0}
+.topbarRow>.syncbar:has(.syncbadge.off){flex-basis:100%;display:flex;justify-content:center}
+.topbarRow>.syncbar:has(.syncbadge.cta),.topbarRow>.syncbar:has(.syncbadge.err){min-width:0;max-width:100%}
+</style>
+<style id="catdetailcss">
+/* Zéphyr : respiration, tête qui vit, museau et moustaches qui frémissent, pupilles qui se dilatent */
+.easterCat .cBreath{transform-box:fill-box;transform-origin:50% 100%;animation:catBreath 3.4s ease-in-out infinite}
+@keyframes catBreath{0%,100%{transform:scale(1,1)}50%{transform:scale(1.012,1.04)}}
+.easterCat .cHeadIdle{transform-box:view-box;transform-origin:52px 16px;animation:catHeadIdle 8s ease-in-out infinite}
+@keyframes catHeadIdle{0%,100%{transform:rotate(0) translateY(0)}22%{transform:rotate(-2.2deg) translateY(.15px)}48%{transform:rotate(1.6deg) translateY(-.1px)}74%{transform:rotate(-.8deg) translateY(.1px)}}
+.easterCat .cNose{transform-box:fill-box;transform-origin:50% 40%;animation:catNose 4.6s ease-in-out infinite}
+@keyframes catNose{0%,70%,100%{transform:scale(1)}74%{transform:scale(1.14,1.08)}78%{transform:scale(.96)}82%{transform:scale(1.1,1.05)}86%{transform:scale(1)}}
+.easterCat .cWhR{transform-box:fill-box;transform-origin:0% 50%;animation:catWhisk 5.2s ease-in-out infinite}
+.easterCat .cWhL{transform-box:fill-box;transform-origin:100% 50%;animation:catWhisk 5.2s ease-in-out infinite .3s}
+@keyframes catWhisk{0%,60%,100%{transform:rotate(0)}66%{transform:rotate(3.2deg)}72%{transform:rotate(-2.4deg)}78%{transform:rotate(1.4deg)}}
+.easterCat .cPupil{transform-box:fill-box;transform-origin:50% 50%;animation:catPupil 7.5s ease-in-out infinite}
+@keyframes catPupil{0%,100%{transform:scale(1,1)}45%{transform:scale(1.2,.94)}55%{transform:scale(1.2,.94)}}
+@media (prefers-reduced-motion:reduce){.easterCat .cBreath,.easterCat .cHeadIdle,.easterCat .cNose,.easterCat .cWhR,.easterCat .cWhL,.easterCat .cPupil{animation:none}}
+</style>
+<style id="cffactscss">
+/* confirmation de suppression : résumé chiffré de ce qui part */
+.cfFacts{margin:0 0 16px;padding:4px 14px;border-radius:16px;background:var(--soft);text-align:left;display:flex;flex-direction:column}
+.cfFacts.hidden{display:none}
+.cfRow{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:8px 0;border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
+.cfRow:first-child{border-top:0}
+.cfK{font-size:13px;color:var(--muted);flex:none}
+.cfV{font-size:14px;font-weight:650;text-align:right;min-width:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.cfV.neg{color:var(--red)}.cfV.pos{color:var(--green)}
+.confirmCard{max-height:92dvh;overflow-y:auto}
+</style>
+<style id="lmenucss">
+/* menu contextuel d'un budget : chiffres clés, indicateurs, tuiles pleine largeur */
+.dARsMetrics{display:flex;flex-direction:column;gap:10px;padding:2px 2px 0}
+.dARsMetrics.hidden{display:none}
+.lmTop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lmBig{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:16px;background:color-mix(in srgb,var(--ink) 5%,var(--card));box-shadow:inset 0 0 0 1px var(--dA-hair);min-width:0}
+.lmBig span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lmBig b{font-size:16px;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.lmBig.neg b{color:var(--red)}.lmBig.pos b{color:var(--green)}
+.lmChips{display:flex;flex-wrap:wrap;gap:6px}
+.lmChip{display:inline-flex;align-items:baseline;gap:5px;padding:5px 11px;border-radius:99px;font-size:12.5px;font-weight:600;color:var(--muted);background:color-mix(in srgb,var(--ink) 5%,transparent);max-width:100%}
+.lmChip b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.lmChip.neg,.lmChip.neg b{color:var(--red)}.lmChip.pos,.lmChip.pos b{color:var(--green)}.lmChip.warn b{color:var(--money-out,var(--ink))}
+.dARsGrid>.dARsTile:last-child:nth-child(odd){grid-column:1/-1}
+@media (max-width:340px){.lmTop{grid-template-columns:1fr 1fr}.lmTop .lmBig:last-child{grid-column:1/-1}}
+</style>
 <style id="qa2css">
 /* ===== Feuille « + Dépense » : plus de place pour les postes, poste choisi toujours visible, plus visuelle ===== */
 .qaCard{gap:10px}
@@ -4707,6 +4771,7 @@ html[data-decor] #bdBody .bdProg i{background-image:linear-gradient(90deg,var(--
     <div class="dARsHead"><span class="dARsIc" id="dARsIc"></span>
       <div class="dARsTxt"><h3 id="dARsTitle"></h3><p id="dARsSub"></p><div class="dARsBar hidden" id="dARsBar" aria-hidden="true"><i></i></div></div>
       <button type="button" class="qaX" id="dARsClose" aria-label="Fermer">✕</button></div>
+    <div class="dARsMetrics hidden" id="dARsMetrics"></div>
     <div class="dARsInfo hidden" id="dARsInfo"></div>
     <div class="dARsGrid" id="dARsGrid"></div>
     <button type="button" class="dARsDel" id="dARsDel"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg><span id="dARsDelTx">Supprimer ce poste</span></button>
@@ -4781,6 +4846,7 @@ html[data-decor] #bdBody .bdProg i{background-image:linear-gradient(90deg,var(--
     <div class="confirmIcon" id="cfIcon">⚠️</div>
     <h3 id="cfTitle">Confirmer ?</h3>
     <p class="modalSub" id="cfSub"></p>
+    <div class="cfFacts hidden" id="cfFacts"></div>
     <div class="confirmBtns">
       <button class="cfBtn secondary" type="button" id="cfCancel">Annuler</button>
       <button class="cfBtn primary" type="button" id="cfConfirm">Confirmer</button>
@@ -5796,9 +5862,9 @@ for(const kind in DELETE_CONFIRM_SWITCHES){
 }
 // Suppression conditionnée au réglage correspondant : si le réglage est désactivé, on supprime directement
 // (sans boîte de dialogue) ; sinon on demande confirmation via la modale existante (askConfirm).
-async function confirmThenDelete(kind,{title,message,icon="🗑️",confirmText="Supprimer"},doDelete){
+async function confirmThenDelete(kind,{title,message,icon="🗑️",confirmText="Supprimer",facts=null},doDelete){
   if(state.confirmDelete&&state.confirmDelete[kind]){
-    const ok=await askConfirm({icon,danger:true,title,message,confirmText});
+    const ok=await askConfirm({icon,danger:true,title,message,confirmText,facts});
     if(!ok)return false;
   }
   doDelete();
@@ -6931,7 +6997,8 @@ function entryEl(line,e){
   const del=document.createElement("button");del.className="delE";del.textContent="×";
   del.onclick=()=>{confirmThenDelete("expense",{
     title:"Supprimer cette dépense ?",
-    message:"Cette ligne de dépense sera supprimée. Rattrapable avec ↶ juste après."
+    message:"Cette ligne de dépense sera supprimée. Rattrapable avec ↶ juste après.",
+    facts:delFacts("expense",e,line)
   },()=>{line.entries=line.entries.filter(x=>x.id!==e.id);commit();render();toastUndo("Dépense supprimée");});};
   top.append(dateWrap,aw,del);
   /* Note : zone qui s'agrandit (2–3 lignes) au lieu d'un champ coupé par « … » */
@@ -7197,7 +7264,8 @@ function buildRow(line){
     const nm=(line.name||"").trim();
     await confirmThenDelete("budget",{
       title:"Supprimer "+(nm?'« '+nm+' »':"ce poste")+" ?",
-      message:"Ce poste et toutes ses dépenses enregistrées seront supprimés. Rattrapable avec ↶ juste après."
+      message:"Ce poste et toutes ses dépenses enregistrées seront supprimés. Rattrapable avec ↶ juste après.",
+      facts:delFacts("budget",line)
     },()=>deleteLine(line));
   }
   const del=document.createElement("button");del.className="del";del.textContent="×";del.setAttribute("aria-label","Supprimer");del.onclick=askDelete;
@@ -7561,7 +7629,8 @@ document.getElementById("bdDeleteBtn").onclick=async()=>{
   const nm=(line.name||"").trim();
   await confirmThenDelete("budget",{
     title:"Supprimer "+(nm?'« '+nm+' »':"ce poste")+" ?",
-    message:"Ce poste et toutes ses dépenses enregistrées seront supprimés. Rattrapable avec ↶ juste après."
+    message:"Ce poste et toutes ses dépenses enregistrées seront supprimés. Rattrapable avec ↶ juste après.",
+    facts:delFacts("budget",line)
   },()=>{deleteLine(line);closeBudgetDetail();});
 };
 
@@ -7572,6 +7641,7 @@ function dItemMenu(kind,item,rowEl,cb){
   rowEl._dAlp=Date.now();
   try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}catch(e){}
   const isSv=kind==="savings";
+  {const mt=document.getElementById("dARsMetrics");if(mt){mt.innerHTML="";mt.classList.add("hidden");}}
   const nm=(item.name||"").trim();
   document.getElementById("dARsIc").textContent=isSv?"🐖":"💶";
   sh.style.setProperty("--dARsC",isSv?"var(--accent-2)":"var(--accent)");{const bar=document.getElementById("dARsBar");if(bar)bar.classList.add("hidden");}
@@ -7705,7 +7775,8 @@ function renderIncomeBox(){
       ()=>{touch();updateComputed();},
       ()=>{confirmThenDelete("income",{
         title:"Supprimer "+(l.name?'« '+l.name+' »':"cette source de revenu")+" ?",
-        message:"Cette source de revenu sera supprimée. Rattrapable avec ↶ juste après."
+        message:"Cette source de revenu sera supprimée. Rattrapable avec ↶ juste après.",
+        facts:delFacts("income",l)
       },()=>{m.incomeLines=m.incomeLines.filter(x=>x.id!==l.id);const sm=delSummary("income",l);commit();render();toastUndo(sm);});}
     ));
   });
@@ -7737,7 +7808,8 @@ function renderSavingsBox(){
       ()=>{touch();updateComputed();},
       ()=>{confirmThenDelete("savings",{
         title:"Supprimer "+(l.name?'« '+l.name+' »':"cette ligne d'épargne")+" ?",
-        message:"Cette ligne d'épargne sera supprimée. Rattrapable avec ↶ juste après."
+        message:"Cette ligne d'épargne sera supprimée. Rattrapable avec ↶ juste après.",
+        facts:delFacts("savings",l)
       },()=>{sv.lines=sv.lines.filter(x=>x.id!==l.id);const sm=delSummary("savings",l);commit();render();toastUndo(sm);});},
       ()=>{l.deduct=!l.deduct;commit();render();}
     ));
@@ -8266,6 +8338,39 @@ function focusNewEntry(lineId,entryId){
   if(inp){inp.focus();inp.scrollIntoView({block:"nearest"});}
 }
 /* Résumé d'un élément supprimé (nom + chiffres clés) pour le message « Annuler » */
+/* Résumé affiché dans la confirmation de suppression : ce qu'on s'apprête à perdre, en chiffres. */
+function delFacts(kind,x,line){
+  const eu=v=>eur(Math.round((+v||0)*100)/100),pc=(a,b)=>b>0?Math.round(a/b*100)+" %":"";
+  const m=ensure(state.current);
+  try{
+    if(kind==="budget"){
+      const p=+x.planned||0,sp=spent(x),n=(x.entries||[]).length,rest=Math.round((p-sp)*100)/100,cat=catById(x.category||"");
+      const f=[["Type",(x.type==="fixed"?"Budget fixe":"Budget variable")+(cat&&cat.name?" · "+cat.icon+" "+cat.name:"")]];
+      f.push(["Dépensé / budgété",p>0?eu(sp)+" / "+eu(p)+(sp>0?" · "+pc(sp,p):""):eu(sp)+" · pas de budget",p>0&&sp>p?"neg":""]);
+      if(p>0)f.push([rest<0?"Dépassement":"Reste",rest<0?eu(-rest):eu(rest),rest<0?"neg":"pos"]);
+      f.push(["Dépenses",n?n+(n>1?" dépenses":" dépense")+" enregistrée"+(n>1?"s":""):"aucune"]);
+      return f;
+    }
+    if(kind==="expense"){
+      const p=line?+line.planned||0:0,sp=line?spent(line):0,a=+x.amount||0,cat=line?catById(line.category||""):null;
+      const f=[["Poste",line?((cat&&cat.icon?cat.icon+" ":"")+((line.name||"").trim()||"Sans nom")):""]];
+      f.push(["Montant",x.amount==null?"à saisir":eu(a),a<0?"pos":""]);
+      f.push(["Date",x.date&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)?x.date.split("-").reverse().join("/"):"aucune date"]);
+      if((x.note||"").trim())f.push(["Note",x.note.trim().length>70?x.note.trim().slice(0,69)+"…":x.note.trim()]);
+      if(line)f.push(["Dépensé du poste",eu(sp)+" → "+eu(sp-a)+(p>0?" sur "+eu(p):"")]);
+      return f;
+    }
+    if(kind==="income"){
+      const tot=(m.incomeLines||[]).reduce((s,l)=>s+(+l.amount||0),0),a=+x.amount||0;
+      return [["Montant",eu(a),"pos"],["Part des revenus",tot>0&&a?pc(a,tot):""],["Total revenus du mois",eu(tot)+" → "+eu(tot-a)]];
+    }
+    if(kind==="savings"){
+      const ls=(m.savings&&m.savings.lines)||[],tot=ls.reduce((s,l)=>s+(+l.amount||0),0),a=+x.amount||0;
+      return [["Montant",eu(a)],["Déduite des revenus",x.deduct?"oui":"non"],["Total épargne du mois",eu(tot)+" → "+eu(tot-a)]];
+    }
+  }catch(_){}
+  return null;
+}
 function delName(n,fb){n=(n||"").trim();if(!n)return fb;return "« "+(n.length>24?n.slice(0,23)+"…":n)+" »";}
 function delSummary(kind,x){
   const eu=v=>eur(Math.round((+v||0)*100)/100);
@@ -9321,9 +9426,33 @@ function dRowMenu(line,wrap){
   grid.innerHTML="";
   const q=sel=>wrap.querySelector(sel);
   const close=()=>{sh.classList.add("hidden");};
+  const renderMetrics=()=>{
+    const mt=document.getElementById("dARsMetrics");if(!mt)return;
+    const r2=v=>Math.round((+v||0)*100)/100;
+    const p=+line.planned||0,sp=spent(line),rest=r2(p-sp),ens=line.entries||[],n=ens.length;
+    const amts=ens.map(e=>+e.amount||0),biggest=n?Math.max.apply(null,amts):0;
+    const dated=ens.filter(e=>e.date&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)).sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0);
+    const last=dated.length?dated[dated.length-1]:null;
+    const big=(k,v,cls)=>'<div class="lmBig'+(cls?" "+cls:"")+'"><span>'+esc(k)+'</span><b>'+esc(v)+'</b></div>';
+    const chip=(k,v,cls)=>'<span class="lmChip'+(cls?" "+cls:"")+'">'+esc(k)+(v?' <b>'+esc(v)+'</b>':"")+'</span>';
+    let h='<div class="lmTop">'+big("Dépensé",eur(sp),p>0&&sp>p?"neg":"")+big("Budgété",p>0?eur(p):"—")
+      +(p>0?big(rest<0?"Dépassement":"Reste",eur(Math.abs(rest)),rest<0?"neg":"pos"):big("Reste","—"))+'</div><div class="lmChips">';
+    if(p>0)h+=chip("Consommé",Math.round(sp/p*100)+" %",sp>p?"neg":"");
+    h+=chip(n?n+(n>1?" dépenses":" dépense"):"Aucune dépense","");
+    if(n>1)h+=chip("Moyenne",eur(r2(sp/n)));
+    if(n>1&&biggest>0)h+=chip("Plus grosse",eur(biggest));
+    if(last)h+=chip("Dernière",last.date.slice(8,10)+"/"+last.date.slice(5,7)+" · "+eur(+last.amount||0));
+    if(isFx)h+=chip(rest<=0&&sp>0?"Payé":"À payer",rest>0?eur(rest):"",rest>0?"warn":"pos");
+    else if(rest>0&&state.current===mKey(new Date())){
+      const now=new Date(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),left=dim-now.getDate()+1;
+      if(left>0)h+=chip("≈ "+eur(r2(rest/left))+" / jour",left>1?"jusqu'au "+dim+"":"aujourd'hui");
+    }
+    mt.innerHTML=h+'</div>';mt.classList.remove("hidden");
+  };
   const refreshHead=()=>{
     const p=+line.planned||0,sp=spent(line);
-    document.getElementById("dARsSub").textContent=eur(sp)+" / "+eur(p)+" · "+(isFx?"charge fixe":(line.recurring?"variable · récurrent":"variable"));
+    document.getElementById("dARsSub").textContent=(isFx?"Charge fixe":"Budget variable")+(ci&&ci.name&&ci.name.trim().toLowerCase()!==nm.toLowerCase()?" · "+ci.name:"")+(line.recurring&&!isFx?" · récurrent":"");
+    renderMetrics();
     info.classList.remove("hidden");
     info.innerHTML=isFx?'<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+DA_IC.rec+'</svg>Reprise chaque mois avec les charges fixes'
       :(line.recurring?'<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+DA_IC.rec+'</svg>Reprise automatiquement le mois prochain':"");
@@ -9816,13 +9945,19 @@ document.getElementById("cbNameIn").addEventListener("keydown",e=>{if(e.key==="E
 
 /* ---------- MODALE DE CONFIRMATION PERSONNALISÉE (remplace confirm()) ---------- */
 let confirmResolve=null;
-function askConfirm({title,message,confirmText="Confirmer",cancelText="Annuler",danger=false,icon="⚠️"}){
+function askConfirm({title,message,confirmText="Confirmer",cancelText="Annuler",danger=false,icon="⚠️",facts=null}){
   return new Promise(resolve=>{
     confirmResolve=resolve;
     const iconEl=document.getElementById("cfIcon");
     iconEl.textContent=icon;iconEl.className="confirmIcon"+(danger?" danger":"");
     document.getElementById("cfTitle").textContent=title;
     document.getElementById("cfSub").textContent=message;
+    const fe=document.getElementById("cfFacts");
+    if(fe){
+      const rows=Array.isArray(facts)?facts.filter(f=>f&&f[1]!=null&&f[1]!==""):[];
+      fe.innerHTML=rows.map(f=>'<div class="cfRow"><span class="cfK">'+esc(f[0])+'</span><b class="cfV'+(f[2]?" "+f[2]:"")+'">'+esc(String(f[1]))+'</b></div>').join("");
+      fe.classList.toggle("hidden",!rows.length);
+    }
     const cb=document.getElementById("cfConfirm");
     cb.textContent=confirmText;cb.className="cfBtn primary"+(danger?" danger":"");
     document.getElementById("cfCancel").textContent=cancelText;
@@ -10926,15 +11061,19 @@ function catBodySVG(look,viewBox){
   const ch=hexToHsl(CAT_COATS.find(c=>c[0]===L.coat)[2]);
   const extr=dk?hslToHex(ch.h,ch.s,Math.max(3,Math.min(96,ch.l+(relLum(CAT_COATS.find(c=>c[0]===L.coat)[2])<.34?16:-18)))):null;
   const fx=v=>Math.round(v*100)/100;
+  const lt=(hex,d)=>{const q=hexToHsl(hex);return hslToHex(q.h,q.s,Math.max(2,Math.min(97,q.l+d)));};
+  const gF=gid+"F",gN=gid+"N";
 
   // ---- patte : hanche + jarret + coussinet (+ chaussette blanche, + patin masqué) ----
   const lg=M.leg, th=fx(7.6*lg), kn=fx(6.2*lg), sh=fx(6.2*lg), pw=fx(5.1*lg);
   const leg=(cls,x,y,shade,paw,hip,knee)=>'<g class="cLeg '+cls+'" transform="translate('+fx(x)+','+fx(y)+') rotate('+hip+')">'
     +'<g class="cUp"><rect x="-2.25" y="-1" width="4.5" height="'+th+'" rx="2.25" fill="'+(dk?extr:shade)+'"/>'
+    +'<rect x="-1.7" y=".4" width="1.1" height="'+fx(th*.62)+'" rx=".55" fill="#fff" opacity=".07"/>'
     +'<g transform="translate(0,'+kn+') rotate('+knee+')"><g class="cLo">'
     +'<rect x="-1.8" y="-.8" width="3.6" height="'+sh+'" rx="1.8" fill="'+(dk?extr:shade)+'"/>'
     +(socks?'<rect x="-1.8" y="'+fx(pw-3.3)+'" width="3.6" height="3.6" rx="1.8" fill="'+C.white+'"/>':'')
     +'<ellipse cx=".45" cy="'+pw+'" rx="1.95" ry="1.2" fill="'+(socks?C.white:(dk?extr:paw))+'"/>'
+    +'<path d="M-.1,'+fx(pw-.55)+' L-.1,'+fx(pw+.45)+' M1,'+fx(pw-.55)+' L1,'+fx(pw+.45)+'" stroke="rgba(0,0,0,.3)" stroke-width=".26" stroke-linecap="round" fill="none"/>'
     // patin à roulettes, masqué hors du mode « roller » : dans la patte, il suit le coussinet
     +'<g class="cRoll"><rect x="-2.1" y="'+fx(pw+.8)+'" width="4.9" height="1.3" rx=".65" fill="#3b414d"/>'
     +'<circle cx="-1" cy="'+fx(pw+2.5)+'" r="1.05" fill="#e6c65a" stroke="#8d7620" stroke-width=".35"/>'
@@ -10958,6 +11097,7 @@ function catBodySVG(look,viewBox){
     const ring=(w,hh)=>L.marks==="tigre"?'<rect x="'+fx(-w+1.2)+'" y="'+fx(-hh/2)+'" width="1.1" height="'+hh+'" fill="'+C.stripe+'" opacity=".85"/>':'';
     return '<g class="cTail" transform="translate('+fx(18.6+dx)+',12.6) rotate(16)"><g class="cT1">'
       +'<rect x="'+fx(-s1+.9)+'" y="'+fx(-h1/2)+'" width="'+s1+'" height="'+h1+'" rx="'+fx(h1/2)+'" fill="'+tCol+'"/>'+ring(s1,h1)
+      +'<rect x="'+fx(-s1+1.6)+'" y="'+fx(-h1/2+.3)+'" width="'+fx(s1-1.4)+'" height="'+fx(h1*.28)+'" rx="'+fx(h1*.14)+'" fill="#fff" opacity=".08"/>'
       +'<g transform="translate('+fx(-s1+.9)+',0) rotate(-11)"><g class="cT2">'
       +'<rect x="'+fx(-s2+.8)+'" y="'+fx(-h2/2)+'" width="'+s2+'" height="'+h2+'" rx="'+fx(h2/2)+'" fill="'+tCol+'"/>'+ring(s2,h2)
       +'<g transform="translate('+fx(-s2+.8)+',0) rotate(-15)"><g class="cT3">'
@@ -11031,17 +11171,28 @@ function catBodySVG(look,viewBox){
     return"";
   }
 
+  // œil grand et rond (cute) : iris dégradé, pupille qui se dilate, paupière, deux reflets
+  const eyeSVG=(cx,gr)=>{
+    const x0=fx(cx-1.85),x1=fx(cx+1.85),c1=fx(cx-1.25),c2=fx(cx+1.25);
+    return '<path d="M'+x0+',9.8 C'+c1+',7.9 '+c2+',7.9 '+x1+',9.8 C'+c2+',11.7 '+c1+',11.7 '+x0+',9.8 Z" fill="url(#'+gr+')"/>'
+      +'<ellipse class="cPupil" cx="'+fx(cx+.05)+'" cy="9.85" rx=".82" ry="1.42" fill="#120d08"/>'
+      +'<path d="M'+x0+',9.8 C'+c1+',7.9 '+c2+',7.9 '+x1+',9.8" stroke="#0e0a06" stroke-width=".5" stroke-linecap="round" fill="none" opacity=".75"/>'
+      +'<circle cx="'+fx(cx-.55)+'" cy="9.05" r=".56" fill="#fff" opacity=".93"/>'
+      +'<circle cx="'+fx(cx+.7)+'" cy="10.6" r=".27" fill="#fff" opacity=".7"/>';
+  };
   const cy0=15.4, bandeTop=fx(cy0-5.2*M.fat), bandeBot=fx(cy0+5.2*M.fat);
   return '<svg viewBox="'+(viewBox||"0 0 70 34")+'" aria-hidden="true" focusable="false">'
     +'<defs><radialGradient id="'+gid+'" cx="42%" cy="26%" r="62%">'
     +'<stop offset="0%" stop-color="'+C.sheen+'" stop-opacity="'+C.sheenOp+'"/>'
-    +'<stop offset="100%" stop-color="'+C.sheen+'" stop-opacity="0"/></radialGradient></defs>'
+    +'<stop offset="100%" stop-color="'+C.sheen+'" stop-opacity="0"/></radialGradient>'
+    +[[gF,eyeFar],[gN,eyeNear]].map(function(g){return '<radialGradient id="'+g[0]+'" cx="50%" cy="30%" r="75%"><stop offset="0%" stop-color="'+lt(g[1],10)+'"/><stop offset="62%" stop-color="'+g[1]+'"/><stop offset="100%" stop-color="'+lt(g[1],-24)+'"/></radialGradient>';}).join("")
+    +'</defs>'
     +'<g class="catRig"><g class="cMorph" transform="translate(0,'+fx(-dy)+')">'
     +tailSVG()
     // pattes du côté opposé : plus sombres et plus hautes (perspective), derrière le corps
     +leg("cLegBR",fx(23.8+dx*.8),17,C.far,C.farPaw,-13,20)
     +leg("cLegFR",43.4,17,C.far,C.farPaw,4,-4)
-    +'<g class="cBody">'
+    +'<g class="cBody"><g class="cBreath">'
     +'<path d="M'+fx(23+dx)+','+bandeTop+' C'+fx(31+dx*.6)+','+fx(bandeTop-2.2)+' 41.5,'+fx(bandeTop-2.4)+' 49,'+fx(bandeTop-.4)
     +' C49.8,13.4 49.8,17 49.2,'+bandeBot+' C41.5,'+fx(bandeBot+2.1)+' '+fx(31+dx*.6)+','+fx(bandeBot+2.1)+' '+fx(23+dx)+','+fx(bandeBot+.2)
     +' C'+fx(22.3+dx)+',17.2 '+fx(22.3+dx)+',14.2 '+fx(23+dx)+','+bandeTop+' Z" fill="'+C.body+'"/>'
@@ -11053,25 +11204,32 @@ function catBodySVG(look,viewBox){
     +' C52.2,16.8 49.8,17 47.8,16 Z" fill="'+C.neck+'"/>'
     +marksSVG()
     +'<ellipse cx="34" cy="11.8" rx="13" ry="4.2" fill="url(#'+gid+')"/>'
+    // volume : ventre plus sombre, brins de fourrure, petit jabot au poitrail
+    +'<ellipse cx="35" cy="'+fx(cy0+4.6*M.fat)+'" rx="11" ry="1.5" fill="#000" opacity=".08"/>'
+    +'<g stroke="'+C.sheen+'" stroke-width=".3" stroke-linecap="round" fill="none" opacity=".16">'
+    +'<path d="M28.5,11.2 q1.1,1.2 .7,2.9"/><path d="M33.2,10.4 q1.2,1.3 .8,3.2"/><path d="M38.4,10.6 q1.1,1.2 .6,3"/>'
+    +'<path d="M43.2,11.4 q1.1,1.1 .6,2.7"/><path d="M26.2,14.6 q1,1.1 .6,2.6"/><path d="M31,15.6 q1,1.1 .6,2.4"/><path d="M41,15.8 q1,1 .5,2.3"/></g>'
+    +'<path d="M48.6,15.6 L50.6,18.6 L49.2,18.3 L50,20.6 L48,18.7 L46.8,19.6 Z" fill="'+(bib?C.white:C.muzzle)+'" opacity="'+(bib?"1":".6")+'"/>'
     +outfitBody()
-    +'</g>'
+    +'</g></g>'
     // pattes du côté visible : un ton plus clair, devant le corps
     +leg("cLegBL",fx(29.5+dx*.8),18.4,C.near,C.nearPaw,-13,20)
     +leg("cLegFL",48.5,18.4,C.near,C.nearPaw,4,-4)
-    +'<g class="cHead"><g transform="translate(57.55,14) scale('+fx(M.head)+') translate(-57.55,-14)">'
+    +'<g class="cHead"><g class="cHeadIdle"><g transform="translate(57.55,14) scale('+fx(M.head)+') translate(-57.55,-14)">'
     +earsSVG()
     // crâne : front bombé, joues qui s'évasent, menton court
     +'<path d="M50.6,10.4 C50.2,6.4 52.9,3.6 56.5,3.6 C60.3,3.6 63.3,6.1 63.9,9.5'
     +' C64.4,12.8 62.4,15.6 59,16.2 C55,16.9 51.3,14.6 50.6,10.4 Z" fill="'+(dk?extr:C.head)+'"/>'
+    // touffes de joues, reflet du front, joues rosées, museau bombé (coussinets de moustaches)
+    +'<g fill="'+(dk?extr:C.head)+'"><path d="M51,12 L49.9,13.2 L51.4,13.4 L50.9,14.5 L52.6,14.2 Z"/><path d="M64,12 L65,13.1 L63.7,13.4 L64.2,14.4 L62.6,14.2 Z"/></g>'
+    +'<ellipse cx="57.3" cy="6.3" rx="2.7" ry="1.1" fill="'+C.sheen+'" opacity=".11"/>'
+    +(L.marks==="tigre"?'<g stroke="'+C.stripe+'" stroke-width=".45" stroke-linecap="round" fill="none" opacity=".85"><path d="M57.55,4.4 L57.55,6.6"/><path d="M55.8,4.8 L56.1,6.4"/><path d="M59.3,4.8 L59,6.4"/></g>':'')
+    +'<ellipse cx="52.9" cy="12.6" rx="1.7" ry="1.05" fill="#ff8fa6" opacity=".2"/><ellipse cx="62.2" cy="12.6" rx="1.7" ry="1.05" fill="#ff8fa6" opacity=".2"/>'
     +'<ellipse cx="57.55" cy="12.9" rx="3.5" ry="2.4" fill="'+C.muzzle+'"/>'
+    +'<ellipse cx="56.2" cy="13.2" rx="2" ry="1.5" fill="'+C.muzzle+'"/><ellipse cx="58.9" cy="13.2" rx="2" ry="1.5" fill="'+C.muzzle+'"/>'
     // yeux en amande, pupille fendue, reflet — de part et d'autre de l'axe
     +'<g class="cEyes">'
-    +'<path d="M53.5,9.5 C54.1,8.3 56,8.3 56.7,9.6 C56,10.9 54.1,10.9 53.5,9.5 Z" fill="'+eyeFar+'"/>'
-    +'<path d="M58.4,9.5 C59.1,8.3 61,8.3 61.6,9.6 C61,10.9 59.1,10.9 58.4,9.5 Z" fill="'+eyeNear+'"/>'
-    +'<ellipse cx="55.1" cy="9.6" rx=".55" ry="1.55" fill="#14100a"/>'
-    +'<ellipse cx="60" cy="9.6" rx=".55" ry="1.55" fill="#14100a"/>'
-    +'<circle cx="54.45" cy="8.85" r=".3" fill="#fff" opacity=".85"/>'
-    +'<circle cx="59.35" cy="8.85" r=".3" fill="#fff" opacity=".85"/>'
+    +eyeSVG(55.1,gF)+eyeSVG(60,gN)
     +'</g>'
     // bouche : le trait du menton puis les deux commissures, en ω sous la truffe
     +'<g stroke="rgba(255,255,255,.2)" stroke-width=".38" stroke-linecap="round" fill="none">'
@@ -11079,18 +11237,21 @@ function catBodySVG(look,viewBox){
     +'<path d="M57.55,13.95 C57.1,14.45 56.4,14.45 56,14.05"/>'
     +'<path d="M57.55,13.95 C58,14.45 58.7,14.45 59.1,14.05"/></g>'
     // moustaches : en éventail, tracées AVANT la truffe (elles passent donc derrière elle)
-    +'<g stroke="rgba(255,255,255,.32)" stroke-width=".42" stroke-linecap="round" fill="none">'
-    +'<path d="M59.7,12.4 L67.4,10.9"/><path d="M59.9,13 L67.8,12.9"/><path d="M59.7,13.6 L67.2,15.2"/></g>'
-    +'<g stroke="rgba(255,255,255,.2)" stroke-width=".4" stroke-linecap="round" fill="none">'
-    +'<path d="M55.4,12.5 L51.9,11.5"/><path d="M55.3,13.2 L51.7,13.5"/></g>'
-    // truffe : triangle centré entre les deux yeux
-    +'<path d="M56.5,11.7 L58.6,11.7 L57.55,13.35 Z" fill="#e08a96"/>'
+    +'<g stroke="rgba(255,255,255,.3)" stroke-width=".32" stroke-linecap="round" fill="none"><path d="M54.1,7.3 L52.7,6.3"/><path d="M61.1,7.3 L62.5,6.3"/></g>'
+    +'<g class="cWhR" stroke="rgba(255,255,255,.34)" stroke-width=".42" stroke-linecap="round" fill="none">'
+    +'<path d="M59.7,12.2 L67.6,10.4"/><path d="M59.9,12.9 L68,12.8"/><path d="M59.7,13.6 L67.4,15.4"/></g>'
+    +'<g class="cWhL" stroke="rgba(255,255,255,.22)" stroke-width=".4" stroke-linecap="round" fill="none">'
+    +'<path d="M55.4,12.4 L51.6,11.2"/><path d="M55.3,13.1 L51.4,13.4"/><path d="M55.4,13.7 L52,15"/></g>'
+    +'<g fill="#fff" opacity=".22"><circle cx="59.2" cy="12.5" r=".16"/><circle cx="59.4" cy="13.1" r=".16"/><circle cx="55.9" cy="12.5" r=".16"/><circle cx="55.7" cy="13.1" r=".16"/></g>'
+    // truffe : petit cœur arrondi centré entre les deux yeux, avec son reflet
+    +'<g class="cNose"><path d="M56.35,11.7 C56.8,11.4 58.3,11.4 58.75,11.7 C58.8,12.5 58.1,13.2 57.55,13.45 C57,13.2 56.3,12.5 56.35,11.7 Z" fill="#e58b99"/>'
+    +'<ellipse cx="57.1" cy="11.95" rx=".5" ry=".25" fill="#fff" opacity=".55"/></g>'
     +'<path class="cTongue" d="M56.95,14.15 C57.5,13.95 57.6,13.95 58.15,14.15'
     +' C57.95,15.5 57.15,15.5 56.95,14.15 Z" fill="#e58fa0"/>'
     +outfitHead()
     +'</g>'
     +((catSeason()==="winter"&&L.outfit!=="bonnet"&&L.outfit!=="lunettes")?catHatSVG():"")
-    +'</g>'
+    +'</g></g>'
     +'</g></g></svg>';
 }
 
@@ -12133,8 +12294,8 @@ function gdBadgeUpdate(){
     const m=text.match(/^(\S+)\s*(.*)$/);
     const icon=m?m[1]:"☁",rest=m?m[2]:"";
     const justSynced=cls==="ok"&&(prevCls==="busy"||prevCls==="pending");
-    el.innerHTML='<span class="sbIcon'+(justSynced?" syncPop":"")+'">'+(justSynced?"✓":icon)+'</span>'+(rest?" "+esc(rest):"");
-    el.title=title;
+    el.innerHTML='<span class="sbIcon'+(justSynced?" syncPop":"")+'">'+(justSynced?"✓":icon)+'</span>'+(rest?'<span class="sbTxt">'+esc(rest)+'</span>':"");
+    el.title=(rest?rest+" — ":"")+title;el.setAttribute("aria-label",(rest?rest+" — ":"")+title);
     if(bar)bar.classList.add("has");
     if(justSynced){
       setTimeout(()=>{if(el.dataset.kind==="ok"){const ic=el.querySelector(".sbIcon");if(ic){ic.textContent=icon;ic.classList.remove("syncPop");}}},900);
@@ -13774,10 +13935,12 @@ const LOVE_CFG={
     var last=null;
     shown.forEach(function(l){
       if(l.type!==last){last=l.type;var h=document.createElement("div");h.className="bdListGrp";h.textContent=l.type==="fixed"?"Fixes":"Variables";list.appendChild(h);}
-      var p=+l.planned||0,sp=spent(l),rest=round2(p-sp),cat=catById(l.category||"");
+      var p=+l.planned||0,sp=spent(l),rest=round2(p-sp),cat=catById(l.category||""),n=(l.entries||[]).length;
       var b=document.createElement("button");b.type="button";b.className="bdListRow"+(l.id===detailLineId?" on":"");b.dataset.id=l.id;
       b.innerHTML='<span class="blIc">'+cat.icon+'</span><span class="blNm">'+esc((l.name||"").trim()||"Sans nom")+'</span>'
-        +'<span class="blRest'+(rest<0?" neg":"")+'">'+(p>0?(rest<0?eur(-rest)+" dépassé":"reste "+eur(rest)):eur(sp))+'</span>'
+        +'<span class="blAmt'+(p>0&&sp>p?" neg":"")+'"><b>'+eur(sp)+'</b>'+(p>0?'<i> / '+eur(p)+'</i>':'')+'</span>'
+        +'<span class="blCnt">'+(n?n+(n>1?" dépenses":" dépense"):"aucune dépense")+'</span>'
+        +'<span class="blRest'+(rest<0?" neg":"")+'">'+(p>0?(rest<0?"dépassé de "+eur(-rest):"reste "+eur(rest)):"sans budget")+'</span>'
         +'<span class="blBar'+(p>0&&sp>p?" over":"")+'" aria-hidden="true"><b style="width:'+(p>0?Math.max(0,Math.min(100,sp/p*100)):0)+'%"></b></span>';
       b.setAttribute("aria-current",l.id===detailLineId?"true":"false");
       list.appendChild(b);
@@ -14219,6 +14382,7 @@ setInterval(function(){if(Date.now()>=nextAt){spawn();nextAt=Date.now()+11000+R(
   function openMenu(k){
     var cust=isCustom(k),st=stats(k);if(!st)return;
     try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}catch(e){}
+    {var mt0=$("dARsMetrics");if(mt0){mt0.innerHTML="";mt0.classList.add("hidden");}}
     var label=mLabel(k),t=st.t,close=function(){sh.classList.add("hidden");sh.classList.remove("mmenu");};
     var inc=t.income||0,sp=t.spent||0,rest=(typeof t.remainReal==="number")?t.remainReal:round2(inc-sp);
     $("dARsIc").textContent=cust?"🎯":(MN[+k.slice(5,7)-1]||"").slice(0,3);
