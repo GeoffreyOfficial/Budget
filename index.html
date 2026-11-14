@@ -3857,6 +3857,11 @@ html:not([data-decor]) #ambient{display:none}
 .dARsGrp{grid-column:1/-1;margin:4px 4px -2px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .dARsTile.wide{grid-column:1/-1}
 </style>
+<style id="entfixcss">
+/* Affichage compact / vue Jauges : la liste des dépenses d'un poste déplié ne doit jamais être plafonnée en hauteur
+   (le débordement étant visible, les dernières lignes passaient par-dessus « + Ajouter une dépense ») */
+.app.compact .row .entries,.app[data-view="flow"] .row .entries{max-height:none;overflow:visible}
+</style>
 <style id="qa2css">
 /* ===== Feuille « + Dépense » : plus de place pour les postes, poste choisi toujours visible, plus visuelle ===== */
 .qaCard{gap:10px}
