@@ -5900,6 +5900,7 @@ function foldSimpleSavingsToLines(sv){
   sv.detailed=true;
 }
 const obj0=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
+function catKey(t){return String(t==null?"":t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();}
 function repairShapes(bag,isMonthBag){
   // Remise en forme défensive : un élément nul/mal typé dans les données locales ne doit jamais empêcher l'appli de démarrer.
   const obj=x=>x&&typeof x==="object"&&!Array.isArray(x);
@@ -5921,6 +5922,13 @@ function migrate(){
   repairShapes(state.customBudgets,false);
   if(Array.isArray(state.categories))state.categories=state.categories.filter(c=>obj0(c)&&typeof c.id==="string"&&c.id&&typeof c.name==="string").map(c=>(typeof c.icon==="string"&&c.icon)?c:{...c,icon:"🏷️"});
   if(!Array.isArray(state.categories)||state.categories.length===0)state.categories=DEFAULT_CATEGORIES.map(c=>({...c}));
+  /* Un nom de catégorie = une seule catégorie (sans tenir compte de la casse, des accents ni des espaces) :
+     les doublons existants sont fusionnés dans la première, et leurs postes lui sont rattachés. */
+  {const seen=new Map(),drop=new Map();
+   state.categories=state.categories.filter(c=>{const k=catKey(c.name);if(!k)return true;if(seen.has(k)){drop.set(c.id,seen.get(k));return false;}seen.set(k,c.id);return true;});
+   if(drop.size){const fix=l=>{if(l&&drop.has(l.category))l.category=drop.get(l.category);};
+     for(const k in state.months)for(const l of (state.months[k].lines||[]))fix(l);
+     for(const k in (state.customBudgets||{}))for(const l of (state.customBudgets[k].lines||[]))fix(l);}}
   if(typeof state.current!=="string"||!(/^\d{4}-\d{2}$/.test(state.current)||(isCustom(state.current)&&state.customBudgets[state.current])))state.current=mKey(new Date());
   for(const k in state.months){const m=state.months[k];for(const l of m.lines){
   if(!Array.isArray(l.entries)){l.entries=[];
@@ -6070,25 +6078,32 @@ function ensure(k){
   if(!Array.isArray(m.savings.lines))m.savings.lines=[];
   return m;}
 /* ---------- Suggestions de noms (autocomplétion maison, par catégorie, jamais mélangées) ---------- */
-function collectNames(kind){
-  const map=new Map(); // nom normalisé -> {name affiché, nb d'occurrences}
-  const add=n=>{n=(n||"").trim();if(!n)return;const k=n.toLowerCase();
-    let e=map.get(k);if(!e){e={name:n,count:0};map.set(k,e);}e.count++;};
+const sgNorm=t=>String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const SG_COLL=new Intl.Collator("fr",{sensitivity:"base",numeric:true});
+/* Liste des noms déjà utilisés : fusionne les variantes (casse, accents, espaces), garde la graphie la plus fréquente,
+   mémorise le nombre d'usages, l'icône de catégorie (postes) et, pour les notes, si la note vient du poste en cours. */
+function collectNames(kind,ctxLine){
+  const map=new Map();
+  const add=(n,icon,own)=>{n=String(n==null?"":n).trim().replace(/\s+/g," ");if(!n)return;const k=sgNorm(n);
+    let e=map.get(k);if(!e){e={key:k,name:n,count:0,vars:new Map(),icon:"",own:false};map.set(k,e);}
+    e.count++;const v=(e.vars.get(n)||0)+1;e.vars.set(n,v);
+    if(v>(e.vars.get(e.name)||0))e.name=n;
+    if(icon&&!e.icon)e.icon=icon;if(own)e.own=true;};
+  const lineIcon=l=>{if(!l||!l.category)return "";const c=catById(l.category);return c&&c.icon&&c!==NOCAT?c.icon:"";};
+  const bags=()=>{const a=[];for(const mk in state.months)a.push(state.months[mk]);for(const ck in (state.customBudgets||{}))a.push(state.customBudgets[ck]);return a;};
   if(kind==="expense"){
-    for(const mk in state.months)for(const l of state.months[mk].lines)add(l.name);
-    for(const ck in (state.customBudgets||{}))for(const l of (state.customBudgets[ck].lines||[]))add(l.name);
+    for(const m of bags())for(const l of (m.lines||[]))add(l.name,lineIcon(l));
   }else if(kind==="income"){
-    for(const mk in state.months)for(const il of (state.months[mk].incomeLines||[]))add(il.name);
-    for(const ck in (state.customBudgets||{}))for(const il of (state.customBudgets[ck].incomeLines||[]))add(il.name);
+    for(const m of bags())for(const il of (m.incomeLines||[]))add(il.name);
   }else if(kind==="savings"){
     for(const mk in state.months){const sv=state.months[mk].savings;if(sv&&Array.isArray(sv.lines))for(const sl of sv.lines)add(sl.name);}
     if(state.savings&&Array.isArray(state.savings.lines))for(const sl of state.savings.lines)add(sl.name);
   }else if(kind==="note"){
-    for(const mk in state.months)for(const l of state.months[mk].lines)for(const e of l.entries)add(e.note);
-    for(const ck in (state.customBudgets||{}))for(const l of (state.customBudgets[ck].lines||[]))for(const e of (l.entries||[]))add(e.note);
+    const own=new Set();if(ctxLine&&Array.isArray(ctxLine.entries))for(const e of ctxLine.entries)if(e&&e.note)own.add(sgNorm(e.note));
+    for(const m of bags())for(const l of (m.lines||[]))for(const e of (l.entries||[]))if(e&&e.note)add(e.note,"",own.has(sgNorm(e.note)));
   }
-  // Les plus utilisés d'abord, puis ordre alphabétique
-  return [...map.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,"fr")).map(o=>o.name);
+  // Ordre alphabétique (sans tenir compte des accents ni de la casse, nombres dans l'ordre naturel)
+  return [...map.values()].sort((a,b)=>SG_COLL.compare(a.name,b.name)||(b.count-a.count));
 }
 // Une seule boîte de suggestions partagée (réutilisée pour tous les champs) : évite de créer
 // un nouvel élément flottant à chaque rendu de ligne, ce qui finirait par accumuler des dizaines
@@ -6100,9 +6115,7 @@ function getSuggBox(){
     suggBoxEl.addEventListener("mousedown",ev=>ev.preventDefault()); // empêche le blur de fermer avant le tap
     suggBoxEl.addEventListener("click",ev=>{
       const btn=ev.target.closest(".suggItem");if(!btn||!suggActiveEl)return;
-      const n=suggItems[+btn.dataset.i];if(n==null)return;
-      suggActiveEl.value=n;suggActiveEl.dispatchEvent(new Event("input",{bubbles:true}));
-      closeSuggest();
+      suggPick(+btn.dataset.i);
     });
   }
   return suggBoxEl;
@@ -6119,9 +6132,9 @@ function placeSuggest(el){
   const tbEl=document.querySelector(".topbar"),tbBot=tbEl?tbEl.getBoundingClientRect().bottom:0; // la barre du haut reste visible : la liste ne passe pas dessous
   const spaceBelow=viewH-(r.bottom-offY)-8, spaceAbove=r.top-Math.max(offY,tbBot)-8;
   const openAbove=spaceBelow<160&&spaceAbove>spaceBelow;
-  const maxH=Math.max(120,Math.min(260,Math.round(openAbove?spaceAbove:spaceBelow)));
+  const maxH=Math.max(120,Math.min(Math.round(viewH*.42),320,Math.round(openAbove?spaceAbove:spaceBelow)));
   box.style.maxHeight=maxH+"px";
-  box.style.width=Math.round(Math.max(r.width,180))+"px";
+  box.style.width=Math.round(Math.min(Math.max(r.width,240),viewW-16))+"px";
   const left=Math.min(r.left,viewW+offX-box.offsetWidth-8);
   box.style.left=Math.round(Math.max(8+offX,left))+"px";
   // la liste est collée au champ : sa hauteur réelle (pas la hauteur max) décide de sa position quand elle s'ouvre vers le haut
@@ -6138,27 +6151,83 @@ function closeSuggest(){
   }
 }
 const SUGG_LABEL={expense:"Postes existants",income:"Revenus existants",savings:"Épargne existante",note:"Dépenses existantes"};
+function sgHighlight(name,q){
+  if(!q)return esc(name);
+  const n=sgNorm(name);if(n.length!==name.length)return esc(name);
+  const at=n.indexOf(q);if(at<0)return esc(name);
+  return esc(name.slice(0,at))+"<mark>"+esc(name.slice(at,at+q.length))+"</mark>"+esc(name.slice(at+q.length));
+}
+let suggHi=-1;
+function suggSetHi(i){
+  const items=suggBoxEl?[...suggBoxEl.querySelectorAll(".suggItem")]:[];
+  items.forEach(b=>b.classList.remove("on"));suggHi=items.length?(i+items.length)%items.length:-1;
+  if(suggHi>=0){const b=items[suggHi];b.classList.add("on");b.scrollIntoView({block:"nearest"});}
+}
+function suggPick(i){
+  const n=suggItems[i];if(n==null||!suggActiveEl)return;const el=suggActiveEl;
+  el.value=n;el.dispatchEvent(new Event("input",{bubbles:true}));closeSuggest();
+}
 function openSuggest(el,kind){
-  const q=(el.value||"").trim().toLowerCase();
-  const all=collectNames(kind);
-  const filtered=(q?all.filter(n=>n.toLowerCase().includes(q)&&n.toLowerCase()!==q):all).slice(0,8);
-  if(!filtered.length){closeSuggest();return;}
-  suggItems=filtered;suggActiveEl=el;
+  const q=sgNorm(el.value||"");
+  const ctx=typeof el._suggLine==="function"?el._suggLine():null;
+  let list=collectNames(kind,ctx).filter(o=>o.key!==q);
+  if(q){
+    // les mots qui COMMENCENT par la saisie d'abord, puis ceux qui la contiennent (chacun dans l'ordre alphabétique)
+    const starts=o=>o.key.split(" ").some(w=>w.startsWith(q));
+    list=list.filter(o=>o.key.includes(q));
+    list=[...list.filter(starts),...list.filter(o=>!starts(o))];
+  }
+  if(!list.length){closeSuggest();return;}
+  list=list.slice(0,80);
+  suggItems=list.map(o=>o.name);suggActiveEl=el;suggHi=-1;
   const box=getSuggBox();
-  box.innerHTML='<div class="suggHead">'+esc(SUGG_LABEL[kind]||"Suggestions")+'</div>'
-    +filtered.map((n,i)=>'<button type="button" class="suggItem" data-i="'+i+'">'+esc(n)+'</button>').join("");
-  box.classList.remove("hidden");placeSuggest(el);
+  const item=(o,i,L)=>'<button type="button" class="suggItem'+(L!=null?' hasL':'')+'" data-i="'+i+'" title="'+esc(o.name)+'">'
+    +(L?'<span class="sgL" aria-hidden="true">'+esc(L)+'</span>':'')
+    +(o.icon?'<span class="sgIc">'+esc(o.icon)+'</span>':'')
+    +'<span class="sgTx">'+sgHighlight(o.name,q)+'</span>'
+    +(o.count>1?'<span class="sgN">×'+o.count+'</span>':'')+'</button>';
+  let html="";
+  if(kind==="note"&&list.some(o=>o.own)&&list.some(o=>!o.own)){
+    // notes déjà utilisées dans CE poste d'abord, puis celles des autres postes
+    html+='<div class="suggHead">Dans ce poste</div>';
+    list.forEach((o,i)=>{if(o.own)html+=item(o,i);});
+    html+='<div class="suggHead">Autres postes</div>';
+    list.forEach((o,i)=>{if(!o.own)html+=item(o,i);});
+  }else{
+    html+='<div class="suggHead">'+esc(kind==="note"&&list.every(o=>o.own)?"Dans ce poste":(SUGG_LABEL[kind]||"Suggestions"))
+      +'<span class="sgCount">'+list.length+(list.length>=80?"+":"")+'</span></div>';
+    let lastL="";
+    list.forEach((o,i)=>{
+      // repères A, B, C… quand la liste est longue et non filtrée
+      let L=null;
+      if(!q&&list.length>12){const c=(sgNorm(o.name).charAt(0)||"#").toUpperCase(),k=/[A-Z]/.test(c)?c:"#";L=k===lastL?"":k;lastL=k;}
+      html+=item(o,i,L);
+    });
+  }
+  box.innerHTML=html;
+  box.classList.remove("hidden");box.scrollTop=0;placeSuggest(el);
   window.addEventListener("scroll",onSuggestReposition,true);window.addEventListener("resize",onSuggestReposition);
   if(window.visualViewport){
     window.visualViewport.addEventListener("resize",onSuggestReposition);
     window.visualViewport.addEventListener("scroll",onSuggestReposition);
   }
 }
-function attachSuggest(el,kind){
+function attachSuggest(el,kind,lineGetter){
   el.setAttribute("autocomplete","off"); // évite que l'autocomplétion native du navigateur double celle-ci
+  if(lineGetter)el._suggLine=lineGetter;
   el.addEventListener("focus",()=>openSuggest(el,kind));
   el.addEventListener("input",()=>openSuggest(el,kind));
   el.addEventListener("blur",()=>setTimeout(()=>{if(suggActiveEl===el)closeSuggest();},150));
+  // Clavier (tablette / Z Fold avec clavier) : ↑ ↓ pour parcourir, Entrée pour choisir, Échap pour fermer
+  el.addEventListener("keydown",ev=>{
+    const open=suggBoxEl&&!suggBoxEl.classList.contains("hidden")&&suggActiveEl===el;
+    if(ev.key==="ArrowDown"||ev.key==="ArrowUp"){
+      if(!open){openSuggest(el,kind);return;}
+      ev.preventDefault();ev.stopPropagation();suggSetHi(suggHi<0?(ev.key==="ArrowDown"?0:-1):suggHi+(ev.key==="ArrowDown"?1:-1));
+    }else if(ev.key==="Enter"&&open&&suggHi>=0){
+      ev.preventDefault();ev.stopImmediatePropagation();suggPick(suggHi);
+    }else if(ev.key==="Escape"&&open){ev.preventDefault();ev.stopPropagation();closeSuggest();}
+  },true);
 }
 
 // Arrondi monétaire : on garde jusqu'à 3 décimales (certains montants — prix au litre,
@@ -6718,6 +6787,7 @@ function teRenderCode(){
 let openIconPickerId=null;
 let iconPickerQuery="";
 const normIcon=s=>(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+function uniqueCatName(base){let n=base,i=2;const taken=x=>state.categories.some(c=>catKey(c.name)===catKey(x));while(taken(n))n=base+" "+(i++);return n;}
 function reassignCategory(oldId,newId){
   for(const k in state.months)for(const l of state.months[k].lines)if(l.category===oldId)l.category=newId;
   for(const k in (state.customBudgets||{}))for(const l of (state.customBudgets[k].lines||[]))if(l.category===oldId)l.category=newId;
@@ -6725,15 +6795,21 @@ function reassignCategory(oldId,newId){
 function renderCategoriesSettings(){
   const wrap=document.getElementById("catList");if(!wrap)return;wrap.innerHTML="";
   if(state.categories.length===0){const e=document.createElement("div");e.className="empty";e.textContent="Aucune catégorie — ajoute-en une.";wrap.append(e);return;}
-  state.categories.forEach(cat=>{
-    const row=document.createElement("div");row.className="catrow";
+  /* affichage alphabétique (l'ordre interne, qui fixe les couleurs, ne change pas) */
+  [...state.categories].sort((a,b)=>SG_COLL.compare(a.name||"",b.name||"")).forEach(cat=>{
+    const row=document.createElement("div");row.className="catrow";row.dataset.id=cat.id;
     const iconBtn=document.createElement("button");iconBtn.className="caticon";iconBtn.textContent=cat.icon;iconBtn.type="button";
     iconBtn.onclick=()=>{
       if(openIconPickerId===cat.id){openIconPickerId=null;}else{openIconPickerId=cat.id;iconPickerQuery="";}
       renderCategoriesSettings();
     };
     const nameIn=document.createElement("input");nameIn.className="catNameIn";nameIn.value=cat.name;nameIn.placeholder="Nom de la catégorie";
-    nameIn.addEventListener("input",()=>{cat.name=nameIn.value;touch();});
+    const warn=document.createElement("div");warn.className="catWarn";warn.hidden=true;
+    const taken=v=>{const k=catKey(v);return !!k&&state.categories.some(c=>c.id!==cat.id&&catKey(c.name)===k);};
+    nameIn.addEventListener("input",()=>{
+      if(taken(nameIn.value)){nameIn.classList.add("dupName");warn.textContent="Une catégorie « "+nameIn.value.trim()+" » existe déjà : choisis un autre nom.";warn.hidden=false;return;}
+      nameIn.classList.remove("dupName");warn.hidden=true;cat.name=nameIn.value;touch();});
+    nameIn.addEventListener("blur",()=>{if(nameIn.classList.contains("dupName")){nameIn.value=cat.name;nameIn.classList.remove("dupName");warn.hidden=true;toast("Nom déjà utilisé — « "+cat.name+" » conservé");}});
     const del=document.createElement("button");del.className="del";del.textContent="×";del.type="button";
     del.onclick=async()=>{
       const ok=await askConfirm({
@@ -6746,7 +6822,7 @@ function renderCategoriesSettings(){
       reassignCategory(cat.id,"");state.categories=state.categories.filter(c=>c.id!==cat.id);commit();renderCategoriesSettings();render();
     };
     row.append(iconBtn,nameIn,del);
-    wrap.append(row);
+    wrap.append(row,warn);
     if(openIconPickerId===cat.id){
       const picker=document.createElement("div");picker.className="iconPicker";
       const searchIn=document.createElement("input");searchIn.type="text";searchIn.className="iconSearchIn";
@@ -6780,10 +6856,10 @@ function renderCategoriesSettings(){
   }
 }
 document.getElementById("addCatBtn").onclick=()=>{
-  const cat={id:uid(),name:"Nouvelle catégorie",icon:"🏷️"};state.categories.push(cat);
+  const cat={id:uid(),name:uniqueCatName("Nouvelle catégorie"),icon:"🏷️"};state.categories.push(cat);
   commit();renderCategoriesSettings();render();
-  const inputs=document.querySelectorAll("#catList .catNameIn");const last=inputs[inputs.length-1];
-  if(last){last.focus();last.select();}
+  const rowEl_=document.querySelector('#catList .catrow[data-id="'+cat.id+'"]');const inp=rowEl_&&rowEl_.querySelector(".catNameIn");
+  if(inp){inp.scrollIntoView({block:"center"});inp.focus();inp.select();}
 };
 
 /* ---------- INDICATEURS D'EN-TÊTE : cartes (tous sauf le héros), dans l'ordre choisi ---------- */
@@ -7092,7 +7168,7 @@ function entryEl(line,e){
   const fitNote=()=>{if(!note.offsetParent)return;note.style.height="auto";const h=note.scrollHeight;if(h>0)note.style.height=h+"px";};
   note._fit=fitNote;requestAnimationFrame(fitNote);
   note.addEventListener("input",()=>{if(note.value.indexOf("\n")>=0)note.value=note.value.replace(/\s*\n+\s*/g," ");e.note=note.value;fitNote();touch();});
-  attachSuggest(note,"note");
+  attachSuggest(note,"note",()=>line);
   const warn=document.createElement("div");warn.className="ewarn";
   const dup=document.createElement("div");dup.className="dupwarn";
   const dupTxt=document.createElement("span");dupTxt.className="dupTxt";dupTxt.textContent="🔁 Doublon possible — même dépense déjà enregistrée ce jour";
@@ -7135,16 +7211,44 @@ function openCatPicker(line){
   const sub=document.getElementById("catPickSub");
   if(sub)sub.textContent=(line.name||"").trim()?"Poste : "+(line.name||"").trim():"";
   const list=document.getElementById("catPickList");list.innerHTML="";
-  [NOCAT,...state.categories].forEach(c=>{
-    const b=document.createElement("button");b.type="button";
-    b.className="catPickOpt"+((line.category||"")===c.id?" sel":"");
-    b.innerHTML='<span class="cpIcon">'+c.icon+'</span><span>'+esc(c.name)+'</span>';
-    b.onclick=()=>{
-      line.category=c.id;touch();closeCatPicker();render();
-    };
-    list.append(b);
-  });
+  const cur=line.category||"";
+  const sorted=[...state.categories].sort((a,b)=>SG_COLL.compare(a.name||"",b.name||""));
+  const search=document.createElement("input");search.type="text";search.className="catPickSearch";search.autocomplete="off";search.maxLength=40;
+  search.placeholder="🔍 Rechercher ou créer une catégorie";search.setAttribute("aria-label","Rechercher ou créer une catégorie");
+  const box=document.createElement("div");box.className="catPickBox";
+  list.append(search,box);
+  const choose=id=>{line.category=id;touch();closeCatPicker();render();};
+  const optBtn=c=>{
+    const b=document.createElement("button");b.type="button";b.className="catPickOpt"+(cur===c.id?" sel":"");
+    b.innerHTML='<span class="cpIcon">'+esc(c.icon)+'</span><span class="cpName">'+esc(c.name)+'</span>'+(cur===c.id?'<span class="cpTick" aria-hidden="true">✓</span>':"");
+    b.onclick=()=>choose(c.id);return b;
+  };
+  const draw=()=>{
+    const q=catKey(search.value);box.innerHTML="";
+    // « Sans catégorie » en premier, puis ordre alphabétique (la recherche garde cet ordre : début de mot d'abord)
+    let items=[NOCAT,...sorted];
+    if(q){const st=c=>catKey(c.name).split(" ").some(w=>w.startsWith(q));
+      items=items.filter(c=>catKey(c.name).includes(q));items=[...items.filter(st),...items.filter(c=>!st(c))];}
+    items.forEach(c=>box.append(optBtn(c)));
+    const exact=q&&state.categories.some(c=>catKey(c.name)===q);
+    if(q&&!exact){
+      const nb=document.createElement("button");nb.type="button";nb.className="catPickOpt catPickNew";
+      nb.innerHTML='<span class="cpIcon">＋</span><span class="cpName">Créer « '+esc(search.value.trim())+' »</span>';
+      nb.onclick=()=>{
+        const nm=search.value.trim().replace(/\s+/g," ");if(!nm)return;
+        const ex=state.categories.find(c=>catKey(c.name)===catKey(nm));
+        if(ex){choose(ex.id);return;}
+        const cat={id:uid(),name:nm,icon:"🏷️"};state.categories.push(cat);commit();toast("Catégorie « "+nm+" » créée");choose(cat.id);
+      };
+      box.append(nb);
+    }
+    if(!items.length&&!(q&&!exact)){const e=document.createElement("p");e.className="catPickEmpty";e.textContent="Aucune catégorie";box.append(e);}
+  };
+  search.addEventListener("input",draw);
+  search.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();const first=box.querySelector(".catPickOpt");if(first)first.click();}});
+  draw();
   document.getElementById("catPickModal").classList.remove("hidden");
+  const sel=box.querySelector(".catPickOpt.sel");if(sel)requestAnimationFrame(()=>sel.scrollIntoView({block:"center"}));
 }
 function closeCatPicker(){document.getElementById("catPickModal").classList.add("hidden");}
 document.getElementById("catPickCancel").onclick=closeCatPicker;
@@ -13512,6 +13616,7 @@ const LOVE_CFG={
       qaAmt.value=v;qaRefresh();});
     qaAmt.addEventListener("input",qaRefresh);
     qaAmt.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();qaAdd(chainOn());}});
+    if(typeof attachSuggest==="function")attachSuggest(qaNote,"note",function(){var m=ensure(state.current);return (m&&m.lines||[]).find(function(l){return l.id===qaSel;})||null;});
     qaNote.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();qaAdd(chainOn());}});
     // Note en cours de saisie : toucher un bouton de la fenêtre ne retire pas le focus du champ (sinon le clavier se ferme,
     // la mise en page bouge avant le « clic » et le bouton touché n'est plus sous le doigt).
@@ -13729,6 +13834,8 @@ const LOVE_CFG={
     if(e.key!=="Enter"||e.isComposing||e.shiftKey)return;
     const t=e.target;if(!t||!t.matches||!t.matches(".nameIn,.amtIn,.planIn,.noteIn"))return;
     e.preventDefault();e.stopPropagation();
+    /* une proposition est surlignée (↑ ↓) : Entrée la choisit au lieu de passer au champ suivant */
+    if(suggBoxEl&&!suggBoxEl.classList.contains("hidden")&&suggActiveEl===t&&suggHi>=0){suggPick(suggHi);return;}
     const n=nextOf(t);
     if(n){try{n.focus();if(n.select)n.select();}catch(_){}return;}
     /* « Enchaîner » : dépense ajoutée dans un poste → Entrée valide et ouvre la ligne suivante */
@@ -15115,5 +15222,37 @@ html.ckOn #budgetDetailPanel #bdBody,html.ckOn[data-density] #budgetDetailPanel 
   window.dFitNum=run;
 })();
 </script>
+<style id="suggcss">
+/* Liste de suggestions : alphabétique, lisible, au-dessus des fenêtres (z-index) */
+.suggBox{z-index:9600;max-width:calc(100vw - 16px);padding:4px 6px 6px;scroll-padding:34px 0 6px;-webkit-overflow-scrolling:touch}
+.suggHead{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:2;background:var(--card);padding:8px 8px 6px;margin:0 -2px 2px}
+.suggHead .sgCount{font-size:10.5px;font-weight:700;letter-spacing:0;background:var(--soft);color:var(--muted);border-radius:999px;padding:1px 7px}
+.suggItem.hasL{position:relative;padding-left:30px}
+.suggItem .sgL{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;text-align:center;font-size:11px;font-weight:800;color:var(--accent)}
+.suggItem{display:flex;align-items:center;gap:9px;min-height:46px;padding:6px 10px;line-height:1.25;white-space:normal;overflow:hidden;text-overflow:clip}
+.suggItem .sgIc{flex:none;width:26px;height:26px;border-radius:8px;background:var(--soft);display:grid;place-items:center;font-size:15px}
+.suggItem .sgTx{flex:1 1 auto;min-width:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+.suggItem .sgTx mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;font-weight:700;border-radius:4px;padding:0 1px}
+.suggItem .sgN{flex:none;font-size:11px;font-weight:700;color:var(--muted);background:var(--soft);border-radius:999px;padding:2px 7px}
+.suggItem.on,.suggItem:hover{background:var(--soft)}
+@media (min-width:700px){.suggItem{min-height:40px}}
+</style>
+<style id="catpickcss">
+/* Choix d'une catégorie : liste compacte alphabétique, recherche / création, coche sur la catégorie actuelle */
+#catPickList{display:flex;flex-direction:column;gap:8px}
+.catPickSearch{width:100%;box-sizing:border-box;border:0;border-radius:14px;background:var(--soft);padding:12px 14px;font:inherit;font-size:15px;color:var(--ink);outline:none}
+.catPickSearch:focus{box-shadow:0 0 0 2px var(--accent)}
+.catPickBox{display:flex;flex-direction:column;gap:4px;max-height:min(46vh,400px);overflow-y:auto;overscroll-behavior:contain;margin:0 -4px;padding:2px 4px;scrollbar-width:thin}
+.catPickBox .catPickOpt{margin:0;min-height:46px;padding:6px 10px;border-color:transparent;background:transparent}
+.catPickBox .catPickOpt:hover,.catPickBox .catPickOpt:active{background:var(--soft)}
+.catPickBox .catPickOpt.sel{background:color-mix(in srgb,var(--accent) 10%,var(--card));border-color:var(--accent)}
+.catPickOpt .cpName{flex:1 1 auto;min-width:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;font-weight:600}
+.catPickOpt .cpTick{flex:none;font-weight:800;color:var(--accent)}
+.catPickNew{color:var(--accent)!important}
+.catPickNew .cpIcon{background:var(--accent)!important;color:#fff;border-color:transparent!important;font-weight:800}
+.catPickEmpty{margin:8px 0;text-align:center;color:var(--muted);font-size:14px}
+.catNameIn.dupName{box-shadow:0 0 0 2px var(--red);border-radius:10px}
+.catWarn{font-size:12.5px;color:var(--red);padding:2px 4px 8px 52px;line-height:1.3}
+</style>
 </body>
 </html>
