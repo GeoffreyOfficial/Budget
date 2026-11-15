@@ -3418,6 +3418,12 @@ body.dA-typing .easterCat{bottom:calc(10px + env(safe-area-inset-bottom))}
 .dA-li.dA-stack .dA-end .dA-right{align-items:flex-start}
 @media (max-width:400px){.dA-vr .dA-end{max-width:60%}}
 .dA-li.dA-stack .dA-end{max-width:100%}
+/* nom long : « Payer » se réduit à un rond ✓ (le nom garde 2 lignes à côté des montants) */
+.dA-li.dA-tight .payBtn:not(.done){width:34px;height:34px;padding:0;border-radius:50%;justify-content:center}
+.dA-li.dA-tight .payBtn:not(.done) .btnLabel{display:none}
+.dA-li.dA-tight .payBtn:not(.done) .btnIcon{display:block!important;font-size:0;line-height:1;color:#fff}
+.dA-li.dA-tight .payBtn:not(.done) .btnIcon::after{content:"€";font-size:16px;font-weight:800}
+.dA-li.dA-tight .nameIn{display:-webkit-box;-webkit-line-clamp:2}
 /* ligne de revenu / épargne / note de dépense trop longue : nom sur sa propre ligne */
 .miniRow.dA-wrap{flex-wrap:wrap;row-gap:2px}
 .miniRow.dA-wrap>.miniName{flex:1 1 100%;order:0}
@@ -4788,14 +4794,16 @@ html[data-decor] #bdBody .bdProg i{background-image:linear-gradient(90deg,var(--
       <span class="qaCur">€</span>
       <button type="button" class="qaCalc" id="qaCalc" aria-label="Calculer le montant avec la calculette" title="Calculette">🧮</button>
     </div>
+    <div class="qaEq" id="qaEq" aria-live="polite" hidden></div>
     <div class="qaLbl"><span>Dans quel poste ?</span><span class="qaLblN" id="qaLblN"></span></div>
     <div class="qaLines" id="qaLines"></div>
     <input id="qaNote" class="qaNote" type="text" placeholder="✎ Note (facultatif)" autocomplete="off" maxlength="80">
     <div class="qaPad" id="qaPad">
-      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
-      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
-      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
-      <button type="button" data-k=",">,</button><button type="button" data-k="0">0</button><button type="button" data-k="back" aria-label="Effacer">⌫</button>
+      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" class="qOp" data-k="/" aria-label="Diviser">÷</button>
+      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button><button type="button" class="qOp" data-k="*" aria-label="Multiplier">×</button>
+      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" class="qOp" data-k="-" aria-label="Moins">−</button>
+      <button type="button" data-k=",">,</button><button type="button" data-k="0">0</button><button type="button" data-k="back" aria-label="Effacer">⌫</button><button type="button" class="qOp" data-k="+" aria-label="Plus">+</button>
+      <div class="qaPad2" id="qaPad2"><button type="button" class="qOp2" data-k="(" aria-label="Parenthèse ouvrante">(</button><button type="button" class="qOp2" data-k=")" aria-label="Parenthèse fermante">)</button><button type="button" class="qOp2" data-k="%" aria-label="Pourcentage">%</button><button type="button" class="qOp2" data-k="C" aria-label="Tout effacer">C</button></div>
     </div>
     <div class="qaDone" id="qaDone" aria-live="polite" hidden></div>
     <div class="qaActions" id="qaActions">
@@ -6175,6 +6183,58 @@ function parseAmt(str){
   const v=parseFloat(s);
   return Number.isFinite(v)?v:null;
 }
+/* Calcul dans les champs en euros : « 12,50 + 8 × 3 », « 86,40 ÷ 4 », « 200 + 10 % », parenthèses.
+   Un simple nombre passe par parseAmt (comportement inchangé). Une expression incomplète (« 12+ ») vaut son début. */
+function amtNorm(str){return String(str==null?"":str).replace(/\s+/g,"").replace(/[−‒–—]/g,"-").replace(/×/g,"*").replace(/÷/g,"/");}
+function amtIsExpr(str){return /[+*\/()%]|.-/.test(amtNorm(str));} // « - » en tête = signe, pas une opération
+function evalAmt(str){
+  if(str==null)return null;
+  if(!amtIsExpr(str))return parseAmt(str);
+  const s=amtNorm(str),T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(/[0-9.,]/.test(c)){let j=i;while(j<s.length&&/[0-9.,]/.test(s[j]))j++;const v=parseAmt(s.slice(i,j));if(v!=null)T.push({n:v});i=j;}
+    else if("+-*/()%".indexOf(c)>=0){T.push({o:c});i++;}
+    else return null;
+  }
+  let p=0;
+  function atom(){
+    const t=T[p];if(!t)return null;
+    if(t.o==="-"){p++;const a=atom();return a&&{v:-a.v,pct:a.pct};}
+    if(t.o==="+"){p++;return atom();}
+    let v;
+    if(t.n!=null){p++;v=t.n;}
+    else if(t.o==="("){p++;v=expr();if(T[p]&&T[p].o===")")p++;if(v==null)return null;}
+    else return null;
+    let pct=false;
+    while(T[p]&&T[p].o==="%"){p++;v=v/100;pct=true;}
+    return {v,pct};
+  }
+  function term(){
+    let a=atom();if(!a)return null;
+    while(T[p]&&(T[p].o==="*"||T[p].o==="/")){
+      const op=T[p].o;p++;
+      const b=atom();
+      if(!b){p=T.length;break;}
+      a={v:op==="/"?a.v/b.v:a.v*b.v,pct:false};
+    }
+    return a;
+  }
+  function expr(){
+    const a=term();if(!a)return null;
+    let acc=a.v;
+    while(T[p]&&(T[p].o==="+"||T[p].o==="-")){
+      const op=T[p].o;p++;
+      const b=term();
+      if(!b){p=T.length;break;}
+      const bv=b.pct?acc*b.v:b.v; // « 200 + 10 % » = 200 + 10 % de 200
+      acc=op==="+"?acc+bv:acc-bv;
+    }
+    return acc;
+  }
+  const r=expr();
+  return (r!=null&&Number.isFinite(r))?Math.round(r*100)/100:null;
+}
 const spent=l=>round2(l.entries.reduce((s,e)=>s+(+e.amount||0),0));
 function monthIncome(m){
   return round2((m.incomeLines||[]).reduce((s,l)=>s+(+l.amount||0),0));
@@ -6817,7 +6877,7 @@ function openQuickAdd(line,wrap){
   const inp=qa.querySelector(".qaAmt");
   const close=()=>{if(qa.isConnected)qa.remove();};
   const confirmAdd=()=>{
-    const v=parseAmt(inp.value);
+    const v=evalAmt(inp.value);
     if(v==null||!(v>0)){inp.classList.add("inv");inp.focus();return;}
     line.entries.push({id:uid(),date:defaultDate(state.current),amount:v,note:""});
     commit();render();toastUndo("Dépense ajoutée ✓");
@@ -6990,7 +7050,7 @@ function entryEl(line,e){
     else{pctBadge.textContent="";pctBadge.className="pctBadge hidden";}
     updateDateIcon();
   };
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);e.amount=v!=null?(v):null;syncSign();syncPct();validate();updateComputed();touch();});
+  amt.addEventListener("input",()=>{const v=evalAmt(amt.value);e.amount=v!=null?(v):null;syncSign();syncPct();validate();updateComputed();touch();});
   sign.onclick=()=>{if(e.amount==null)return;e.amount=round2(-e.amount);amt.value=e.amount;syncSign();syncPct();validate();updateComputed();touch();};
   syncSign();syncPct();
   const cur=document.createElement("span");cur.className="amtCur";cur.textContent="€";aw.append(pctBadge,sign,amt,cur);
@@ -7257,7 +7317,7 @@ function buildRow(line){
   const pw=document.createElement("div");pw.className="planWrap";
   const plan=document.createElement("input");plan.className="planIn";plan.type="text";plan.inputMode="decimal";plan.autocomplete="off";
   plan.value=(+line.planned||0)===0?"":line.planned;plan.placeholder="—";
-  plan.addEventListener("input",()=>{const v=parseAmt(plan.value);line.planned=v!=null?(v):0;updateComputed();touch();});
+  plan.addEventListener("input",()=>{const v=evalAmt(plan.value);line.planned=v!=null?(v):0;updateComputed();touch();});
   const pc=document.createElement("span");pc.className="planCur";pc.textContent="€";pw.append(plan,pc);
   // Suppression (logique commune, présentée différemment selon le mode)
   async function askDelete(){
@@ -7496,7 +7556,7 @@ function renderDetailBody(line){
   const plan=document.createElement("input");plan.className="bdPlanIn";plan.id="bdPlanIn";plan.type="text";
   plan.inputMode="decimal";plan.autocomplete="off";
   plan.value=(+line.planned||0)===0?"":line.planned;plan.placeholder="—";
-  plan.addEventListener("input",()=>{const v=parseAmt(plan.value);line.planned=v!=null?v:0;updateComputed();touch();});
+  plan.addEventListener("input",()=>{const v=evalAmt(plan.value);line.planned=v!=null?v:0;updateComputed();touch();});
   const cur=document.createElement("span");cur.textContent="€";cur.style.cssText="font-weight:700;color:var(--muted)";
   pw.append(plan,cur);
   planRow.append(planLbl,pw);
@@ -7731,7 +7791,7 @@ function miniLineEl(item,onChange,onDelete){
   const amt=document.createElement("input");amt.className="miniAmt";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=(+item.amount||0)===0?"":item.amount;amt.placeholder="0";
   const syncSign=()=>{const neg=(+item.amount||0)<0;amt.classList.toggle("neg",neg);sign.classList.toggle("neg",neg);};
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?(v):0;syncSign();onChange();});
+  amt.addEventListener("input",()=>{const v=evalAmt(amt.value);item.amount=v!=null?(v):0;syncSign();onChange();});
   sign.onclick=()=>{item.amount=round2(-(+item.amount||0));amt.value=item.amount===0?"":item.amount;syncSign();onChange();};
   syncSign();
   const cur=document.createElement("span");cur.className="miniCur";cur.textContent="€";
@@ -7754,7 +7814,7 @@ function savingsLineEl(item,onChange,onDelete,onToggleDeduct){
   const amt=document.createElement("input");amt.className="miniAmt";amt.type="text";amt.inputMode="decimal";amt.autocomplete="off";
   amt.value=(+item.amount||0)===0?"":item.amount;amt.placeholder="0";
   const syncSign=()=>{const neg=(+item.amount||0)<0;amt.classList.toggle("neg",neg);sign.classList.toggle("neg",neg);};
-  amt.addEventListener("input",()=>{const v=parseAmt(amt.value);item.amount=v!=null?(v):0;syncSign();onChange();});
+  amt.addEventListener("input",()=>{const v=evalAmt(amt.value);item.amount=v!=null?(v):0;syncSign();onChange();});
   sign.onclick=()=>{item.amount=round2(-(+item.amount||0));amt.value=item.amount===0?"":item.amount;syncSign();onChange();};
   syncSign();
   const cur=document.createElement("span");cur.className="miniCur";cur.textContent="€";
@@ -9558,14 +9618,18 @@ function dAFit(){
   const rows=[...document.querySelectorAll(".miniRow")].filter(r=>!r.querySelector(":focus"));
   rows.forEach(r=>r.classList.remove("dA-wrap"));
   const fx=[...document.querySelectorAll(".row.dA-li")].filter(r=>r.offsetParent&&!r.querySelector(".nameIn:focus"));
-  fx.forEach(r=>r.classList.remove("dA-stack"));
+  fx.forEach(r=>r.classList.remove("dA-stack","dA-tight"));
   const tas=[...document.querySelectorAll("textarea.nameIn,textarea.bdNameIn")].filter(t=>t.offsetParent&&t!==document.activeElement);
   tas.forEach(t=>{t.style.height="auto";});
-  const wide=fx.map(r=>{const t=r.querySelector("textarea.nameIn");return !!t&&t.scrollHeight>30;});
-  fx.forEach((r,k)=>{if(wide[k])r.classList.add("dA-stack");});
-  // montants + « Payer » qui ne tiennent pas à côté du nom : on les passe sous le nom
-  fx.forEach(r=>{if(r.classList.contains("dA-stack"))return;const tp=r.querySelector(".rtop"),en=r.querySelector(".dA-end");
-    if(tp&&en&&en.getBoundingClientRect().right>tp.getBoundingClientRect().right+0.5)r.classList.add("dA-stack");});
+  /* Adaptation en 3 temps quand un nom est long : (1) le nom court sur 2 lignes à côté des montants ;
+     (2) sinon « Payer » devient un rond ✓ pour rendre de la place au nom ; (3) en dernier recours seulement, les montants passent sous le nom. */
+  const tall=r=>{const t=r.querySelector("textarea.nameIn");if(!t)return false;t.style.height="auto";const lh=parseFloat(getComputedStyle(t).lineHeight)||22;return t.scrollHeight>lh*2+6;};
+  const over=r=>{const tp=r.querySelector(".rtop"),en=r.querySelector(".dA-end");return !!(tp&&en&&en.getBoundingClientRect().right>tp.getBoundingClientRect().right+0.5);};
+  fx.forEach(r=>{
+    if(!tall(r)&&!over(r))return;
+    r.classList.add("dA-tight");
+    if(tall(r)||over(r)){r.classList.remove("dA-tight");r.classList.add("dA-stack");}
+  });
   tas.forEach(t=>{t.style.height="auto";});
   document.querySelectorAll(".miniAmt").forEach(a=>{a.style.width=Math.max(92,Math.min(190,(a.value||"").length*10+14))+"px";});
   dAFitStats();
@@ -13275,7 +13339,7 @@ const LOVE_CFG={
     return byPop(sortLines(m.lines.filter(function(l){return l.type==="variable";}),"variable"))
       .concat(byPop(sortLines(m.lines.filter(function(l){return l.type==="fixed";}),"fixed")));
   }
-  function qaVal(){return parseAmt(qaAmt.value);}
+  function qaVal(){return evalAmt(qaAmt.value);}
   /* Enchaîner les dépenses : préférence par appareil (activée par défaut) */
   var CHAIN_KEY="carnet-budget-chain";
   function chainOn(){try{return localStorage.getItem(CHAIN_KEY)!=="0";}catch(_){return true;}}
@@ -13293,6 +13357,9 @@ const LOVE_CFG={
       else{mo.disabled=!ok;mo.textContent="+ Ajouter et continuer";mo.classList.remove("qaEnd");}}
     qaGo.textContent=ok?("Ajouter "+eur(v)+" · "+(l.dataset.nm||"Poste")):(l?"Saisis un montant":"Choisis un poste");
     $("qaSign").classList.toggle("neg",v!=null&&v<0);qaAmt.classList.toggle("neg",v!=null&&v<0);
+    var ex=amtIsExpr(qaAmt.value),eq=$("qaEq");
+    qaAmt.classList.toggle("ex",ex);var pd=$("qaPad");if(pd)pd.classList.toggle("ex",ex);
+    if(eq){eq.hidden=!ex;eq.textContent=ex?(v==null?"…":"= "+eur(v)):"";}
   }
   function qaFavorites(lines){
     var use={};
@@ -13385,11 +13452,25 @@ const LOVE_CFG={
     $("qaPad").addEventListener("click",function(e){var b=e.target.closest("button[data-k]");if(!b)return;
       var k=b.dataset.k,v=qaAmt.value;
       if(typeof buzz==="function")buzz(5);
+      var tok=(v.match(/[\d.,]*$/)||[""])[0],last=v.slice(-1);
       if(k==="back")v=v.slice(0,-1);
-      else if(k===","){if(!/[.,]/.test(v))v=(v===""||v==="-"?v+"0":v)+",";}
-      else{var dec=v.split(/[.,]/)[1];if(dec!=null&&dec.length>=2)return;if(v.replace(/\D/g,"").length>=9)return;v=(v==="0"?"":v==="-0"?"-":v)+k;}
+      else if(k==="C")v="";
+      else if(k==="+"||k==="*"||k==="/"){
+        var g=k==="*"?"\u00d7":k==="/"?"\u00f7":"+";
+        if(v===""||last==="(")return;
+        v=/[+\u2212\u00d7\u00f7]$/.test(v)?v.slice(0,-1)+g:v+g;
+      }
+      else if(k==="-"){if(last==="\u2212")return;v+="\u2212";}
+      else if(k==="("){v+=(/[\d.,%)]$/.test(v)?"\u00d7":"")+"(";}
+      else if(k===")"){var o=(v.match(/\(/g)||[]).length,c=(v.match(/\)/g)||[]).length;if(o<=c||/[+\u2212\u00d7\u00f7(]$/.test(v)||v==="")return;v+=")";}
+      else if(k==="%"){if(!/[\d)]$/.test(v))return;v+="%";}
+      else if(k===","){if(/[)%]$/.test(v))return;if(!/[.,]/.test(tok))v=(tok===""?v+"0":v)+",";}
+      else{if(/[)%]$/.test(v))v+="\u00d7";else{var dec=tok.split(/[.,]/)[1];if(dec!=null&&dec.length>=2)return;if(tok.replace(/\D/g,"").length>=9)return;if(tok==="0")v=v.slice(0,-1);}v+=k;}
       qaAmt.value=v;qaRefresh();});
-    $("qaSign").addEventListener("click",function(){var v=qaAmt.value.trim();qaAmt.value=v.charAt(0)==="-"?v.slice(1):"-"+v;qaRefresh();});
+    $("qaSign").addEventListener("click",function(){var v=qaAmt.value.trim();
+      if(typeof amtIsExpr==="function"&&amtIsExpr(v))v=(v.slice(0,2)==="\u2212("&&v.slice(-1)===")")?v.slice(2,-1):"\u2212("+v+")";
+      else v=(v.charAt(0)==="-"||v.charAt(0)==="\u2212")?v.slice(1):"-"+v;
+      qaAmt.value=v;qaRefresh();});
     qaAmt.addEventListener("input",qaRefresh);
     qaAmt.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();qaAdd(chainOn());}});
     qaNote.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();qaAdd(chainOn());}});
@@ -14243,7 +14324,9 @@ function buildAmbient(id){
   var a=ensureAmb();a.textContent="";
   if(reduce())return;
   (AMB[id]||[]).forEach(function(g){
-    for(var i=0;i<g.n;i++){
+    /* moins de particules (≈ 2 sur 5) et un peu plus discrètes : le ciel ne doit pas embrouiller la lecture */
+    var cnt=g.k==="shoot"?g.n:Math.max(1,Math.round(g.n*.4));
+    for(var i=0;i<cnt;i++){
       var el=document.createElement("span"),d=rnd(g.d[0],g.d[1]);
       el.className="ap "+(g.k==="fall"?"fall":g.k==="rise"?"rise":g.k==="twk"?"twk":g.k==="shoot"?"shoot":"drift")+(g.cls?" "+g.cls:"");
       if(g.ch)el.textContent=pick(g.ch);
@@ -14251,7 +14334,7 @@ function buildAmbient(id){
       st.setProperty("--x",f1(rnd(2,96))+"%");st.setProperty("--y",f1(rnd(2,72))+"%");
       st.setProperty("--d",f1(d)+"s");st.setProperty("--dl","-"+f1(rnd(0,d))+"s");
       if(g.s)st.setProperty("--s",f1(rnd(g.s[0],g.s[1]))+"px");
-      if(g.o)st.setProperty("--o",f1(rnd(g.o[0],g.o[1])*100)/100);
+      if(g.o)st.setProperty("--o",f1(rnd(g.o[0],g.o[1])*80)/100);
       st.setProperty("--dx",f1(g.dx?rnd(g.dx[0],g.dx[1]):rnd(-70,70))+"px");
       st.setProperty("--sw",f1(g.sw||rnd(14,34))+"px");
       st.setProperty("--rot",f1(g.rot?rnd(g.rot[0],g.rot[1]):rnd(-260,260))+"deg");
@@ -14777,5 +14860,194 @@ setInterval(function(){if(Date.now()>=nextAt){spawn();nextAt=Date.now()+11000+R(
 .section>.sechead,.entry .dateToggle{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .dARsTile.dng .dARsTi{background:var(--red-soft);color:var(--red)}
 </style>
+<style id="ckcss">
+/* ---- Pavé de l'ajout rapide : 4e colonne d'opérations (masquée en mode « nombre seul ») ---- */
+.qaPad{grid-template-columns:repeat(4,minmax(0,1fr))}
+.qaPad.qaNoOps{grid-template-columns:repeat(3,minmax(0,1fr))}
+.qaPad.qaNoOps .qOp,.qaPad.qaNoOps .qaPad2{display:none}
+.qaPad .qOp{background:color-mix(in srgb,var(--accent) 16%,var(--soft));color:var(--accent);font-weight:700}
+.qaPad .qaPad2{display:none;grid-column:1/-1;grid-template-columns:repeat(4,minmax(0,1fr));gap:inherit}
+.qaPad.ex .qaPad2{display:grid}
+.qaPad .qaPad2 button{height:36px;font-size:18px;border-radius:13px}
+.qaCard:has(.qaNote:focus) .qaPad2{display:none}
+.qaAmt.ex{font-size:28px;letter-spacing:-.01em}
+.qaEq{align-self:flex-end;margin:-4px 4px 0;padding:3px 12px;border-radius:999px;background:var(--accent);color:#fff;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.qaEq[hidden]{display:none}
+
+/* ---- Barre de calcul au-dessus du clavier (tous les champs en euros) ---- */
+.ckBar{position:fixed;left:0;right:0;top:0;z-index:9500;box-sizing:border-box;max-width:600px;margin:0 auto;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+  background:color-mix(in srgb,var(--card) 94%,var(--soft));border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;
+  box-shadow:0 -10px 30px rgba(0,0,0,.16);display:flex;flex-direction:column;gap:8px;opacity:0;transform:translateY(14px);
+  transition:opacity .18s ease,transform .2s cubic-bezier(.16,1,.3,1);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.ckBar.in{opacity:1;transform:none}
+.ckBar[hidden]{display:none}
+.ckTop{display:flex;align-items:center;gap:10px;min-height:40px}
+.ckInfo{flex:1;min-width:0;display:flex;align-items:baseline;gap:10px}
+.ckCtx{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:var(--muted)}
+.ckEq{flex:0 0 auto;font-size:22px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.ckEq:empty{display:none}
+.ckInfo.ex .ckCtx{display:none}
+.ckInfo.bad .ckEq{color:var(--muted);font-weight:600}
+.ckOps,.ckPad{display:flex;gap:6px}
+.ckOps button.o{flex:1 1 0}
+.ckBar button{touch-action:manipulation}
+.ckOps button,.ckPad button{flex:1 1 0;min-width:0;height:46px;border:0;border-radius:14px;background:var(--soft);color:var(--ink);font:inherit;font-size:21px;font-weight:600;cursor:pointer;
+  box-shadow:inset 0 -1px 0 rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;padding:0}
+.ckOps button:active,.ckPad button:active{transform:scale(.95);background:color-mix(in srgb,var(--accent) 22%,var(--soft))}
+.ckOps .o,.ckPad .o{background:var(--accent);color:#fff;font-weight:700}
+.ckOps .o:active,.ckPad .o:active{background:color-mix(in srgb,var(--accent) 80%,#000)}
+.ckPad{flex-wrap:wrap}
+.ckPad button{flex:0 0 calc(25% - 4.5px)}
+.ckPad .go{flex:0 0 calc(50% - 3px);background:var(--accent);color:#fff;font-size:17px;font-weight:700}
+.ckPad .del{color:var(--accent)}
+.ckPad .clr{color:var(--red)}
+@media (max-height:700px){.ckOps button,.ckPad button{height:40px;font-size:19px}.ckTop{min-height:32px}}
+@media (max-height:520px){.ckBar{padding-top:4px;gap:4px}.ckOps button,.ckPad button{height:32px;font-size:17px;border-radius:10px}.ckTop{min-height:24px}.ckEq{font-size:17px}.ckCtx{font-size:12px}.ckOps,.ckPad{gap:4px}.ckPad button{flex-basis:calc(25% - 3px)}.ckPad .go{flex-basis:calc(50% - 2px)}}
+@media (prefers-reduced-motion:reduce){.ckBar{transition:none}}
+html.ckOn::after{content:"";display:block;height:var(--ckH,0px)}
+html.ckOn #budgetDetailPanel #bdBody,html.ckOn[data-density] #budgetDetailPanel #bdBody{padding-bottom:calc(var(--ckH,0px) + 24px)}
+</style>
+<script id="calckbdjs">
+/* Clavier de calcul intégré : remplace TOTALEMENT le clavier du téléphone dans tous les champs en euros
+   (chiffres, virgule, ( ) % ÷ × − +, résultat en direct). Le clavier du téléphone ne reste que pour les textes. */
+(function(){
+  "use strict";
+  var FIELD=".amtIn,.planIn,.miniAmt,.bdPlanIn,.quickAdd .qaAmt";
+  function isField(el){return !!(el&&el.nodeType===1&&el.matches&&el.matches(FIELD)&&el.isConnected);}
+  /* Les champs en euros n'ouvrent jamais le clavier du téléphone : inputmode="none" posé avant tout focus (Android ne
+     change pas de clavier si l'attribut change après coup), y compris sur les champs créés plus tard par render(). */
+  function quiet(root){
+    if(!root||root.nodeType!==1)return;
+    if(root.matches&&root.matches(FIELD))root.setAttribute("inputmode","none");
+    if(root.querySelectorAll)root.querySelectorAll(FIELD).forEach(function(f){if(f.getAttribute("inputmode")!=="none")f.setAttribute("inputmode","none");});
+  }
+  quiet(document.body);
+  new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(quiet);
+    if(m.type==="attributes"&&m.target.getAttribute("inputmode")==="decimal"&&isField(m.target))m.target.setAttribute("inputmode","none");});})
+    .observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["inputmode"]});
+
+  var bar=document.createElement("div");bar.id="ckBar";bar.className="ckBar";bar.hidden=true;
+  bar.setAttribute("role","toolbar");bar.setAttribute("aria-label","Clavier de calcul");
+  function b(cls,k,v,txt,lbl){return '<button type="button" class="'+cls+'" data-ck="'+k+'"'+(v!=null?' data-v="'+v+'"':'')+(lbl?' aria-label="'+lbl+'"':'')+'>'+txt+'</button>';}
+  bar.innerHTML='<div class="ckTop"><div class="ckInfo" id="ckInfo" aria-live="polite"><span class="ckCtx" id="ckCtx"></span><b class="ckEq" id="ckEq"></b></div></div>'
+    +'<div class="ckOps">'+b("","op","(","(","Parenthèse ouvrante")+b("","op",")",")","Parenthèse fermante")+b("","op","%","%","Pourcentage")
+    +b("o","op","/","÷","Diviser")+b("o","op","*","×","Multiplier")+b("o","op","-","−","Moins")+'</div>'
+    +'<div class="ckPad">'+["7","8","9"].map(function(d){return b("","d",d,d);}).join("")+b("o","op","+","+","Plus")
+    +["4","5","6"].map(function(d){return b("","d",d,d);}).join("")+b("del","back",null,"⌫","Effacer")
+    +["1","2","3"].map(function(d){return b("","d",d,d);}).join("")+b("clr","clear",null,"C","Tout effacer")
+    +b("","d","0","0")+b("","d",",",",")+b("go","go",null,"Valider")+'</div>';
+  document.body.appendChild(bar);
+  var cur=null,hideT=null,ctxEl=bar.querySelector("#ckCtx"),eqEl=bar.querySelector("#ckEq"),infoEl=bar.querySelector("#ckInfo"),goEl=bar.querySelector(".go");
+
+  function lineName(f){
+    try{var row=f.closest(".row[data-id]"),id=row?row.dataset.id:(f.closest("#bdBody")&&typeof detailLineId!=="undefined"?detailLineId:null);
+      var l=id?ensure(state.current).lines.find(function(x){return x.id===id;}):null;return l?(l.name||"").trim():"";}catch(_){return "";}
+  }
+  function label(f){
+    var n;
+    if(f.matches(".miniAmt")){var r=f.closest(".miniRow,.svRow"),nm=r&&r.querySelector(".miniName");n=nm?nm.value.trim():"";
+      return (f.closest("#savingsLinesList")?"Épargne":"Revenu")+(n?" · "+n:"");}
+    n=lineName(f);
+    if(f.matches(".planIn,.bdPlanIn"))return "Budget prévu"+(n?" · "+n:"");
+    if(f.matches(".qaAmt"))return "Nouvelle dépense"+(n?" · "+n:"");
+    return "Montant"+(n?" · "+n:"");
+  }
+  function refresh(){
+    if(!cur)return;
+    var v=cur.value,ex=typeof amtIsExpr==="function"&&amtIsExpr(v);
+    infoEl.classList.toggle("ex",ex);
+    if(ex){var r=evalAmt(v);infoEl.classList.toggle("bad",r==null);eqEl.textContent=r==null?"…":"= "+eur(r);goEl.textContent=r==null?"Valider":"Valider · "+eur(r);}
+    else{infoEl.classList.remove("bad");eqEl.textContent="";ctxEl.textContent=label(cur);goEl.textContent="Valider";}
+  }
+  function place(){
+    if(bar.hidden)return;
+    var vv=window.visualViewport,h=bar.offsetHeight;
+    var top=vv?(vv.offsetTop+vv.height-h):(window.innerHeight-h);
+    bar.style.top=Math.max(0,Math.round(top))+"px";
+    document.documentElement.style.setProperty("--ckH",h+"px");
+  }
+  function scroller(el){for(var p=el.parentElement;p&&p!==document.body;p=p.parentElement){var o=getComputedStyle(p).overflowY;if((o==="auto"||o==="scroll")&&p.scrollHeight>p.clientHeight+1)return p;}return null;}
+  function reveal(f){
+    if(!f||bar.hidden||cur!==f)return;
+    var bt=bar.getBoundingClientRect().top,r=f.getBoundingClientRect(),over=r.bottom+14-bt;
+    if(over>0){var sc=scroller(f);if(sc)sc.scrollTop+=over;else window.scrollBy(0,over);}
+  }
+  function show(f){
+    clearTimeout(hideT);cur=f;
+    var first=bar.hidden;bar.hidden=false;place();refresh();
+    if(first){bar.classList.remove("in");void bar.offsetWidth;}
+    requestAnimationFrame(function(){bar.classList.add("in");place();});
+    document.documentElement.classList.add("ckOn");
+    setTimeout(function(){place();reveal(f);},60);setTimeout(function(){place();reveal(f);},320);
+  }
+  function hide(now){
+    clearTimeout(hideT);
+    var go=function(){if(isField(document.activeElement))return;cur=null;bar.classList.remove("in");bar.hidden=true;document.documentElement.classList.remove("ckOn");document.documentElement.style.removeProperty("--ckH");};
+    if(now)go();else hideT=setTimeout(go,160);
+  }
+  document.addEventListener("focusin",function(e){
+    var f=e.target;
+    if(isField(f)){f.setAttribute("inputmode","none");show(f);}
+    else if(!bar.contains(f))hide();});
+  document.addEventListener("focusout",function(e){
+    var f=e.target;
+    if(isField(f)&&typeof amtIsExpr==="function"&&amtIsExpr(f.value)){ // à la sortie du champ, le calcul est remplacé par son résultat
+      var r=evalAmt(f.value);if(r!=null)f.value=String(r);
+    }
+    hide();});
+  document.addEventListener("input",function(e){if(e.target===cur){refresh();place();}},true);
+  if(window.visualViewport){["resize","scroll"].forEach(function(n){window.visualViewport.addEventListener(n,function(){place();if(n==="resize")reveal(cur);});});}
+  window.addEventListener("resize",function(){if(cur){place();reveal(cur);}});
+
+  /* Toucher une touche ne doit jamais retirer le focus du champ */
+  ["pointerdown","mousedown"].forEach(function(n){bar.addEventListener(n,function(e){e.preventDefault();});});
+  function fire(f){f.dispatchEvent(new Event("input",{bubbles:true}));}
+  function tokOf(v){return (v.match(/[\d.,]*$/)||[""])[0];}
+  function insert(txt){
+    var f=cur;if(!f)return;
+    var s=f.selectionStart,e=f.selectionEnd;if(s==null){s=e=f.value.length;}
+    f.setRangeText(txt,s,e,"end");fire(f);
+  }
+  function op(k){
+    var f=cur;if(!f)return;var v=f.value,s=f.selectionStart==null?v.length:f.selectionStart,before=v.slice(0,s),last=before.slice(-1);
+    var g={"/":"÷","*":"×","-":"−","+":"+","(":"(",")":")","%":"%"}[k];if(!g)return;
+    if(k==="+"||k==="*"||k==="/"){
+      if(before===""||last==="(")return;
+      if(/[+−×÷-]$/.test(before)&&before.length>1&&!/[(]$/.test(before.slice(0,-1))){f.setRangeText(g,s-1,s,"end");fire(f);return;}
+      if(/[+−×÷-]$/.test(before))return;
+    }
+    if(k==="-"&&(last==="−"||last==="-"))return;
+    if(k==="("&&/[\d.,%)]$/.test(before)){insert("×(");return;}
+    if(k===")"){var o=(before.match(/\(/g)||[]).length,c=(before.match(/\)/g)||[]).length;if(o<=c||/[+−×÷(-]$/.test(before)||before==="")return;}
+    if(k==="%"&&!/[\d)]$/.test(before))return;
+    insert(g);
+  }
+  function digit(d){
+    var f=cur;if(!f)return;var v=f.value,s=f.selectionStart==null?v.length:f.selectionStart,before=v.slice(0,s),tok=tokOf(before);
+    if(d===","){if(/[)%]$/.test(before))return;var after=(v.slice(s).match(/^[\d.,]*/)||[""])[0];if(/[.,]/.test(tok+after))return;insert(tok===""?"0,":",");return;}
+    if(/[)%]$/.test(before)){insert("×"+d);return;}
+    if(tok==="0"&&!/[.,]/.test(tok)){f.setRangeText(d,s-1,s,"end");fire(f);return;}
+    insert(d);
+  }
+  function back(){var f=cur;if(!f)return;var s=f.selectionStart,e=f.selectionEnd;if(s==null){s=e=f.value.length;}
+    if(s!==e)f.setRangeText("",s,e,"end");else if(s>0)f.setRangeText("",s-1,s,"end");fire(f);}
+  var rep=null;
+  function stopRep(){clearTimeout(rep);clearInterval(rep);rep=null;}
+  function done(){var f=cur;if(f)f.blur();hide(true);}
+  bar.addEventListener("click",function(e){var t=e.target.closest("button[data-ck]");if(!t||!cur)return;
+    if(typeof buzz==="function")try{buzz(5);}catch(_){}
+    var k=t.dataset.ck;
+    if(k==="op")op(t.dataset.v);
+    else if(k==="d")digit(t.dataset.v);
+    else if(k==="back")back();
+    else if(k==="clear"){cur.value="";fire(cur);}
+    else if(k==="go")done();
+    setTimeout(function(){place();reveal(cur);},30);});
+  bar.addEventListener("pointerdown",function(e){var t=e.target.closest('button[data-ck="back"]');if(!t)return;stopRep();
+    rep=setTimeout(function(){rep=setInterval(function(){if(cur)back();},70);},380);});
+  ["pointerup","pointercancel","pointerleave"].forEach(function(n){bar.addEventListener(n,stopRep);});
+  window.dCalcKbd={bar:bar,mode:function(){return "pad";}};
+})();
+</script>
 </body>
 </html>
