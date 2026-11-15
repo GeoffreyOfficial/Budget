@@ -5354,6 +5354,7 @@ const ICON_GROUPS=[
 const ICONS=ICON_GROUPS.flatMap(g=>g.items.map(it=>it.e));
 // Formateurs Intl.NumberFormat mis en cache (leur construction est coûteuse et eur()/num2()
 // sont appelés en boucle à chaque rendu de ligne/carte — les recréer à chaque appel était mesurable).
+const _dtf={};const dtf=(o)=>{const k=JSON.stringify(o);return _dtf[k]||(_dtf[k]=new Intl.DateTimeFormat("fr-FR",o));};
 const FMT_EUR=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:3});
 const FMT_NUM2=new Intl.NumberFormat("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:3});
 const eur=n=>FMT_EUR.format(Number.isFinite(n)?n:0);
@@ -5370,12 +5371,12 @@ const mKey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 const isCustom=k=>typeof k==="string"&&k.startsWith("cb:");
 function customName(k){const b=state.customBudgets&&state.customBudgets[k];return (b&&typeof b.name==="string"&&b.name.trim())?b.name.trim():"Budget personnalisé";}
 function mLabel(k){if(isCustom(k))return customName(k);const[y,m]=k.split("-").map(Number);const d=new Date(y,m-1,1);
-  const s=new Intl.DateTimeFormat("fr-FR",{month:"long",year:"numeric"}).format(d);return s[0].toUpperCase()+s.slice(1);}
+  const s=dtf({month:"long",year:"numeric"}).format(d);return s[0].toUpperCase()+s.slice(1);}
 function mLabelShort(k){if(isCustom(k))return customName(k);const[y,m]=k.split("-").map(Number);const d=new Date(y,m-1,1);
-  const s=new Intl.DateTimeFormat("fr-FR",{month:"long"}).format(d);
+  const s=dtf({month:"long"}).format(d);
   const label=s[0].toUpperCase()+s.slice(1);
   return y===new Date().getFullYear()?label:label+" "+y;}
-function mShort(k){if(isCustom(k))return customName(k);const[y,m]=k.split("-").map(Number);return new Intl.DateTimeFormat("fr-FR",{month:"short"}).format(new Date(y,m-1,1)).replace(".","");}
+function mShort(k){if(isCustom(k))return customName(k);const[y,m]=k.split("-").map(Number);return dtf({month:"short"}).format(new Date(y,m-1,1)).replace(".","");}
 // Comme mShort, mais ajoute l'année (sur 2 chiffres) quand withYear est vrai — utilisé sur les
 // axes/en-têtes qui peuvent mélanger plusieurs années, pour ne pas s'y perdre.
 function mShortY(k,withYear){if(isCustom(k)||!withYear)return mShort(k);return mShort(k)+" '"+k.slice(2,4);}
@@ -5387,7 +5388,7 @@ function defaultDate(k){const t=new Date();const today=mKey(t)+"-"+String(t.getD
   if(isCustom(k))return today; // budget personnalisé : pas de mois imposé, on part d'aujourd'hui
   return mKey(t)===k?today:k+"-01";}
 function longDay(iso){const d=new Date(iso+"T00:00:00");
-  const s=new Intl.DateTimeFormat("fr-FR",{weekday:"long",day:"numeric",month:"long"}).format(d);return s[0].toUpperCase()+s.slice(1);}
+  const s=dtf({weekday:"long",day:"numeric",month:"long"}).format(d);return s[0].toUpperCase()+s.slice(1);}
 const gv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const palette=()=>["--c1","--c2","--c3","--c4","--c5","--c6"].map(gv);
 
@@ -5461,10 +5462,14 @@ let detailLineId=null,detailEntrySearch="";
 const folded=new Set(); // état d'affichage (sections/détails repliés) — purement visuel, non lié à l'historique annuler/rétablir
 let localDataCorrupted=false;
 try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);state.months=d.months||{};if(d.customBudgets&&typeof d.customBudgets==="object")state.customBudgets=d.customBudgets;if(d.current)state.current=d.current;state.customTheme=sanitizeCustomTheme(d.customTheme);state.customFrom=sanitizeThemeFrom(d.customFrom);if(isThemeId(d.theme))state.theme=d.theme;if(CAT_FREQS.includes(d.catFreq))state.catFreq=d.catFreq;if(CAT_SIZES.includes(d.catSize))state.catSize=d.catSize;state.catLook=sanitizeCatLook(d.catLook);state.catModes=sanitizeCatModes(d.catModes);state.catActs=sanitizeCatActs(d.catActs);if(Array.isArray(d.categories)&&d.categories.length)state.categories=d.categories;if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));if(d.budgetView==="cards"||d.budgetView==="flow")state.budgetView=d.budgetView;if(d.savings&&typeof d.savings==="object")state.savings=d.savings;if(typeof d.savingsMigrated==="boolean")state.savingsMigrated=d.savingsMigrated;if(typeof d.savingsPerMonth==="boolean")state.savingsPerMonth=d.savingsPerMonth;if(Array.isArray(d.statsOrder))state.statsOrder=d.statsOrder;if(typeof d.heroMetric==="string")state.heroMetric=d.heroMetric;if(d.labels&&typeof d.labels==="object")state.labels=d.labels;if(d.confirmDelete&&typeof d.confirmDelete==="object")state.confirmDelete=d.confirmDelete;if(d.compact!=null)state.compact=dens(d.compact);if(typeof d.moveMode==="boolean")state.moveMode=d.moveMode;if(typeof d.sortBudgets==="string"&&BUDGET_SORT_KEYS.includes(d.sortBudgets))state.sortBudgets=d.sortBudgets;if(typeof d.sortExpenses==="string"&&EXPENSE_SORT_KEYS.includes(d.sortExpenses))state.sortExpenses=d.sortExpenses;if(Number.isFinite(+d.seq))state.seq=+d.seq;if(typeof d.showSearch==="boolean")state.showSearch=d.showSearch;if(typeof d.showEntryPct==="boolean")state.showEntryPct=d.showEntryPct;if(d.autoTheme)state.autoTheme=sanitizeAutoTheme(d.autoTheme);if(typeof d.cmpCat==="string")state.cmpCat=d.cmpCat;if(typeof d.cmpCbPoste==="string")state.cmpCbPoste=d.cmpCbPoste;if(typeof d.cmpYear==="string")state.cmpYear=d.cmpYear;if(typeof d.cmpA==="string")state.cmpA=d.cmpA;if(typeof d.cmpB==="string")state.cmpB=d.cmpB;if(Number.isFinite(+d.cmpSpan))state.cmpSpan=+d.cmpSpan;if(typeof d.cmpCbA==="string")state.cmpCbA=d.cmpCbA;if(typeof d.cmpCbB==="string")state.cmpCbB=d.cmpCbB;if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;state.cmpDensity=CMP_DENSITIES.includes(d.cmpDensity)?d.cmpDensity:(d.cmpMonths!=null?cmpMonthsToDensity(d.cmpMonths):"med");if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen}}
-catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;}
+catch(e){console.error("Budget — données locales illisibles :",e);localDataCorrupted=true;
+  /* Copie de secours du contenu brut AVANT que la prochaine sauvegarde ne l'écrase : rien n'est perdu définitivement. */
+  try{const bad=localStorage.getItem(KEY);if(bad&&bad.length>2)localStorage.setItem(KEY+"-illisible",bad);}catch(_){}}
 function isFolded(id){return folded.has(id);}
 function toggleFolded(id){if(folded.has(id))folded.delete(id);else folded.add(id);save();}
 function catById(id){return state.categories.find(c=>c.id===id)||NOCAT;}
+/* Deux catégories de même nom et même icône (ex. une perso « Courses » + celle par défaut) comptent pour une seule dans les totaux par catégorie */
+function catMerged(id){const c=catById(id),k=(c.icon+" "+c.name).trim().toLowerCase();return state.categories.find(x=>(x.icon+" "+x.name).trim().toLowerCase()===k)||c;}
 function applyBudgetView(){
   const v="cards"; // vue Jauges retirée : on affiche toujours la liste (la préférence enregistrée reste intacte)
   const app=document.querySelector(".app");if(app)app.setAttribute("data-view",v);
@@ -5894,8 +5899,29 @@ function foldSimpleSavingsToLines(sv){
   }
   sv.detailed=true;
 }
+const obj0=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
+function repairShapes(bag,isMonthBag){
+  // Remise en forme défensive : un élément nul/mal typé dans les données locales ne doit jamais empêcher l'appli de démarrer.
+  const obj=x=>x&&typeof x==="object"&&!Array.isArray(x);
+  for(const k of Object.keys(bag)){const m=bag[k];
+    if(!obj(m)||(isMonthBag&&!/^\d{4}-\d{2}$/.test(k))){delete bag[k];continue;}
+    m.lines=(Array.isArray(m.lines)?m.lines:[]).filter(obj);
+    for(const l of m.lines){
+      if(typeof l.id!=="string"||!l.id)l.id=uid();
+      if(Array.isArray(l.entries)){l.entries=l.entries.filter(obj);for(const e of l.entries)if(typeof e.id!=="string"||!e.id)e.id=uid();}
+    }
+    if(Array.isArray(m.incomeLines))m.incomeLines=m.incomeLines.filter(obj);
+    if(obj(m.savings)&&Array.isArray(m.savings.lines))m.savings.lines=m.savings.lines.filter(obj);
+  }
+}
 function migrate(){
+  if(!obj0(state.months))state.months={};
+  repairShapes(state.months,true);
+  if(!obj0(state.customBudgets))state.customBudgets={};
+  repairShapes(state.customBudgets,false);
+  if(Array.isArray(state.categories))state.categories=state.categories.filter(c=>obj0(c)&&typeof c.id==="string"&&c.id&&typeof c.name==="string").map(c=>(typeof c.icon==="string"&&c.icon)?c:{...c,icon:"🏷️"});
   if(!Array.isArray(state.categories)||state.categories.length===0)state.categories=DEFAULT_CATEGORIES.map(c=>({...c}));
+  if(typeof state.current!=="string"||!(/^\d{4}-\d{2}$/.test(state.current)||(isCustom(state.current)&&state.customBudgets[state.current])))state.current=mKey(new Date());
   for(const k in state.months){const m=state.months[k];for(const l of m.lines){
   if(!Array.isArray(l.entries)){l.entries=[];
     if(l.consumed){const amt=l.actual==null?(+l.planned||0):(+l.actual||0);if(amt>0)l.entries.push({id:uid(),date:k+"-01",amount:amt,note:""});}
@@ -5987,7 +6013,7 @@ function sanitizeConfirmDelete(o){
 function sanitizeGlobalSavings(sv){
   const o={detailed:!!(sv&&sv.detailed),total:0,deduct:!!(sv&&sv.deduct),lines:[]};
   o.total=Number.isFinite(+(sv&&sv.total))?(+sv.total):0;
-  if(sv&&Array.isArray(sv.lines))o.lines=sv.lines.map(sl=>({
+  if(sv&&Array.isArray(sv.lines))o.lines=sv.lines.filter(sl=>sl&&typeof sl==='object').map(sl=>({
     id:typeof sl.id==="string"?sl.id:uid(),
     name:typeof sl.name==="string"?sl.name:"",
     amount:Number.isFinite(+sl.amount)?(+sl.amount):0,
@@ -5998,7 +6024,7 @@ function sanitizeGlobalSavings(sv){
 migrate();
 let saveFailWarned=false;
 function save(){try{localStorage.setItem(KEY,JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,customFrom:state.customFrom,catFreq:state.catFreq,catSize:state.catSize,catLook:state.catLook,catModes:state.catModes,catActs:state.catActs,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsMigrated:state.savingsMigrated,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,autoTheme:state.autoTheme,cmpCat:state.cmpCat,cmpCbPoste:state.cmpCbPoste,cmpYear:state.cmpYear,cmpA:state.cmpA,cmpB:state.cmpB,cmpSpan:state.cmpSpan,cmpCbA:state.cmpCbA,cmpCbB:state.cmpCbB,cmpMonths:state.cmpMonths,cmpDensity:state.cmpDensity,cmpListCount:state.cmpListCount,cmpListOpen:state.cmpListOpen}));saveFailWarned=false;}
-  catch(e){if(!saveFailWarned){saveFailWarned=true;toast("⚠ Sauvegarde locale impossible — exporte tes données");}}}
+  catch(e){if(!saveFailWarned){saveFailWarned=true;setTimeout(()=>{saveFailWarned=false;},60000);toast("⚠ Sauvegarde locale impossible — exporte tes données",6000);}}}
 
 function emptySavings(){return{detailed:false,total:0,deduct:true,lines:[]};}
 // Copie profonde d'une épargne (nouveaux ids). Si undeduct, toute l'épargne est reprise mais
@@ -8532,7 +8558,7 @@ function buildStatCategoryBreakdown(m,useSpent,pal,centerLbl){
   m.lines.forEach(l=>{
     const val=useSpent?spent(l):round2(+l.planned||0);
     if(val<=0)return;
-    const cat=catById(l.category||"");
+    const cat=catMerged(l.category||"");
     const cur=byCat.get(cat.id)||{cat,total:0};
     cur.total=round2(cur.total+val);
     byCat.set(cat.id,cur);
@@ -8678,7 +8704,7 @@ function renderMonthSummary(){
   const cust=isCustom(state.current);
   const byCat=new Map();
   m.lines.forEach(l=>{
-    const cat=catById(l.category||"");
+    const cat=catMerged(l.category||"");
     const cur=byCat.get(cat.id)||{cat,planned:0,spent:0,lines:[]};
     cur.planned=round2(cur.planned+(+l.planned||0));cur.spent=round2(cur.spent+spent(l));cur.lines.push(l);
     byCat.set(cat.id,cur);
@@ -8894,7 +8920,10 @@ function groupedBars(data,density,opts){
       let axisLabel=d.label||"";
       const ym=/^(.*?)(\s'\d{2})$/.exec(axisLabel);
       if(ym){if(ym[2]===prevYearTag)axisLabel=ym[1];prevYearTag=ym[2];}else{prevYearTag=null;}
-      s+='<text x="'+cx.toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle" font-size="11" fill="'+(d.cur?cMut:cFaint)+'" font-weight="'+(d.cur?"700":"400")+'">'+esc(axisLabel)+'</text>';
+      // une étiquette plus large que l'espace à gauche/droite du graphique est alignée sur le bord au lieu d'être coupée
+      const hw=axisLabel.length*3.4;let lx=cx,anc="middle";
+      if(cx-hw<1){lx=1;anc="start";}else if(cx+hw>plotW-1){lx=plotW-1;anc="end";}
+      s+='<text x="'+lx.toFixed(1)+'" y="'+(H-9)+'" text-anchor="'+anc+'" font-size="11" fill="'+(d.cur?cMut:cFaint)+'" font-weight="'+(d.cur?"700":"400")+'">'+esc(axisLabel)+'</text>';
     }
   });
   const svg='<svg class="gbars" viewBox="0 0 '+plotW+' '+H+'" width="'+plotW+'" height="'+H+'">'+s+'</svg>';
@@ -9022,7 +9051,7 @@ function buildWrapSlides(year){
     totalManualSavings=round2(totalManualSavings+t.savings);totalDeducted=round2(totalDeducted+t.deducted);
     if(!bestMonth||t.remainReal>bestMonth.remainReal)bestMonth={k,remainReal:t.remainReal};
     if(!worstMonth||t.spent>worstMonth.spent)worstMonth={k,spent:t.spent};
-    state.months[k].lines.forEach(l=>{const cat=catById(l.category||"");const s=spent(l);if(s<=0)return;
+    state.months[k].lines.forEach(l=>{const cat=catMerged(l.category||"");const s=spent(l);if(s<=0)return;
       catTotals.set(cat.id,round2((catTotals.get(cat.id)||0)+s));});
   });
   const topCats=[...catTotals.entries()].map(([id,v])=>({cat:catById(id),v})).sort((a,b)=>b.v-a.v).slice(0,3);
@@ -9264,7 +9293,7 @@ function renderComparer(){
     '<div class="daysum" style="grid-template-columns:1fr 1fr 1fr">'
     +'<div class="dsum"><div class="k">Mois suivis</div><div class="v">'+rows.length+'</div></div>'
     +'<div class="dsum"><div class="k">Dépense moy.</div><div class="v">'+eur0(avgDep)+'</div></div>'
-    +'<div class="dsum"><div class="k">Dépense médiane</div><div class="v">'+eur0(medDep)+'</div></div>'
+    +'<div class="dsum"><div class="k">Dép. médiane</div><div class="v">'+eur0(medDep)+'</div></div>'
     +'</div>');
   if(excludedUnfinished)c.insertAdjacentHTML("beforeend",'<p class="psub" style="margin:-4px 2px 12px;opacity:.85">Seuls les mois échus sont comparés — le mois en cours et les mois à venir sont exclus.</p>');
 
@@ -9282,7 +9311,7 @@ function renderComparer(){
     const yopts=years.map(y=>'<option'+(y===state.cmpYear?' selected':'')+'>'+y+'</option>').join("");
     const yKeys=keys.filter(k=>k.slice(0,4)===state.cmpYear);
     const catTotals=new Map();
-    yKeys.forEach(k=>state.months[k].lines.forEach(l=>{const cat=catById(l.category||"");const s=spent(l);if(s<=0)return;
+    yKeys.forEach(k=>state.months[k].lines.forEach(l=>{const cat=catMerged(l.category||"");const s=spent(l);if(s<=0)return;
       catTotals.set(cat.id,round2((catTotals.get(cat.id)||0)+s));}));
     const pal=palette();
     const rawItems=[...catTotals.entries()].map(([id,value])=>{const cat=catById(id);return{name:cat.icon+" "+cat.name,value};}).sort((a,b)=>b.value-a.value);
@@ -9472,8 +9501,9 @@ function dALi(wrap,line){
   dAUpdate(wrap,line);
   return wrap;
 }
+const DA_MONFMT=dtf({month:"short"});
 function dADay(iso){if(!iso)return "";const d=new Date(iso+"T00:00:00");if(isNaN(d))return "";
-  return d.getDate()+" "+new Intl.DateTimeFormat("fr-FR",{month:"short"}).format(d);}
+  return d.getDate()+" "+DA_MONFMT.format(d);}
 /* ---------- Feuille d'actions d'un poste (maintien du doigt / clic droit) ----------
    Rien de neuf côté données : chaque tuile déclenche le bouton qui existait déjà sur la ligne
    (Récurrente, Dupliquer, Payer, Supprimer, plein écran, saisie rapide). */
@@ -9914,7 +9944,7 @@ function render(){
   ensure(state.current);
   dAScrollTrack();
   updateMonthNavUI();
-  document.getElementById("monthLabel").innerHTML=mLabelShort(state.current)+' <span style="opacity:.5;font-size:11px">⌄</span>';
+  document.getElementById("monthLabel").innerHTML='<i class="mnTxt">'+esc(mLabelShort(state.current))+'</i> <span style="opacity:.5;font-size:11px">⌄</span>';
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
   ["budgets","analyse","comparer"].forEach(t=>document.getElementById("tab-"+t).classList.toggle("hidden",t!==tab));
   renderBudgets();
@@ -10121,7 +10151,7 @@ function toggleMonthDrop(){
   const bd=document.getElementById("monthDropBackdrop");
   if(!d.classList.contains("hidden")){d.classList.add("hidden");bd.classList.add("hidden");return;}
   const keys=existingKeys().slice().reverse(); // décroissant : mois le plus récent d'abord
-  const monthName=k=>{const[y,m]=k.split("-").map(Number);const s=new Intl.DateTimeFormat("fr-FR",{month:"long"}).format(new Date(y,m-1,1));return s[0].toUpperCase()+s.slice(1);};
+  const monthName=k=>{const[y,m]=k.split("-").map(Number);const s=dtf({month:"long"}).format(new Date(y,m-1,1));return s[0].toUpperCase()+s.slice(1);};
   let inner="";
   if(keys.length){
     let curYear=null;
@@ -10270,7 +10300,12 @@ let history=[],hIndex=-1,recTimer;
 const snapshot=()=>JSON.stringify({months:state.months,customBudgets:state.customBudgets,current:state.current,theme:state.theme,customTheme:state.customTheme,customFrom:state.customFrom,catFreq:state.catFreq,catSize:state.catSize,catLook:state.catLook,catModes:state.catModes,catActs:state.catActs,categories:state.categories,expanded:[...expanded],folded:[...folded],budgetView:state.budgetView,savings:state.savings,savingsPerMonth:state.savingsPerMonth,statsOrder:state.statsOrder,heroMetric:state.heroMetric,labels:state.labels,confirmDelete:state.confirmDelete,compact:state.compact,moveMode:state.moveMode,sortBudgets:state.sortBudgets,sortExpenses:state.sortExpenses,seq:state.seq,showSearch:state.showSearch,showEntryPct:state.showEntryPct,autoTheme:state.autoTheme});
 function record(){const s=snapshot();if(history[hIndex]===s)return;
   history=history.slice(0,hIndex+1);history.push(s);hIndex=history.length-1;
-  if(history.length>120){history.shift();hIndex--;}updateUndoUI();}
+  if(history.length>120){history.shift();hIndex--;}
+  // Garde-fou mémoire : chaque entrée est un instantané complet. Avec un très gros historique de mois, on limite le total
+  // (≈ 24 M de caractères) pour ne pas saturer la mémoire d'un téléphone ; on garde toujours au moins 2 états.
+  let tot=0;for(const x of history)tot+=x.length;
+  while(history.length>2&&tot>24e6&&hIndex>0){tot-=history.shift().length;hIndex--;}
+  updateUndoUI();}
 // L'écriture localStorage (save()) sérialise tout l'historique (tous les mois) : la faire à
 // chaque frappe clavier peut saccader la saisie sur un budget ancien avec beaucoup de mois.
 // On la débounce donc légèrement (300ms d'inactivité), avec un filet de sécurité : flushSave()
@@ -10329,7 +10364,7 @@ function snapKeyLabel(key,bodyNew,bodyOld){
   if(isCustom(key))return((bodyNew&&bodyNew.name)||(bodyOld&&bodyOld.name)||"Budget personnalisé").trim()||"Budget personnalisé";
   const mm=/^(\d{4})-(\d{2})$/.exec(key);if(!mm)return key;
   const d=new Date(+mm[1],+mm[2]-1,1);
-  const s=new Intl.DateTimeFormat("fr-FR",{month:"long",year:"numeric"}).format(d);
+  const s=dtf({month:"long",year:"numeric"}).format(d);
   return s[0].toUpperCase()+s.slice(1);
 }
 function diffBudgetBody(a,b,label,msgs){
@@ -10629,6 +10664,7 @@ function importData(file){
     if([3,6,9,12].includes(+d.cmpMonths))state.cmpMonths=+d.cmpMonths;if(CMP_DENSITIES.includes(d.cmpDensity))state.cmpDensity=d.cmpDensity;else if(d.cmpMonths!=null)state.cmpDensity=cmpMonthsToDensity(d.cmpMonths);if(typeof d.cmpListOpen==="boolean")state.cmpListOpen=d.cmpListOpen
     expanded.clear();if(Array.isArray(d.expanded))d.expanded.forEach(id=>expanded.add(id));
     folded.clear();if(Array.isArray(d.folded))d.folded.forEach(id=>folded.add(id));
+    localDataCorrupted=false;
     migrate();applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyCmpMonthsSeg();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();commit();render();
     document.getElementById("settings").classList.add("hidden");
     toast("Sauvegarde importée ✓");
@@ -12493,6 +12529,9 @@ async function gdPush(keepalive){
 }
 function gdSchedulePush(){
   if(!gdMeta.enabled) return;
+  // Données locales illisibles au démarrage : on n'envoie rien vers Drive tant qu'on n'a pas tenté de restaurer la sauvegarde cloud,
+  // sinon un « nouveau départ » vide écraserait la copie saine (le bouton « Sauvegarder » manuel reste possible).
+  if(typeof localDataCorrupted!=="undefined"&&localDataCorrupted) return;
   gdSyncPending=true;gdBadgeUpdate();
   clearTimeout(gdPushTimer);
   gdPushTimer=setTimeout(gdPush,2500);
@@ -12512,13 +12551,13 @@ async function gdPull(force){
   try{
     gdBusy=true;gdStatus("busy","Lecture de Drive…");
     const id=await gdFindFile();
-    if(!id){gdBusy=false;gdUpdateUI();if(force)toast("Aucune sauvegarde dans Drive");return false;}
+    if(!id){gdBusy=false;localDataCorrupted=false;gdUpdateUI();if(force)toast("Aucune sauvegarde dans Drive");return false;}
     const d=await gdReadFile(id);
     const remoteAt=+d.updatedAt||0;
     // « Local vide » = ni mois ni budget personnalisé. Sans le second test, un utilisateur qui
     // n'a QUE des budgets personnalisés serait considéré « vide » et Drive écraserait ses données
     // sans confirmation.
-    const localEmpty=Object.keys(state.months||{}).length===0 && Object.keys(state.customBudgets||{}).length===0;
+    const localEmpty=localDataCorrupted || (Object.keys(state.months||{}).length===0 && Object.keys(state.customBudgets||{}).length===0);
     // Les données distantes sont en réalité les mêmes que les données locales (seul un horodatage
     // diffère, par ex. après un rechargement pendant une synchro) : on resynchronise silencieusement
     // les métadonnées sans rien demander.
@@ -12535,7 +12574,7 @@ async function gdPull(force){
       if(!ok){gdUpdateUI();return false;}
     }
     gdBusy=true;gdStatus("busy","Restauration…");
-    gdApply(d);
+    gdApply(d);localDataCorrupted=false;
     dataUpdatedAt=remoteAt||Date.now();gdMeta.updatedAt=dataUpdatedAt;gdMeta.lastSync=Date.now();gdSaveMeta();
     gdBusy=false;gdLastError=null;gdUpdateUI();toast("Données restaurées depuis Drive ✓");return true;
   }catch(e){gdBusy=false;if(force)gdFail("Restauration Drive impossible");else gdStatus("err","Synchronisation Drive impossible");console.warn(e);return false;}
@@ -15047,6 +15086,33 @@ html.ckOn #budgetDetailPanel #bdBody,html.ckOn[data-density] #budgetDetailPanel 
     rep=setTimeout(function(){rep=setInterval(function(){if(cur)back();},70);},380);});
   ["pointerup","pointercancel","pointerleave"].forEach(function(n){bar.addEventListener(n,stopRep);});
   window.dCalcKbd={bar:bar,mode:function(){return "pad";}};
+})();
+</script>
+<style id="fitnumcss">
+/* Barre du haut : un nom de mois / budget perso très long est tronqué (…) au lieu de faire passer la barre sur 3 lignes */
+.topbarRow .nav{flex:1 1 0;min-width:120px}
+.topbarRow .month{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:2px;overflow:hidden;white-space:nowrap}
+.month .mnTxt{font-style:normal;min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.month span{flex:none}
+.fitnum{white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;overflow:hidden;text-overflow:clip}
+</style>
+<script id="fitnumjs">
+/* Montants très longs (millions…) : on les garde sur UNE ligne en réduisant la taille jusqu'à ce qu'ils tiennent (jamais en dessous de 7 px). Purement visuel. */
+(function(){
+  var SEL=".ctr .cval,.dsum .v,.hero .big,.hero .stat .v,.hero .st .v";
+  var raf=0;
+  function fit(el){
+    if(!el.offsetParent&&getComputedStyle(el).position!=="fixed")return;
+    el.classList.add("fitnum");el.style.fontSize="";
+    if(el.scrollWidth<=el.clientWidth+0.5)return;
+    var fs=parseFloat(getComputedStyle(el).fontSize)||14,n=0;
+    while(el.scrollWidth>el.clientWidth+0.5&&fs>7&&n++<40){fs-=Math.max(.5,fs*.06);el.style.fontSize=fs+"px";}
+  }
+  function run(){raf=0;document.querySelectorAll(SEL).forEach(fit);}
+  function soon(){if(!raf)raf=requestAnimationFrame(run);}
+  new MutationObserver(soon).observe(document.body,{childList:true,subtree:true,characterData:true});
+  window.addEventListener("resize",soon);window.addEventListener("load",soon);soon();
+  window.dFitNum=run;
 })();
 </script>
 </body>
