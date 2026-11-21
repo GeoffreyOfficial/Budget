@@ -2180,7 +2180,9 @@ html{scroll-behavior:smooth}
   padding:10px 10px 9px;box-shadow:0 12px 26px -14px rgba(0,0,0,.65),0 1px 0 rgba(0,0,0,.06);
   transform:rotate(var(--tilt,-1.4deg));
   cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
-.photoFrame img{display:block;width:100%;max-height:56vh;object-fit:contain;background:#efeeea;border-radius:2px}
+.photoFrame img{display:block;width:100%;max-height:56vh;max-height:max(110px,min(56vh,calc(100vh - 340px)));max-height:max(110px,min(56vh,calc(100dvh - 340px)));object-fit:contain;background:#efeeea;border-radius:2px}
+/* petits téléphones : la carte + la tête de Zéphyr doivent tenir dans l'écran, boutons compris */
+@media (max-height:720px){.photoHint{display:none}.photoCard{padding-top:12px}.photoHead{margin-bottom:8px}.photoBtns{margin-top:10px}}
 /* Changement de photo : l'ancienne est éjectée comme une carte qu'on chasse d'une chiquenaude
    (sortie du flux au préalable, pour que la nouvelle prenne sa place sans à-coup), la nouvelle
    jaillit de dessous en tournant. La hauteur du conteneur est animée en parallèle : plus de
@@ -2207,19 +2209,52 @@ html{scroll-behavior:smooth}
       inverse à la fermeture).
    3) Coup de patte + griffures : au changement de photo, une patte entre par un côté, chasse la
       photo de l'autre, et trois griffures traversent la carte au moment de l'impact. */
-.catEars{position:absolute;left:50%;bottom:100%;width:clamp(84px,26vmin,116px);pointer-events:none;
-  transform:translateX(-50%);z-index:0}
+.catEars{--ew:clamp(104px,33vmin,148px);position:absolute;left:50%;bottom:100%;width:var(--ew);margin-bottom:calc(var(--ew) * -.05);pointer-events:none;
+  transform:translateX(-50%);z-index:0;--lx:0;--ly:1.2}
 .catEars svg{display:block;width:100%;height:auto}
-.photoModal:not(.closing) .catEars{animation:catEarsUp .52s cubic-bezier(.2,.9,.3,1.1) both .34s}
+.photoModal:not(.closing) .catEars{animation:catEarsUp .62s cubic-bezier(.2,.9,.3,1.12) both .34s}
 .photoModal.closing .catEars{animation:catEarsDown .24s ease-in both}
 @keyframes catEarsUp{
-  0%{opacity:0;transform:translateX(-50%) translateY(22px) scale(.88)}
-  55%{opacity:1;transform:translateX(-50%) translateY(-4px) scale(1)}
-  75%{transform:translateX(-50%) translateY(0) rotate(2.5deg)}
+  0%{opacity:0;transform:translateX(-50%) translateY(34px) scale(.86)}
+  50%{opacity:1;transform:translateX(-50%) translateY(-8px) scale(1.02)}
+  72%{transform:translateX(-50%) translateY(2px) rotate(-2.5deg)}
   100%{opacity:1;transform:translateX(-50%) translateY(0) rotate(0)}
 }
-@keyframes catEarsDown{to{opacity:0;transform:translateX(-50%) translateY(20px) scale(.9)}}
-.catEars .cEye{transform-box:fill-box;transform-origin:center;animation:catBlink 5.4s ease-in-out infinite 1.2s}
+@keyframes catEarsDown{to{opacity:0;transform:translateX(-50%) translateY(26px) scale(.9)}}
+/* tête : respire, se balance, se penche quand une nouvelle photo arrive */
+.catEars .ceHead{transform-box:view-box;transform-origin:60px 50px;animation:ceSway 7s ease-in-out infinite,ceBreath 3.2s ease-in-out infinite}
+.catEars.react .ceHead{animation:ceTilt .85s cubic-bezier(.3,.8,.3,1.2) both}
+@keyframes ceSway{0%,100%{transform:rotate(0deg)}30%{transform:rotate(-3.2deg) translateX(-1px)}65%{transform:rotate(2.6deg) translateX(1px)}}
+@keyframes ceBreath{0%,100%{scale:1}50%{scale:1.014}}
+@keyframes ceTilt{0%{transform:rotate(0) translateY(0)}25%{transform:rotate(-9deg) translateY(2px)}55%{transform:rotate(6deg) translateY(-3px)}100%{transform:rotate(0) translateY(0)}}
+/* oreilles : tressaillent à tour de rôle */
+.catEars .ceEar{transform-box:fill-box;transform-origin:50% 100%}
+.catEars .ceEarL{animation:ceTwL 5.3s ease-in-out infinite .8s}
+.catEars .ceEarR{animation:ceTwR 6.7s ease-in-out infinite 2.4s}
+.catEars.react .ceEarL{animation:ceEarPerk .6s ease-out both}.catEars.react .ceEarR{animation:ceEarPerk .6s ease-out both .06s}
+@keyframes ceTwL{0%,84%,100%{transform:rotate(0)}88%{transform:rotate(-16deg)}92%{transform:rotate(5deg)}96%{transform:rotate(-6deg)}}
+@keyframes ceTwR{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(15deg)}90%{transform:rotate(-5deg)}94%{transform:rotate(4deg)}}
+@keyframes ceEarPerk{0%{transform:rotate(0) scaleY(1)}35%{transform:rotate(0) scaleY(1.14)}100%{transform:rotate(0) scaleY(1)}}
+/* yeux : suivent le doigt (variables --lx/--ly posées en JS), regardent autour, clignent */
+.catEars .ceLid{transform-box:fill-box;transform-origin:50% 55%;animation:catBlink 4.6s ease-in-out infinite 1.4s}
+.catEars .ceEye:nth-of-type(2) .ceLid{animation-delay:1.4s}
+.catEars .cePupil{transition:transform .22s cubic-bezier(.3,.8,.3,1);transform:translate(calc(var(--lx) * 1px),calc(var(--ly) * 1px))}
+.catEars .ceIdle{animation:ceLook 9s ease-in-out infinite 1s}
+@keyframes ceLook{0%,60%,100%{transform:translate(0,0)}66%{transform:translate(-1.4px,-.6px)}74%{transform:translate(1.6px,-.4px)}82%{transform:translate(.4px,.8px)}}
+.catEars.react .cePupil ellipse{animation:cePupilBig .8s ease-out both}
+@keyframes cePupilBig{0%{transform:scale(1)}25%{transform:scale(1.55,1.05)}100%{transform:scale(1)}}
+.catEars .cePupil ellipse{transform-box:fill-box;transform-origin:50% 50%}
+/* museau, moustaches, langue, pattes qui pétrissent le bord de la carte */
+.catEars .ceNose{transform-box:fill-box;transform-origin:50% 50%;animation:ceSniff 4.4s ease-in-out infinite .6s}
+@keyframes ceSniff{0%,70%,100%{transform:scale(1)}76%{transform:scale(1.14) translateY(-.4px)}82%{transform:scale(.96)}88%{transform:scale(1.1)}}
+.catEars .ceWhisk{transform-box:fill-box;animation:ceWhisk 3.6s ease-in-out infinite}
+.catEars .ceWL{transform-origin:100% 50%}.catEars .ceWR{transform-origin:0% 50%;animation-delay:.3s;animation-direction:reverse}
+@keyframes ceWhisk{0%,100%{transform:rotate(0)}50%{transform:rotate(2.2deg)}}
+.catEars .ceTongue{transform-box:fill-box;transform-origin:50% 0%;opacity:0;animation:ceLick 11s ease-in-out infinite 3s}
+@keyframes ceLick{0%,90%,100%{opacity:0;transform:scaleY(.2)}93%{opacity:1;transform:scaleY(1)}96%{opacity:1;transform:scaleY(.8)}98%{opacity:1;transform:scaleY(1)}99.5%{opacity:0;transform:scaleY(.3)}}
+.catEars .cePaw{transform-box:fill-box;transform-origin:50% 100%;animation:cePaw 2.6s ease-in-out infinite}
+.catEars .cePawR{animation-delay:1.3s}
+@keyframes cePaw{0%,100%{transform:translateY(0) scaleY(1)}45%{transform:translateY(-2.4px) scaleY(1.05)}70%{transform:translateY(.4px) scaleY(.96)}}
 @keyframes catBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
 
 .pawTrail{position:fixed;z-index:401;width:clamp(20px,7vmin,34px);aspect-ratio:1;pointer-events:none;
@@ -2278,10 +2313,9 @@ html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){
   .photoCard,.frameIn,.frameOut,.photoStage.waiting .photoFrame{animation:none!important}
   .photoStage{transition:none!important}
-  .catEars,.pawTrail,.batPaw,.clawMarks{animation:none!important}
+  .catEars,.catEars *,.pawTrail,.batPaw,.clawMarks{animation:none!important;transition:none!important}
   .pawTrail,.batPaw,.clawMarks{display:none}
   .catEars{opacity:1;transform:translateX(-50%)}
-  .catEars .cEye{animation:none!important}
   .photoModal.opening,.photoModal.closing{animation:none!important;-webkit-clip-path:none!important;clip-path:none!important}
   .photoRing{display:none}
   .catPurr{animation-duration:.01s!important}
@@ -4978,23 +5012,40 @@ html[data-decor] #bdBody .bdProg i{background-image:linear-gradient(90deg,var(--
 <!-- Modale « photos de Zéphyr » : s'ouvre en touchant Zéphyr, le petit chat noir (easter egg). -->
 <div class="modalWrap hidden photoModal" id="photoModal" role="dialog" aria-modal="true" aria-label="Photos de Zéphyr">
   <div class="photoCard">
-    <!-- Zéphyr passe la tête derrière la carte : oreilles, yeux qui clignent, museau. -->
-    <div class="catEars" aria-hidden="true"><svg viewBox="0 0 120 46" focusable="false">
-      <path d="M24 32 L29 3 L52 24 Z" fill="#111"/><path d="M96 32 L91 3 L68 24 Z" fill="#111"/>
-      <path d="M28.5 27 L31 10 L44.5 22 Z" fill="#3c2b31"/><path d="M91.5 27 L89 10 L75.5 22 Z" fill="#3c2b31"/>
-      <ellipse cx="60" cy="56" rx="41" ry="38" fill="#111"/>
-      <ellipse class="cEye" cx="46" cy="32" rx="4.6" ry="5.2" fill="#f4c94a"/>
-      <ellipse class="cEye" cx="74" cy="32" rx="4.6" ry="5.2" fill="#f4c94a"/>
-      <ellipse cx="46" cy="32" rx="1.5" ry="4.2" fill="#1a1206"/><ellipse cx="74" cy="32" rx="1.5" ry="4.2" fill="#1a1206"/>
-      <circle cx="44.4" cy="30" r=".9" fill="#fff"/><circle cx="72.4" cy="30" r=".9" fill="#fff"/>
-      <path d="M56.5 43 L63.5 43 L60 46.5 Z" fill="#e69aa6"/>
+    <!-- Zéphyr passe la tête derrière la carte : oreilles qui bougent, yeux qui suivent le doigt et clignent, museau, moustaches, pattes posées sur le bord. -->
+    <div class="catEars" id="catEars" aria-hidden="true"><svg viewBox="0 0 120 56" focusable="false" style="overflow:visible">
+      <defs>
+        <clipPath id="ceClip"><rect x="-20" y="-20" width="160" height="70"/></clipPath>
+        <radialGradient id="ceHeadG" cx=".5" cy=".28" r=".8"><stop offset="0" stop-color="#2c2c33"/><stop offset=".55" stop-color="#17171b"/><stop offset="1" stop-color="#0c0c0f"/></radialGradient>
+        <radialGradient id="ceIris" cx=".5" cy=".42" r=".62"><stop offset="0" stop-color="#f1ec8f"/><stop offset=".7" stop-color="#d8d867"/><stop offset="1" stop-color="#a9b447"/></radialGradient>
+      </defs>
+      <g clip-path="url(#ceClip)"><g class="ceHead">
+        <g class="ceEar ceEarL"><path d="M21 33 C19 20 21 8 26 3.5 C29 1.5 32.5 3 38 7.5 C44 12 48 16 51 20 Z" fill="#17171b"/><path d="M27.6 30 C26.4 20.5 27.8 11.5 30.2 8.2 C33 9 36.8 12 41 16 C43.4 18.4 44.8 20 45.6 21.4 Z" fill="#e79aa8"/><path d="M33 24 C32.5 19 33.5 14.5 35 12.5" stroke="#cf7d8d" stroke-width="1" stroke-linecap="round" fill="none"/></g>
+        <g class="ceEar ceEarR"><path d="M99, 33C101, 20 99, 8 94, 3.5C91, 1.5 87.5, 3 82, 7.5C76, 12 72, 16 69, 20Z" fill="#17171b"/><path d="M92.4, 30C93.6, 20.5 92.2, 11.5 89.8, 8.2C87, 9 83.2, 12 79, 16C76.6, 18.4 75.2, 20 74.4, 21.4Z" fill="#e79aa8"/><path d="M87 24 C87.5 19 86.5 14.5 85 12.5" stroke="#cf7d8d" stroke-width="1" stroke-linecap="round" fill="none"/></g>
+        <path d="M15 44 L7 46.5 L14 49.5 L9.5 54 L22 53Z" fill="#17171b"/><path d="M105 44 L113 46.5 L106 49.5 L110.5 54 L98 53Z" fill="#17171b"/>
+        <ellipse cx="60" cy="46" rx="46" ry="31.5" fill="url(#ceHeadG)"/>
+        <path d="M60 15.5 L58.2 21 M54.5 16.4 L54 21 M65.5 16.4 L66 21" stroke="#26262d" stroke-width="1.1" stroke-linecap="round"/>
+        <ellipse cx="60" cy="25" rx="15" ry="3.2" fill="#fff" opacity=".045"/>
+        <g class="ceEye" transform="translate(44 31)"><g class="ceLid"><ellipse rx="8.2" ry="8.6" fill="#06060a" transform="rotate(9)"/><ellipse rx="7.2" ry="7.7" fill="url(#ceIris)" transform="rotate(9)"/>
+          <g class="cePupil"><g class="ceIdle"><ellipse rx="2.3" ry="6" fill="#050507"/></g></g>
+          <circle cx="2.4" cy="-3" r="1.9" fill="#fff"/><circle cx="-2.4" cy="3" r=".9" fill="#fff" opacity=".8"/></g></g>
+        <g class="ceEye" transform="translate(76 31)"><g class="ceLid"><ellipse rx="8.2" ry="8.6" fill="#06060a" transform="rotate(-9)"/><ellipse rx="7.2" ry="7.7" fill="url(#ceIris)" transform="rotate(-9)"/>
+          <g class="cePupil"><g class="ceIdle"><ellipse rx="2.3" ry="6" fill="#050507"/></g></g>
+          <circle cx="2.4" cy="-3" r="1.9" fill="#fff"/><circle cx="-2.4" cy="3" r=".9" fill="#fff" opacity=".8"/></g></g>
+        <g class="ceNose"><path d="M55.6 40.4 Q60 38.8 64.4 40.4 Q63.2 44.6 60 46.2 Q56.8 44.6 55.6 40.4Z" fill="#e8909f"/><path d="M57.2 41 Q60 40 62.8 41" stroke="#fff" stroke-width=".7" stroke-linecap="round" opacity=".55" fill="none"/></g>
+        <g class="ceMouth" stroke="#f0eaea" stroke-width="1" stroke-linecap="round" fill="none" opacity=".75"><path d="M60 46.2 L60 48.4"/><path d="M60 48.4 C58.6 50.6 55.2 50.6 53.6 48.6"/><path d="M60 48.4 C61.4 50.6 64.8 50.6 66.4 48.6"/></g>
+        <path class="ceTongue" d="M58.2 49.2 C58 53 62 53 61.8 49.2Z" fill="#e8808f"/>
+        <g class="ceWhisk ceWL" stroke="#f4f1ea" stroke-width=".85" stroke-linecap="round" fill="none" opacity=".85"><path d="M45 44 Q28 40.5 9 37.5"/><path d="M45 46.6 Q27 46.6 8 47.5"/><path d="M46 49 Q30 52 13 56"/></g>
+        <g class="ceWhisk ceWR" stroke="#f4f1ea" stroke-width=".85" stroke-linecap="round" fill="none" opacity=".85"><path d="M75 44 Q92 40.5 111 37.5"/><path d="M75 46.6 Q93 46.6 112 47.5"/><path d="M74 49 Q90 52 107 56"/></g>
+      </g></g>
+      <g class="cePaw cePawL"><ellipse cx="31" cy="53" rx="10" ry="5.6" fill="#141417"/><path d="M26 49.6 l0,2.6 M31 48.8 l0,3 M36 49.6 l0,2.6" stroke="#3a3a42" stroke-width=".8" stroke-linecap="round"/></g>
+      <g class="cePaw cePawR"><ellipse cx="89" cy="53" rx="10" ry="5.6" fill="#141417"/><path d="M84 49.6 l0,2.6 M89 48.8 l0,3 M94 49.6 l0,2.6" stroke="#3a3a42" stroke-width=".8" stroke-linecap="round"/></g>
     </svg></div>
     <button class="wrapClose" id="photoClose" type="button" aria-label="Fermer">×</button>
     <div class="photoHead">🐈‍⬛ Zéphyr t'a rapporté une photo<span class="photoHeadSub" id="photoCount"></span></div>
     <div id="photoStage" class="photoStage"></div>
     <div class="photoBtns">
       <button type="button" class="photoBtn primary" id="photoNext">🔀 Une autre</button>
-      <button type="button" class="photoBtn photoFav" id="photoFav" aria-pressed="false" aria-label="Ajouter aux favoris">♡</button>
       <button type="button" class="photoBtn" id="photoAlbum">📚 Album</button>
       <button type="button" class="photoBtn" id="photoDone">Merci Zéphyr</button>
     </div>
@@ -5144,7 +5195,7 @@ const SIL=[
 ];
 function silhouette(yaw){
   const t=yaw<=.5?yaw*2:(yaw-.5)*2,A=SIL[yaw<=.5?0:1],B=SIL[yaw<=.5?1:2];
-  return A.map((p,i)=>[lerp(p[0],B[i][0],t),lerp(p[1],B[i][1],t)]);
+  return A.map((p,i)=>[lerp(p[0],B[i][0],t)*(yaw<.5?1.06:1),lerp(p[1],B[i][1],t)]);
 }
 function closedPath(p){
   const n=p.length;let d="M"+f(p[0][0])+","+f(p[0][1]);
@@ -5157,8 +5208,10 @@ function closedPath(p){
 function earPath(cx,cy,w,h,tilt,lean){
   const a=tilt*D,ca=Math.cos(a),sa=Math.sin(a);
   const T=(x,y)=>f(cx+x*ca-y*sa)+","+f(cy+x*sa+y*ca);
-  return "M"+T(-w/2,0)+"C"+T(-w*.58,-h*.45)+" "+T(-w*.3+lean,-h*.9)+" "+T(lean,-h)
-    +"C"+T(w*.3+lean,-h*.86)+" "+T(w*.56,-h*.4)+" "+T(w/2,0)+"Z";
+  // pointe légèrement arrondie (oreille de chat, pas de chauve-souris)
+  return "M"+T(-w/2,0)+"C"+T(-w*.6,-h*.42)+" "+T(-w*.36+lean,-h*.84)+" "+T(lean-w*.1,-h*.96)
+    +"Q"+T(lean,-h*1.05)+" "+T(lean+w*.1,-h*.95)
+    +"C"+T(w*.34+lean,-h*.8)+" "+T(w*.58,-h*.4)+" "+T(w/2,0)+"Z";
 }
 function headSVG(P,H,o){
   o=o||{};
@@ -5168,13 +5221,13 @@ function headSVG(P,H,o){
   const ear=(side)=>{
     const L=side<0;
     const cx=K3(L?[-9.4,-6.4,-4.2]:[9.4,6.6,2.8],y),cy0=K3([-9.8,-10,-10.4],y);
-    let w=K3(L?[13.4,12.4,13]:[13.4,11,9.6],y),h=K3(L?[15,15,16]:[15,14.4,13.4],y);
-    let tilt=K3(L?[-9,-6,-13]:[9,5,-8],y),lean=K3(L?[-1.6,-1,-.6]:[1.6,1,1.2],y),cy=cy0;
+    let w=K3(L?[13.4,12.4,13]:[13.4,11,9.6],y)*1.1,h=K3(L?[15,15,16]:[15,14.4,13.4],y)*.88;
+    let tilt=K3(L?[-12,-8,-14]:[12,7,-9],y),lean=K3(L?[-1.6,-1,-.6]:[1.6,1,1.2],y),cy=cy0;
     if(ev==="larges"){w*=1.14;h*=1.2;cy-=.4;}
     else if(ev==="pliees"){h*=.52;w*=1.02;cy+=1.2;tilt+=(L?-1:1)*(y<.5?30:18);lean*=.4;}
     const ea=(L?-1:1)*0+((L?H.earL:H.earR)||0);
     const rim=earPath(cx,cy,w,h,tilt,lean);
-    const ii=earPath(cx+(L?.15:-.15),cy-.5,w*.64,h*.68,tilt,lean*.7);
+    const ii=earPath(cx+(L?.15:-.15),cy-.4,w*.58,h*.6,tilt,lean*.7);
     return '<g style="transform-box:fill-box;transform-origin:50% 100%;transform:rotate('+f(ea)+'deg)">'
       +'<path d="'+rim+'" fill="'+P.ear+'"/><path d="'+ii+'" fill="'+P.inner+'"/>'
       +'<path transform="rotate('+f(tilt)+' '+f(cx)+' '+f(cy)+')" d="M'+f(cx-1.3)+','+f(cy+h*.34)+' l.5,'+f(-h*.3)+' M'+f(cx+.2)+','+f(cy+h*.38)+' l0,'+f(-h*.34)+' M'+f(cx+1.5)+','+f(cy+h*.33)+' l-.5,'+f(-h*.28)+'" stroke="'+P.ear+'" stroke-width=".55" stroke-linecap="round" fill="none" opacity=".75"/></g>';
@@ -5522,7 +5575,7 @@ function render(st0,Po,o){
   const tr=i=>(o.bobtail?3.6:(3.2-1*i/segN))*tth;
   const tch=chain(tp.map((p,i)=>[p[0],p[1],tr(i)]),.8);
   const tcut=Math.floor(tch.length*.86),tcol=o.mask?P.ext:P.tail;
-  let tailSVG='<path d="'+blob(o.tip&&!o.bobtail?tch.slice(0,tcut+2):tch)+'" fill="'+tcol+'"/>'+(o.tip&&!o.bobtail?'<path d="'+blob(tch.slice(tcut))+'" fill="'+P.white+'"/>':'');
+  let tailSVG='<path d="'+blob(tch)+'" fill="'+tcol+'"/>';   // jamais de bout de queue blanc
   if(o.stripes&&!o.bobtail){
     let rings="";
     for(let i=6;i<tch.length*.82;i+=7){const a=tch[i],b=tch[Math.min(tch.length-1,i+2)],dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l,r=a[2]*.95;
@@ -17054,9 +17107,6 @@ html.ckOn #budgetDetailPanel #bdBody,html.ckOn[data-density] #budgetDetailPanel 
 @keyframes zxEarTwitch{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-14deg)}94%{transform:rotate(4deg)}}
 @keyframes zxBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
 @keyframes zxFound{to{transform:translateY(-26px) scale(1.3);opacity:0}}
-/* favori dans la modale photo */
-.photoBtns .photoFav{flex:0 0 52px;font-size:21px;line-height:1;padding:0;color:var(--muted)}
-.photoBtns .photoFav.on{color:#e0426b;background:color-mix(in srgb,#e0426b 12%,var(--soft));border-color:#e0426b}
 .photoBtns{flex-wrap:wrap}.photoBtns .photoBtn{min-height:46px}
 .photoBtns #photoNext{flex:1 1 100%}
 /* photo en fond de l'en-tête */
@@ -17070,9 +17120,6 @@ html.zxHeroBg .hero::before{content:"";position:absolute;inset:0;z-index:-1;poin
 .zxAlbHead h2{flex:1;margin:0;font-size:20px;line-height:1.1}.zxAlbHead small{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-top:3px}
 .zxIco{flex:none;width:44px;height:44px;border-radius:14px;border:0;background:var(--soft);color:var(--ink);font-size:18px;cursor:pointer;display:grid;place-items:center}
 .zxIco.on{background:var(--accent);color:var(--dA-onAccent,#fff)}
-.zxChips{display:flex;gap:8px;padding:0 14px 8px}
-.zxChip{border:0;border-radius:999px;padding:9px 14px;background:var(--soft);color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;min-height:40px}
-.zxChip.on{background:var(--accent);color:var(--dA-onAccent,#fff)}
 .zxAlbBody{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:4px 14px calc(env(safe-area-inset-bottom,0px) + 22px)}
 .zxToday{position:relative;display:block;width:100%;border:0;padding:0;border-radius:20px;overflow:hidden;cursor:pointer;margin:2px 0 14px;aspect-ratio:16/10;background:var(--soft)}
 .zxToday img{width:100%;height:100%;object-fit:cover;display:block}
@@ -17080,8 +17127,6 @@ html.zxHeroBg .hero::before{content:"";position:absolute;inset:0;z-index:-1;poin
 .zxGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
 .zxCell{position:relative;aspect-ratio:1;border:0;padding:0;border-radius:14px;overflow:hidden;background:var(--soft);cursor:pointer;content-visibility:auto;contain-intrinsic-size:104px 104px}
 .zxCell img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .3s ease}.zxCell img.in{opacity:1}
-.zxCell .zxH{position:absolute;right:5px;bottom:5px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:15px;display:grid;place-items:center;line-height:1}
-.zxCell .zxH.on{background:#e0426b}
 .zxEmpty{text-align:center;color:var(--muted);padding:40px 16px;font-size:15px;line-height:1.5}
 .zxViewer{position:fixed;inset:0;z-index:9200;background:#000;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .22s ease;touch-action:none;user-select:none;-webkit-user-select:none}
 .zxViewer.open{opacity:1;visibility:visible}
@@ -17092,7 +17137,6 @@ html.zxHeroBg .hero::before{content:"";position:absolute;inset:0;z-index:-1;poin
 .zxVBot{bottom:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:linear-gradient(transparent,rgba(0,0,0,.6));justify-content:center}
 .zxViewer.bare .zxVTop,.zxViewer.bare .zxVBot{opacity:0;pointer-events:none}
 .zxViewer .zxIco{background:rgba(255,255,255,.16);color:#fff;backdrop-filter:blur(8px)}
-.zxViewer .zxIco.fav.on{background:#e0426b}
 .zxVCount{flex:1;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .zxVBtn{border:0;border-radius:999px;padding:12px 18px;min-height:46px;background:rgba(255,255,255,.18);color:#fff;font:inherit;font-size:14px;font-weight:700;cursor:pointer;backdrop-filter:blur(8px)}
 .zxVBtn.on{background:var(--accent)}
@@ -17148,13 +17192,11 @@ html.zxHeroBg .hero::before{content:"";position:absolute;inset:0;z-index:-1;poin
   <div class="zxAlbHead"><h2>📚 Album de Zéphyr<small id="zxAlbCount"></small></h2>
     <button type="button" class="zxIco" id="zxAlbSlide" aria-label="Diaporama" title="Diaporama">▶</button>
     <button type="button" class="zxIco" id="zxAlbClose" aria-label="Fermer l'album">✕</button></div>
-  <div class="zxChips"><button type="button" class="zxChip on" data-f="all">Toutes</button><button type="button" class="zxChip" data-f="fav">♥ Favoris <b id="zxFavN"></b></button></div>
   <div class="zxAlbBody" id="zxAlbBody"></div>
 </div>
 <div class="zxViewer" id="zxViewer" role="dialog" aria-modal="true" aria-label="Photo" aria-hidden="true">
   <div class="zxVStage" id="zxVStage"></div>
   <div class="zxVTop"><span class="zxVCount" id="zxVCount"></span>
-    <button type="button" class="zxIco fav" id="zxVFav" aria-label="Favori" aria-pressed="false">♡</button>
     <button type="button" class="zxIco" id="zxVClose" aria-label="Fermer">✕</button></div>
   <div class="zxVBot"><button type="button" class="zxVBtn" id="zxVPrev" aria-label="Précédente">‹</button>
     <button type="button" class="zxVBtn" id="zxVSlide">▶ Diaporama</button>
@@ -17542,15 +17584,27 @@ window.zxPeekNow=function(){removePeek();hideWrite({});return showPeek(true);};
 /* ---------- 5 · Album ---------- */
 var AL={files:[],filter:"all",obs:null,slide:null,cur:-1,list:[]};
 var photoUrl=function(f){return PHOTO_DIR+encodeURIComponent(f);};
-var isFav=function(f){return X().favs.indexOf(f)>=0;};
-function toggleFav(f){var a=X().favs,i=a.indexOf(f);if(i>=0)a.splice(i,1);else a.push(f);persist();updateFavUI();}
-function updateFavUI(){
-  var f=window.zxCurPhoto;var b=$("photoFav");
-  if(b){var on=!!f&&isFav(f);b.classList.toggle("on",on);b.textContent=on?"♥":"♡";b.setAttribute("aria-pressed",on?"true":"false");b.setAttribute("aria-label",on?"Retirer des favoris":"Ajouter aux favoris");}
-  if($("zxAlbum").classList.contains("open"))renderAlbum();
-  if(AL.cur>=0)viewerFav();
+/* Tête de Zéphyr dans la modale photo : ses yeux suivent le doigt, et il réagit à chaque nouvelle photo */
+var ceEl=null,ceT=0,ceReact=0;
+function ceGet(){return ceEl||(ceEl=$("catEars"));}
+function ceLook(px,py){
+  var e=ceGet();if(!e||RM())return;var r=e.getBoundingClientRect();if(!r.width)return;
+  var dx=(px-(r.left+r.width/2))/(r.width*.9),dy=(py-(r.top+r.height*.55))/(r.width*1.1);
+  dx=Math.max(-1,Math.min(1,dx));dy=Math.max(-.7,Math.min(1,dy));
+  e.style.setProperty("--lx",(dx*2.6).toFixed(2));e.style.setProperty("--ly",(dy*2).toFixed(2));
 }
-window.zxOnPhoto=function(f){window.zxCurPhoto=f||null;updateFavUI();};
+function ceMove(ev){
+  var pm=$("photoModal");if(!pm||pm.classList.contains("hidden"))return;
+  if(ceT)return;ceT=requestAnimationFrame(function(){ceT=0;ceLook(ev.clientX,ev.clientY);});
+}
+document.addEventListener("pointermove",ceMove,{passive:true});document.addEventListener("pointerdown",ceMove,{passive:true});
+window.zxOnPhoto=function(f){
+  window.zxCurPhoto=f||null;
+  var e=ceGet();if(!e||RM())return;
+  e.style.setProperty("--lx","0");e.style.setProperty("--ly","1.6");     // il regarde la photo qui arrive
+  e.classList.remove("react");void e.offsetWidth;e.classList.add("react");
+  clearTimeout(ceReact);ceReact=setTimeout(function(){e.classList.remove("react");},900);
+};
 function sortedFiles(){return photoFiles.slice().sort(function(a,b){return a.localeCompare(b,"fr",{numeric:true});});}
 function dayPick(files){
   if(!files.length)return null;var s=dayKey(),h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return files[h%files.length];
@@ -17562,24 +17616,22 @@ function lazyImg(img,src){
   AL.obs.observe(img);
 }
 function renderAlbum(){
-  var body=$("zxAlbBody"),files=sortedFiles(),favs=files.filter(isFav);
-  var list=AL.filter==="fav"?favs:files;AL.list=list;
-  $("zxAlbCount").textContent=files.length+" photo"+(files.length>1?"s":"")+" · "+favs.length+" favorite"+(favs.length>1?"s":"");
-  $("zxFavN").textContent=favs.length?"("+favs.length+")":"";
+  var body=$("zxAlbBody"),files=sortedFiles();
+  var list=files;AL.list=list;
+  $("zxAlbCount").textContent=files.length+" photo"+(files.length>1?"s":"");
   var sc=body.scrollTop;if(AL.obs)AL.obs.disconnect();body.innerHTML="";
   if(!files.length){body.innerHTML='<div class="zxEmpty">🐾 Aucune photo pour l\'instant.<br>Dépose des images dans le dossier <b>photos/</b> à côté de index.html — Zéphyr te les rapportera.</div>';return;}
-  if(AL.filter==="all"){
+  {
     var t=dayPick(files),tb=document.createElement("button");tb.type="button";tb.className="zxToday";tb.setAttribute("aria-label","Photo du jour");
     tb.innerHTML='<span>☀️ Photo du jour</span><img alt="">';lazyImg(tb.querySelector("img"),photoUrl(t));
     tb.onclick=function(){openViewer(files.indexOf(t),files);};body.append(tb);
   }
-  if(!list.length){var e=document.createElement("div");e.className="zxEmpty";e.innerHTML="♡ Pas encore de favorite.<br>Touche le cœur d'une photo pour la retrouver ici.";body.append(e);return;}
   var g=document.createElement("div");g.className="zxGrid";
   list.forEach(function(f,i){
     var c=document.createElement("button");c.type="button";c.className="zxCell";c.setAttribute("aria-label","Photo "+(i+1));
-    c.innerHTML='<img alt=""><span class="zxH'+(isFav(f)?" on":"")+'">'+(isFav(f)?"♥":"♡")+'</span>';
+    c.innerHTML='<img alt="">';
     lazyImg(c.querySelector("img"),photoUrl(f));
-    c.onclick=function(ev){if(ev.target.classList.contains("zxH")){ev.stopPropagation();toggleFav(f);return;}openViewer(i,list);};
+    c.onclick=function(){openViewer(i,list);};
     g.append(c);
   });
   body.append(g);body.scrollTop=sc;
@@ -17587,16 +17639,13 @@ function renderAlbum(){
 async function openAlbum(){
   var a=$("zxAlbum");a.classList.add("open");a.setAttribute("aria-hidden","false");
   if(!photoFiles.length){try{photoFiles=await loadPhotoList(false);}catch(e){photoFiles=[];}}
-  AL.filter="all";[].forEach.call(a.querySelectorAll(".zxChip"),function(c){c.classList.toggle("on",c.dataset.f==="all");});
   renderAlbum();
 }
 function closeAlbum(){stopSlide();closeViewer();var a=$("zxAlbum");a.classList.remove("open");a.setAttribute("aria-hidden","true");}
-[].forEach.call(document.querySelectorAll(".zxChip"),function(c){c.onclick=function(){AL.filter=c.dataset.f;[].forEach.call(document.querySelectorAll(".zxChip"),function(x){x.classList.toggle("on",x===c);});$("zxAlbBody").scrollTop=0;renderAlbum();};});
 $("zxAlbClose").onclick=closeAlbum;
 $("zxAlbSlide").onclick=function(){var l=AL.list.length?AL.list:sortedFiles();if(l.length){openViewer(0,l);startSlide();}};
 var ab=$("albumBtn");if(ab)ab.onclick=function(){openAlbum();};
 var pa=$("photoAlbum");if(pa)pa.onclick=function(){var pm=$("photoModal");try{closePhotoModal();}catch(e){pm&&pm.classList.add("hidden");}setTimeout(openAlbum,120);};
-var pf=$("photoFav");if(pf)pf.onclick=function(ev){ev.stopPropagation();if(window.zxCurPhoto){toggleFav(window.zxCurPhoto);if(!RM()&&isFav(window.zxCurPhoto)){var r=pf.getBoundingClientRect();heart(r.left+r.width/2,r.top,"♥");}}};
 /* Visionneuse : zoom au pincement / double toucher, déplacement, balayage entre photos */
 var V={sc:1,x:0,y:0,img:null,pts:{},d0:0,s0:1,sx:0,sy:0,tap:0,moved:false};
 function applyV(){if(V.img)V.img.style.transform="translate(-50%,-50%) translate("+V.x+"px,"+V.y+"px) scale("+V.sc+")";}
@@ -17607,17 +17656,15 @@ function openViewer(i,list){
 function showViewer(){
   var f=AL.vlist[AL.cur],st=$("zxVStage");st.innerHTML="";var img=new Image();img.alt="Photo de Zéphyr";img.draggable=false;
   img.onload=function(){resetV();};img.src=photoUrl(f);st.appendChild(img);V.img=img;resetV();
-  $("zxVCount").textContent=(AL.cur+1)+" / "+AL.vlist.length;viewerFav();
+  $("zxVCount").textContent=(AL.cur+1)+" / "+AL.vlist.length;
   var bg=$("zxVBg");bg.classList.toggle("on",X().bg===f);bg.textContent=X().bg===f?"🖼 Fond actif":"🖼 En fond";
 }
-function viewerFav(){var f=AL.vlist&&AL.vlist[AL.cur];var b=$("zxVFav");if(!f||!b)return;var on=isFav(f);b.classList.toggle("on",on);b.textContent=on?"♥":"♡";b.setAttribute("aria-pressed",on?"true":"false");}
 function stepViewer(d){var n=AL.vlist.length;if(!n)return;AL.cur=(AL.cur+d+n)%n;showViewer();}
 function closeViewer(){stopSlide();AL.cur=-1;var v=$("zxViewer");v.classList.remove("open");v.setAttribute("aria-hidden","true");$("zxVStage").innerHTML="";V.img=null;}
 function startSlide(){stopSlide();var b=$("zxVSlide");b.classList.add("on");b.textContent="❚❚ Pause";$("zxViewer").classList.add("bare");AL.slide=setInterval(function(){stepViewer(1);},4000);}
 function stopSlide(){if(AL.slide){clearInterval(AL.slide);AL.slide=null;}var b=$("zxVSlide");if(b){b.classList.remove("on");b.textContent="▶ Diaporama";}}
 $("zxVClose").onclick=closeViewer;$("zxVPrev").onclick=function(){stepViewer(-1);};$("zxVNext").onclick=function(){stepViewer(1);};
 $("zxVSlide").onclick=function(){AL.slide?stopSlide():startSlide();};
-$("zxVFav").onclick=function(){var f=AL.vlist[AL.cur];if(f)toggleFav(f);};
 $("zxVBg").onclick=function(){var f=AL.vlist[AL.cur];if(!f)return;X().bg=X().bg===f?"":f;persist();applyBg();showViewer();toast(X().bg?"Zéphyr en fond de l'en-tête ✓":"Fond retiré");};
 var vst=$("zxVStage");
 vst.addEventListener("pointerdown",function(e){vst.setPointerCapture&&vst.setPointerCapture(e.pointerId);V.pts[e.pointerId]={x:e.clientX,y:e.clientY};V.moved=false;
