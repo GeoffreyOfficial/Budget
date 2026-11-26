@@ -891,7 +891,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .prog{height:7px;border-radius:99px;background:var(--soft);margin:10px 0 8px;overflow:hidden}
 .prog>i{display:block;height:100%;border-radius:99px;background:var(--accent-2);transition:width .4s ease}
 .prog>i.over{background:var(--red)}
-.prog>i.full{background:var(--green)}
+.prog>i.full{background:var(--accent-2)}
 .rmeta{display:flex;align-items:center;gap:8px}
 .mtxt{flex:1;min-width:0;font-size:12.5px;color:var(--muted);white-space:normal;overflow:visible}
 .mtxt b{font-family:var(--mono);color:var(--ink);font-weight:700}
@@ -950,7 +950,7 @@ button.rowCatIcon:active{transform:scale(.92)}
 .app[data-view="flow"] .prog{order:5;flex:1 1 100%;height:9px;border-radius:6px;margin:0 0 8px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
 .app[data-view="flow"] .prog>i{border-radius:6px;background:linear-gradient(90deg,var(--accent-2),var(--accent));box-shadow:0 0 10px -2px var(--accent-2)}
 .app[data-view="flow"] .prog>i.over{background:linear-gradient(90deg,var(--red),#ff8a7a);box-shadow:0 0 10px -1px var(--red)}
-.app[data-view="flow"] .prog>i.full{background:linear-gradient(90deg,var(--green),var(--green));box-shadow:0 0 10px -2px var(--green)}
+.app[data-view="flow"] .prog>i.full{background:linear-gradient(90deg,var(--accent-2),var(--accent));box-shadow:0 0 10px -2px var(--accent-2)}
 .app[data-view="flow"] .rmeta{order:6;flex:1 1 100%;flex-wrap:wrap;gap:6px}
 /* Le texte de statut ("12,50 € / 50,00 €") prend sa propre ligne pour laisser toute la largeur
    aux boutons d'action juste en dessous, plutôt que de les pousser à la ligne ou de déborder. */
@@ -3030,14 +3030,14 @@ input,textarea,select,button{font-family:inherit;font-variant-numeric:tabular-nu
 .dA-li .planWrap{background:none;padding:0;border-radius:6px;gap:2px}
 .dA-li .planIn{font-family:var(--dA-font);width:56px;field-sizing:content;min-width:1.5ch;max-width:110px;font-size:12px;font-weight:400;color:var(--muted);padding:0;text-align:right}
 .dA-li .planCur{font-size:12px;font-weight:400;color:var(--muted)}
-.dA-li .planIn:focus{color:var(--ink);background:var(--soft);border-radius:6px}
+.dA-li .planIn:focus{color:var(--ink);background:linear-gradient(var(--accent-2),var(--accent-2)) 0 100%/100% 2px no-repeat content-box,var(--soft) content-box;border-radius:6px}   /* fond limité au texte : la zone de tap élargie ne masque plus le dépensé */
 .dA-fx .dA-right .planIn{font-size:15px;font-weight:600;color:var(--ink);width:72px;min-width:1.5ch}
 .dA-fx .dA-right .planCur{font-size:15px;font-weight:600;color:var(--ink)}
 .dA-li .prog{height:4px;margin:10px 0 0;background:var(--dA-track);box-shadow:none;border-radius:99px}
-.dA-li .prog>i{background:var(--dA-c,var(--accent-2));box-shadow:none}
+.dA-li .prog>i{background:var(--accent-2);box-shadow:none}   /* couleur du thème ; rouge seulement en dépassement */
 .dA-li .prog>i.near{background:var(--money-out)}
 .dA-li .prog>i.over{background:var(--red)}
-.dA-li .prog>i.full{background:var(--dA-c,var(--green))}
+.dA-li .prog>i.full{background:var(--accent-2)}
 .dA-fx .prog{display:none}
 .dA-li .rmeta{display:none}
 .dA-li .rwarn:empty{display:none}
@@ -3203,6 +3203,30 @@ body.dA-qa .calcPopup{z-index:340}
 .qaLbl{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:2px 4px -4px}
 .qaLines{flex:0 1 auto;min-height:92px;display:flex;flex-direction:column;max-height:min(30vh,240px);overflow-y:auto;overscroll-behavior:contain;background:var(--card);border-radius:18px;box-shadow:0 0 0 1px var(--dA-div)}
 .qaLines>*{flex:none}
+/* saisie rapide ouverte depuis un poste : détail du poste (non modifiable) */
+#qaModal.locked #qaLines{flex:1 1 auto;max-height:none;min-height:0;overflow:hidden;display:flex;flex-direction:column;box-shadow:none;background:transparent;border-radius:0;padding:0}
+#qaModal.locked .qaLbl{display:none}
+.qaDetail{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:18px;background:color-mix(in srgb,var(--accent) 7%,var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent);flex:1 1 auto;min-height:0}
+.qaDH{flex:none;display:flex;align-items:center;gap:10px;min-width:0}
+.qaDT{min-width:0;flex:1;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.qaDT b{display:flex;align-items:center;gap:8px;min-width:0;font-size:16px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qaDT .qaIc{flex:none;width:auto;height:auto;min-width:0;padding:0;margin:0;background:none;box-shadow:none;border-radius:0;display:inline;font-size:17px;line-height:1}
+.qaDT small{flex:none;font-size:12px;color:var(--muted)}
+.qaDBar{flex:none;height:6px;border-radius:99px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
+.qaDBar b{display:block;height:100%;border-radius:inherit;background:var(--accent-2);transition:width .25s ease}
+.qaDBar.over b{background:var(--red)}
+.qaDStats{flex:none;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.qaDStats>div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.qaDStats small,.qaDLast>small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.qaDStats b{font-family:var(--mono);font-size:14.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qaDStats .qaDNext.neg,.qaDRow b.neg{color:var(--red)}
+.qaDetail.typing .qaDNext{color:var(--accent-2)}.qaDetail.typing .qaDNext.neg{color:var(--red)}
+.qaDLast{display:flex;flex-direction:column;gap:3px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--ink) 9%,transparent);flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.qaDLast>small{flex:none;position:sticky;top:0}
+.qaDRow{display:grid;grid-template-columns:42px 1fr auto;gap:8px;align-items:baseline;font-size:13px;color:var(--muted);flex:none;min-height:22px}
+.qaDRow em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.qaDRow b{font-family:var(--mono);font-weight:600;color:var(--ink)}
+@media (max-height:680px){.qaDetail{gap:5px;padding:7px 10px;overflow:hidden}.qaDT b{font-size:15px}.qaDStats b{font-size:13.5px}.qaDLast{min-height:0}#qaModal.locked #qaTitle small{display:none}}
 .qaGrp{min-height:26px;box-sizing:border-box;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:10px 14px 2px}
 .qaLine{box-sizing:border-box;min-height:50px;display:flex;align-items:center;gap:10px;width:100%;border:0;border-radius:0;padding:8px 14px 8px 10px;background:transparent;
   color:var(--ink);font:inherit;text-align:left;cursor:pointer}
@@ -3407,6 +3431,7 @@ html.dA-lock{overflow:hidden}
 .nameIn.inv,.miniName.inv,.bdNameIn.inv{color:var(--red)!important}
 .nameIn.inv::placeholder,.miniName.inv::placeholder{color:color-mix(in srgb,var(--red) 75%,transparent)!important;font-weight:500}
 :is(.amtIn,.planIn,.miniAmt,.bdPlanIn).inv{background:var(--red-soft)!important;border-radius:9px!important;color:var(--red)!important}
+:is(.amtIn,.planIn,.miniAmt,.bdPlanIn).inv{background-clip:content-box!important;background-origin:content-box!important}
 :is(.amtIn,.miniAmt).inv::placeholder{color:var(--red)!important;opacity:.6}
 .rwarn,.ewarn{font-size:12px;font-weight:600;color:var(--red)}
 .dA-li .rwarn{margin:6px 0 0 50px}
@@ -3674,6 +3699,8 @@ body.dA-typing #budgetDetailPanel .bdBar{display:none}
 .dA-sub.ok b{color:var(--green)}
 .dA-sub.near{color:var(--muted)}
 .dA-sub.near b{color:var(--money-out)}
+.dA-sub.zero{color:var(--muted)}
+.dA-sub.zero b{color:var(--accent-2)}
 
 #issues.show{background:color-mix(in srgb,var(--money-out) 14%,var(--card));color:var(--money-out);border:0;box-shadow:0 0 0 1px color-mix(in srgb,var(--money-out) 35%,transparent);border-radius:14px;font-weight:600}
 
@@ -11100,7 +11127,7 @@ function dAUpdate(el,line){
     if(over){txt=cnt+"dépassé de "+eur(s-p);cls="neg";}
     else if(!(p>0)&&!(s>0))txt="sans montant";
     else if(!n)txt="Aucune dépense";
-    else{txt=cnt+"reste "+eur(p-s);html='reste <b>'+eur(p-s)+'</b>';cls=(p-s)/p<=.15?"near":"ok";}
+    else{txt=cnt+"reste "+eur(p-s);html='reste <b>'+eur(p-s)+'</b>';const rem=round2(p-s);cls=rem<=0?"zero":(rem/p<=.15?"near":"ok");}   // 0 € restant : couleur du thème (ni rouge, ni alerte) ; rouge seulement en dépassement
   }
   if(sub){if(html)sub.innerHTML=html;else sub.textContent=txt;sub.className="dA-sub"+(cls?" "+cls:"");}
   const det=el.querySelector(":scope>.details");
@@ -15304,8 +15331,9 @@ const LOVE_CFG={
     if(typeof qaRefresh==="function"&&qa)qaRefresh();}
   window.dChainOn=chainOn;window.dChainSet=chainSet;
   function qaRefresh(){
-    var v=qaVal(),l=qaLines.querySelector("button.on[data-id]");
+    var v=qaVal(),l=qaLines.querySelector(".on[data-id]");
     var ok=v!=null&&v!==0&&!!l;
+    if(qaLocked)qaDetailNext(v);
     var acts=$("qaActions");if(acts)acts.classList.toggle("chain",chainOn());
     qaGo.disabled=!ok;var mo=$("qaMore");
     if(mo){if(chainOn()){mo.disabled=false;mo.textContent=qaCount>0?"✓ Terminer · "+qaCount+" ajoutée"+(qaCount>1?"s":""):"Terminer";mo.classList.add("qaEnd");}
@@ -15331,8 +15359,44 @@ const LOVE_CFG={
     var rm=false;try{rm=matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(_){}
     try{qaLines.scrollTo({top:tgt,behavior:(smooth&&!rm)?"smooth":"auto"});}catch(_){qaLines.scrollTop=tgt;}
   }
+  /* Ouverte depuis un poste (« + Dépense » d'un budget) : on ne choisit pas un autre poste, on voit le détail de CELUI-CI
+     (budget, dépensé, reste, dernières dépenses) et le « reste » se met à jour pendant la frappe. */
+  var qaLocked=false;
+  function qaDateTxt(d){var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d||"");return m?m[3]+"/"+m[2]:"";}
+  function qaDetailNext(v){
+    var box=qaLines.querySelector(".qaDetail");if(!box)return;
+    var line=ensure(state.current).lines.find(function(x){return x.id===box.dataset.id;});if(!line)return;
+    var p=+line.planned||0,sp=spent(line),el=box.querySelector(".qaDNext"),lb=box.querySelector(".qaDNextL");if(!el)return;
+    var after=(v!=null&&v!==0)?round2(sp+v):sp,rest=round2(p-after);
+    box.classList.toggle("typing",v!=null&&v!==0);
+    el.className="qaDNext"+(p>0&&rest<0?" neg":"");
+    el.textContent=p>0?(rest<0?"+"+eur(-rest):eur(rest)):"—";
+    if(lb)lb.textContent=(v!=null&&v!==0)?"Après ajout":(p>0&&rest<0?"Dépassement":"Reste");
+    var bar=box.querySelector(".qaDBar"),bb=bar&&bar.firstElementChild;
+    if(bar&&bb){bar.classList.toggle("over",p>0&&after>p);bb.style.width=(p>0?Math.max(0,Math.min(100,after/p*100)):(after>0?100:0))+"%";}
+  }
+  function qaRenderLocked(line){
+    var p=+line.planned||0,sp=spent(line),rest=round2(p-sp),cat=catById(line.category||""),nm=(line.name||"").trim()||"Sans nom";
+    var n=(line.entries||[]).length;
+    var last=(line.entries||[]).slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));}).slice(0,8);
+    var d=document.createElement("div");d.className="qaDetail on";d.dataset.id=line.id;d.dataset.nm=nm;
+    d.style.setProperty("--qc",(typeof catColor==="function"?catColor(line.category||""):"")||"var(--accent)");
+    d.innerHTML='<div class="qaDH"><div class="qaDT"><b><span class="qaIc">'+cat.icon+'</span>'+esc(nm)+'</b><small>'+(line.type==="fixed"?"Fixe":"Variable")+' · '+n+' dépense'+(n>1?'s':'')+'</small></div></div>'
+      +'<div class="qaDBar'+(p>0&&sp>p?" over":"")+'" aria-hidden="true"><b style="width:'+(p>0?Math.max(0,Math.min(100,sp/p*100)):(sp>0?100:0))+'%"></b></div>'
+      +'<div class="qaDStats"><div><small>Budget</small><b>'+(p>0?eur(p):"sans montant")+'</b></div>'
+      +'<div><small>Dépensé</small><b>'+eur(sp)+'</b></div>'
+      +'<div><small class="qaDNextL">'+(p>0&&rest<0?"Dépassement":"Reste")+'</small><b class="qaDNext'+(p>0&&rest<0?" neg":"")+'">'+(p>0?(rest<0?"+"+eur(-rest):eur(rest)):"—")+'</b></div></div>'
+      +(last.length?'<div class="qaDLast"><small>Dernières dépenses</small>'+last.map(function(e){
+          return '<div class="qaDRow"><span>'+esc(qaDateTxt(e.date)||"·")+'</span><em>'+esc((e.note||"").trim()||"—")+'</em><b'+((+e.amount||0)<0?' class="neg"':"")+'>'+eur(+e.amount||0)+'</b></div>';}).join("")+'</div>':'');
+    qaLines.append(d);
+  }
   function qaRender(){
     var keepTop=qaLines.scrollTop;
+    if(qaLocked){
+      var L=ensure(state.current).lines.find(function(l){return l.id===qaSel;});
+      if(L){qaLines.innerHTML="";var ln0=$("qaLblN");if(ln0)ln0.textContent="";qaRenderLocked(L);qaRefresh();return;}
+      qaLocked=false;qa.classList.remove("locked");
+    }
     var lines=qaLinesOf();qaLines.innerHTML="";var ln=$("qaLblN");if(ln)ln.textContent=lines.length?lines.length+" poste"+(lines.length>1?"s":""):"";
     if(!lines.length){qaLines.innerHTML='<p class="qaEmpty">Crée d\'abord un poste (fixe ou variable) pour y ajouter des dépenses.</p>';qaSel=null;qaRefresh();return;}
     if(!qaSel||!lines.some(function(l){return l.id===qaSel;}))qaSel=(qaLast&&lines.some(function(l){return l.id===qaLast;}))?qaLast:lines[0].id;
@@ -15358,7 +15422,9 @@ const LOVE_CFG={
   function qaOpen(forId){
     if(!qa)return;
     if(typeof ensure==="function"&&!ensure(state.current).lines.length){try{toast("Crée d'abord un poste pour ajouter une dépense");}catch(_){}return;}
-    qaAmt.value="";qaNote.value="";qaSel=(typeof forId==="string")?forId:null;qaCount=0;var qd=$("qaDone");if(qd){qd.hidden=true;qd.textContent="";}
+    qaAmt.value="";qaNote.value="";qaSel=(typeof forId==="string")?forId:null;qaCount=0;
+    qaLocked=typeof forId==="string"&&ensure(state.current).lines.some(function(l){return l.id===forId;});qa.classList.toggle("locked",qaLocked);
+    var lbl=qa.querySelector(".qaLbl>span");if(lbl)lbl.textContent=qaLocked?"Dans ce poste":"Dans quel poste ?";var qd=$("qaDone");if(qd){qd.hidden=true;qd.textContent="";}
     /* « + Dépense » global : on retrouve ce qui était en cours (montant, signe, note, poste) tant qu'on n'a pas validé */
     if(typeof forId!=="string"&&qaDraft){
       if(qaDraft.month===state.current&&ensure(state.current).lines.some(function(l){return l.id===qaDraft.sel;})){
@@ -15379,7 +15445,7 @@ const LOVE_CFG={
     if($("calcPopup").classList.contains("open")){var cc=$("calcClose");if(cc)cc.click();}}
   var qaCount=0;
   function qaAdd(keep){
-    var v=qaVal(),b=qaLines.querySelector("button.on[data-id]");if(v==null||v===0||!b)return;
+    var v=qaVal(),b=qaLines.querySelector(".on[data-id]");if(v==null||v===0||!b)return;
     var line=ensure(state.current).lines.find(function(l){return l.id===b.dataset.id;});if(!line)return;
     var nm=b.dataset.nm;
     line.entries.push({id:uid(),date:defaultDate(state.current),amount:v,note:qaNote.value.trim()});
