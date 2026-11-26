@@ -11701,7 +11701,7 @@ function undo(){
   clearTimeout(recTimer);
   const before=history[hIndex];hIndex--;const after=history[hIndex];
   restoreSnap(after);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();if(typeof window.qaSync==="function")window.qaSync();
   queueHistoryChange("undo",diffSnapshots(before,after));
 }
 function redo(){
@@ -11709,7 +11709,7 @@ function redo(){
   clearTimeout(recTimer);
   const before=history[hIndex];hIndex++;const after=history[hIndex];
   restoreSnap(after);
-  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();
+  applyTheme();applyBudgetView();applyCompact();applyMoveMode();applyShowSearch();applyShowEntryPct();applyCatFreq();applyCatSize();applyHeroFold();renderThemebar();renderCategoriesSettings();renderStatOrderSettings();renderDeleteConfirmSettings();renderSortSettings();save();gdMarkDataChanged();render();updateUndoUI();if(typeof window.qaSync==="function")window.qaSync();
   queueHistoryChange("redo",diffSnapshots(before,after));
 }
 
@@ -15378,7 +15378,9 @@ const LOVE_CFG={
   function qaRenderLocked(line){
     var p=+line.planned||0,sp=spent(line),rest=round2(p-sp),cat=catById(line.category||""),nm=(line.name||"").trim()||"Sans nom";
     var n=(line.entries||[]).length;
-    var last=(line.entries||[]).slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));}).slice(0,8);
+    /* toutes les dépenses, dans le même ordre que la vue normale du poste (réglage « Ordre des dépenses ») ; la liste défile */
+    var all=line.entries||[],newest=all.length?all[all.length-1].id:null;
+    var last=(typeof sortEntries==="function"?sortEntries(all):all.slice().reverse()).slice();
     var d=document.createElement("div");d.className="qaDetail on";d.dataset.id=line.id;d.dataset.nm=nm;
     d.style.setProperty("--qc",(typeof catColor==="function"?catColor(line.category||""):"")||"var(--accent)");
     d.innerHTML='<div class="qaDH"><div class="qaDT"><b><span class="qaIc">'+cat.icon+'</span>'+esc(nm)+'</b><small>'+(line.type==="fixed"?"Fixe":"Variable")+' · '+n+' dépense'+(n>1?'s':'')+'</small></div></div>'
@@ -15387,8 +15389,18 @@ const LOVE_CFG={
       +'<div><small>Dépensé</small><b>'+eur(sp)+'</b></div>'
       +'<div><small class="qaDNextL">'+(p>0&&rest<0?"Dépassement":"Reste")+'</small><b class="qaDNext'+(p>0&&rest<0?" neg":"")+'">'+(p>0?(rest<0?"+"+eur(-rest):eur(rest)):"—")+'</b></div></div>'
       +(last.length?'<div class="qaDLast"><small>Dernières dépenses</small>'+last.map(function(e){
-          return '<div class="qaDRow"><span>'+esc(qaDateTxt(e.date)||"·")+'</span><em>'+esc((e.note||"").trim()||"—")+'</em><b'+((+e.amount||0)<0?' class="neg"':"")+'>'+eur(+e.amount||0)+'</b></div>';}).join("")+'</div>':'');
+          return '<div class="qaDRow" data-eid="'+esc(String(e.id||""))+'"'+(e.id===newest?' data-newest="1"':"")+'><span>'+esc(qaDateTxt(e.date)||"·")+'</span><em>'+esc((e.note||"").trim()||"—")+'</em><b'+((+e.amount||0)<0?' class="neg"':"")+'>'+eur(+e.amount||0)+'</b></div>';}).join("")+'</div>':'');
     qaLines.append(d);
+    qaShowNewest();
+  }
+  /* la dernière dépense ajoutée reste visible (en haut en tri « récent », en bas en tri « ancien ») */
+  function qaShowNewest(){
+    var box=qaLines.querySelector(".qaDLast"),row=box&&box.querySelector(".qaDRow[data-newest]");if(!box)return;
+    if(!row||!box.clientHeight){box.scrollTop=0;return;}
+    var head=box.querySelector(":scope>small"),hh=head?head.offsetHeight:0;
+    var br=box.getBoundingClientRect(),rr=row.getBoundingClientRect(),top=rr.top-br.top+box.scrollTop,bot=top+rr.height;
+    if(top-hh<box.scrollTop)box.scrollTop=Math.max(0,top-hh);
+    else if(bot>box.scrollTop+box.clientHeight)box.scrollTop=bot-box.clientHeight;
   }
   function qaRender(){
     var keepTop=qaLines.scrollTop;
@@ -15434,6 +15446,7 @@ const LOVE_CFG={
     }
     var t=$("qaTitle");if(t){var mo_=(($("monthLabel")||{}).textContent||"").replace(/[⌄▾]/g,"").trim();t.innerHTML='<span class="qaT">Nouvelle dépense</span>'+(mo_?'<small>'+esc(mo_)+'</small>':"");}
     qaLines.scrollTop=0;qaRender();qa.classList.remove("hidden");document.body.classList.add("dA-qa");
+    if(qaLocked){qaShowNewest();if(window.requestAnimationFrame)requestAnimationFrame(qaShowNewest);}
     /* le poste choisi est amené au milieu de la liste (la feuille vient d'apparaître : on mesure maintenant) */
     qaCenter(false);if(window.requestAnimationFrame)requestAnimationFrame(function(){qaCenter(false);});setTimeout(function(){qaCenter(false);},260);
     setTimeout(function(){try{qaAmt.focus({preventScroll:true});}catch(_){qaAmt.focus();}},60);
@@ -15455,6 +15468,7 @@ const LOVE_CFG={
       qaCount++;qaAmt.value="";qaNote.value="";try{if(document.activeElement===qaNote)qaNote.blur();}catch(_){}qaRender();qaRefresh();
       var d=$("qaDone");if(d){d.hidden=false;d.textContent="✓ "+eur(v)+" ajouté à "+nm+(qaCount>1?" · "+qaCount+" dépenses ajoutées":"");}
       if(typeof buzz==="function")buzz(12);
+      qaShowNewest();
       try{qaAmt.focus({preventScroll:true});}catch(_){}
       return;
     }
@@ -15464,6 +15478,8 @@ const LOVE_CFG={
   if(qa){
     $("dAAddBtn").addEventListener("click",function(){qaOpen();});
     window.dAQuickAddFor=function(id){qaOpen(id);};
+    /* annuler/rétablir pendant que la feuille est ouverte : la liste suit les données */
+    window.qaSync=function(){if(!qa.classList.contains("hidden"))qaRender();};
     $("qaClose").addEventListener("click",qaCloseFn);
     qa.addEventListener("click",function(e){if(e.target===qa)qaCloseFn();});
     qaLines.addEventListener("click",function(e){var b=e.target.closest("button.qaLine,button.qaFavBtn");if(!b)return;
